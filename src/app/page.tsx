@@ -127,7 +127,7 @@ const HomePage = () => {
   };
 
   const renderMonthsSlider = (type: InsuranceType) => (
-    <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-cyan-100/20">
+    <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-red-100/20">
       <label 
         htmlFor={`months-${type}`} 
         className="block text-sm font-medium text-gray-700 mb-2"
@@ -168,7 +168,7 @@ const HomePage = () => {
     helpText: string,
     type: InsuranceType
   ) => (
-    <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-cyan-100/20">
+    <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-red-100/20">
       <label 
         htmlFor={`${field}-${type}`} 
         className="block text-sm font-medium text-gray-700 mb-2"
@@ -178,7 +178,7 @@ const HomePage = () => {
       <input
         type="number"
         id={`${field}-${type}`}
-        className={`w-full rounded-lg border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 bg-white/90 
+        className={`w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 bg-white/90 
           ${errors[field] ? 'border-red-500' : ''}`}
         value={calculatorData[field]}
         onChange={(e) => handleInputChange(field, Number(e.target.value))}
@@ -202,9 +202,9 @@ const HomePage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-cyan-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-red-50 to-green-50">
       {/* Nawigacja */}
-      <nav className="border-b bg-gradient-to-r from-pink-100/90 to-purple-100/90 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b bg-gradient-to-r from-blue-100/90 to-cyan-100/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <NavigationMenu className="mx-auto">
@@ -212,7 +212,7 @@ const HomePage = () => {
                 <NavigationMenuItem>
                   <Link href="/" legacyBehavior passHref>
                     <NavigationMenuLink 
-                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                      className={`text-lg font-medium text-blue-900 hover:text-blue-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
                     >
                       Strona główna
                     </NavigationMenuLink>
@@ -221,7 +221,7 @@ const HomePage = () => {
                 <NavigationMenuItem>
                   <Link href="/pytania" legacyBehavior passHref>
                     <NavigationMenuLink 
-                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                      className={`text-lg font-medium text-blue-900 hover:text-blue-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
                     >
                       Pytania
                     </NavigationMenuLink>
@@ -230,7 +230,7 @@ const HomePage = () => {
                 <NavigationMenuItem>
                   <Link href="/kontakt" legacyBehavior passHref>
                     <NavigationMenuLink 
-                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                      className={`text-lg font-medium text-blue-900 hover:text-blue-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
                     >
                       Kontakt
                     </NavigationMenuLink>
@@ -239,7 +239,7 @@ const HomePage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 absolute right-4 text-lg px-6 py-2 transition-all duration-300 shadow-md">
+            <Button className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 absolute right-4 text-lg px-6 py-2 transition-all duration-300 shadow-md">
               Kup ubezpieczenie
             </Button>
           </div>
@@ -250,8 +250,8 @@ const HomePage = () => {
       <main className="p-8">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-start">
           {/* Lewa kolumna - Kalkulator */}
-          <div className="bg-gradient-to-br from-cyan-100 to-blue-50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-cyan-200">
-            <h2 className="text-2xl font-bold text-cyan-800 mb-6">
+          <div className="bg-gradient-to-br from-blue-100 to-cyan-50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-blue-200">
+            <h2 className="text-2xl font-bold text-blue-800 mb-6">
               Kalkulator ubezpieczenia
             </h2>
             <Tabs defaultValue="fakturowy" className="w-full mb-6">
@@ -285,7 +285,7 @@ const HomePage = () => {
 
                   <Button 
                     onClick={handleCalculate}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                     size="lg"
                     disabled={isCalculating || Object.keys(errors).length > 0}
                     aria-label="Oblicz składkę ubezpieczenia"
@@ -299,11 +299,11 @@ const HomePage = () => {
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-6 space-y-4"
                     >
-                      <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg border border-cyan-200"
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200"
                         role="alert"
                         aria-live="polite"
                       >
-                        <p className="text-center text-lg font-semibold text-cyan-900">
+                        <p className="text-center text-lg font-semibold text-blue-900">
                           Szacowana składka: {insurance.toLocaleString('pl-PL')} PLN
                         </p>
                       </div>
@@ -316,7 +316,7 @@ const HomePage = () => {
                       >
                         <Link href="/gap">
                           <Button 
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                            className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
                             size="lg"
                           >
                             Kup ubezpieczenie GAP
@@ -372,11 +372,11 @@ const HomePage = () => {
           </div>
 
           {/* Prawa kolumna - Treść marketingowa */}
-          <div className="space-y-8 p-8 bg-gradient-to-br from-purple-100 to-pink-50 rounded-2xl shadow-xl border border-purple-200">
+          <div className="space-y-8 p-8 bg-gradient-to-br from-white to-rose-50 rounded-2xl shadow-xl border border-red-100">
             <motion.h1 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-5xl font-bold text-purple-900 leading-tight"
+              className="text-4xl md:text-5xl font-bold text-blue-900 leading-tight"
             >
               Zabezpiecz swoją podróż z najlepszym ubezpieczeniem
             </motion.h1>
@@ -438,9 +438,9 @@ const HomePage = () => {
 
         {/* Karty informacyjne */}
         <div className="max-w-7xl mx-auto mt-12 grid md:grid-cols-2 gap-6">
-          <Card className="border-none shadow-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-400 rounded-full -mr-16 -mt-16 opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400 rounded-full -ml-12 -mb-12 opacity-50"></div>
+          <Card className="border-none shadow-xl bg-gradient-to-br from-blue-500 to-cyan-600 text-white overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400 rounded-full -mr-16 -mt-16 opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-cyan-400 rounded-full -ml-12 -mb-12 opacity-50"></div>
             
             <CardHeader className="relative z-10">
               <div className="flex items-center space-x-3 mb-2">
@@ -453,20 +453,20 @@ const HomePage = () => {
                   Ubezpieczenie Fakturowe
                 </CardTitle>
               </div>
-              <CardDescription className="text-cyan-100 font-medium">
+              <CardDescription className="text-blue-100 font-medium">
                 Ochrona wartości fakturowej pojazdu
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
               <ul className="space-y-4">
                 <li className="flex items-start bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20 hover:bg-white/20 transition-colors duration-200">
-                  <svg className="w-5 h-5 text-cyan-200 mr-3 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-200 mr-3 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-white">Gwarancja wypłaty odszkodowania w wysokości równej wartości z faktury zakupu</span>
                 </li>
                 <li className="flex items-start bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20 hover:bg-white/20 transition-colors duration-200">
-                  <svg className="w-5 h-5 text-cyan-200 mr-3 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-200 mr-3 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-white">Brak amortyzacji wartości pojazdu</span>
@@ -475,9 +475,9 @@ const HomePage = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-xl bg-gradient-to-br from-pink-500 to-purple-600 text-white overflow-hidden">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-pink-400 rounded-full -ml-16 -mt-16 opacity-50"></div>
-            <div className="absolute bottom-0 right-0 w-24 h-24 bg-purple-400 rounded-full -mr-12 -mb-12 opacity-50"></div>
+          <Card className="border-none shadow-xl bg-gradient-to-br from-red-500 to-rose-600 text-white overflow-hidden">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-red-400 rounded-full -ml-16 -mt-16 opacity-50"></div>
+            <div className="absolute bottom-0 right-0 w-24 h-24 bg-rose-400 rounded-full -mr-12 -mb-12 opacity-50"></div>
             
             <CardHeader className="relative z-10">
               <div className="flex items-center space-x-3 mb-2">
@@ -523,10 +523,10 @@ const HomePage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-cyan-100 to-blue-50 rounded-2xl shadow-xl p-6 border border-cyan-200">
+            <div className="bg-gradient-to-br from-blue-100 to-cyan-50 rounded-2xl shadow-xl p-6 border border-blue-200">
               <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem value="item-1" className="border-b border-cyan-200">
-                  <AccordionTrigger className="text-cyan-900 hover:text-cyan-700 font-medium text-lg py-4">
+                <AccordionItem value="item-1" className="border-b border-blue-200">
+                  <AccordionTrigger className="text-blue-900 hover:text-blue-700 font-medium text-lg py-4">
                     Jak mogę obliczyć składkę ubezpieczeniową?
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-700 bg-white/50 p-4 rounded-lg">
@@ -536,8 +536,8 @@ const HomePage = () => {
                   </AccordionContent>
                 </AccordionItem>
                 
-                <AccordionItem value="item-2" className="border-b border-cyan-200">
-                  <AccordionTrigger className="text-cyan-900 hover:text-cyan-700 font-medium text-lg py-4">
+                <AccordionItem value="item-2" className="border-b border-blue-200">
+                  <AccordionTrigger className="text-blue-900 hover:text-blue-700 font-medium text-lg py-4">
                     Jaka jest różnica między ubezpieczeniem fakturowym a casco?
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-700 bg-white/50 p-4 rounded-lg">
@@ -547,8 +547,8 @@ const HomePage = () => {
                   </AccordionContent>
                 </AccordionItem>
                 
-                <AccordionItem value="item-3" className="border-b border-cyan-200">
-                  <AccordionTrigger className="text-cyan-900 hover:text-cyan-700 font-medium text-lg py-4">
+                <AccordionItem value="item-3" className="border-b border-blue-200">
+                  <AccordionTrigger className="text-blue-900 hover:text-blue-700 font-medium text-lg py-4">
                     Jak długo trwa proces wypłaty odszkodowania?
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-700 bg-white/50 p-4 rounded-lg">
@@ -560,9 +560,9 @@ const HomePage = () => {
               </Accordion>
             </div>
             
-            <div className="bg-gradient-to-br from-pink-100 to-purple-50 rounded-2xl shadow-xl p-6 border border-pink-200">
+            <div className="bg-gradient-to-br from-red-100 to-rose-50 rounded-2xl shadow-xl p-6 border border-red-200">
               <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem value="item-4" className="border-b border-pink-200">
+                <AccordionItem value="item-4" className="border-b border-red-200">
                   <AccordionTrigger className="text-pink-900 hover:text-pink-700 font-medium text-lg py-4">
                     Czy mogę ubezpieczyć samochód używany?
                   </AccordionTrigger>
@@ -573,7 +573,7 @@ const HomePage = () => {
                   </AccordionContent>
                 </AccordionItem>
                 
-                <AccordionItem value="item-5" className="border-b border-pink-200">
+                <AccordionItem value="item-5" className="border-b border-red-200">
                   <AccordionTrigger className="text-pink-900 hover:text-pink-700 font-medium text-lg py-4">
                     Jakie dokumenty są potrzebne do zawarcia umowy ubezpieczenia?
                   </AccordionTrigger>
@@ -584,7 +584,7 @@ const HomePage = () => {
                   </AccordionContent>
                 </AccordionItem>
                 
-                <AccordionItem value="item-6" className="border-b border-pink-200">
+                <AccordionItem value="item-6" className="border-b border-red-200">
                   <AccordionTrigger className="text-pink-900 hover:text-pink-700 font-medium text-lg py-4">
                     Czy mogę rozłożyć płatność składki na raty?
                   </AccordionTrigger>
@@ -610,9 +610,9 @@ const HomePage = () => {
         <AboutUs />
 
         {/* Sekcja zaufania */}
-        <div className="max-w-7xl mx-auto mt-20 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-8 border border-purple-100">
+        <div className="max-w-7xl mx-auto mt-20 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-xl p-8 border border-green-100">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-800 to-pink-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-800 to-emerald-600 bg-clip-text text-transparent mb-4">
               Dlaczego warto nam zaufać?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -621,13 +621,13 @@ const HomePage = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow-md p-6 border border-purple-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-4 mx-auto">
+            <div className="bg-white rounded-xl shadow-md p-6 border border-blue-100 hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-4 mx-auto">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-center text-purple-900 mb-2">Bezpieczeństwo</h3>
+              <h3 className="text-xl font-semibold text-center text-blue-900 mb-2">Bezpieczeństwo</h3>
               <p className="text-gray-600 text-center">
                 Twoje dane są zawsze bezpieczne, a nasze procedury spełniają najwyższe standardy ochrony.
               </p>
@@ -645,13 +645,13 @@ const HomePage = () => {
               </p>
             </div>
             
-            <div className="bg-white rounded-xl shadow-md p-6 border border-pink-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full mb-4 mx-auto">
+            <div className="bg-white rounded-xl shadow-md p-6 border border-green-100 hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 mx-auto">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-center text-pink-900 mb-2">Wsparcie</h3>
+              <h3 className="text-xl font-semibold text-center text-emerald-900 mb-2">Wsparcie</h3>
               <p className="text-gray-600 text-center">
                 Nasz zespół ekspertów jest dostępny 24/7, aby pomóc Ci w każdej sytuacji.
               </p>
@@ -749,12 +749,12 @@ const HomePage = () => {
                 </a>
                 <a href="#" className="text-white hover:text-pink-200 transition-colors">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.054 10.054 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </a>
                 <a href="#" className="text-white hover:text-pink-200 transition-colors">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.124-2.126-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z" />
+                    <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.649.072-4.859.072-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z" />
                   </svg>
                 </a>
               </div>
