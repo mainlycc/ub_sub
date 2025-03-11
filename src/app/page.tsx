@@ -33,6 +33,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Slider } from "@/components/ui/slider";
+import AboutUs from '@/components/AboutUs';
 
 type CalculatorData = {
   carPrice: number;
@@ -120,6 +122,44 @@ const HomePage = () => {
     setErrors({});
   };
 
+  const handleMonthsChange = (value: number[]) => {
+    handleInputChange('months', value[0]);
+  };
+
+  const renderMonthsSlider = (type: InsuranceType) => (
+    <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-cyan-100/20">
+      <label 
+        htmlFor={`months-${type}`} 
+        className="block text-sm font-medium text-gray-700 mb-2"
+      >
+        Okres ubezpieczenia: {calculatorData.months} miesięcy
+      </label>
+      <Slider
+        id={`months-${type}`}
+        min={1}
+        max={60}
+        step={1}
+        value={[calculatorData.months]}
+        onValueChange={handleMonthsChange}
+        className="my-4"
+        aria-label="Wybierz okres ubezpieczenia w miesiącach"
+      />
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>1 miesiąc</span>
+        <span>60 miesięcy</span>
+      </div>
+      {errors.months && (
+        <p 
+          id={`months-${type}-error`} 
+          className="mt-1 text-xs text-red-500"
+          role="alert"
+        >
+          {errors.months}
+        </p>
+      )}
+    </div>
+  );
+
   const renderInput = (
     field: keyof CalculatorData,
     label: string,
@@ -171,21 +211,27 @@ const HomePage = () => {
               <NavigationMenuList className="space-x-4">
                 <NavigationMenuItem>
                   <Link href="/" legacyBehavior passHref>
-                    <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-lg uppercase text-center`}>
+                    <NavigationMenuLink 
+                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                    >
                       Strona główna
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link href="/pytania" legacyBehavior passHref>
-                    <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-lg uppercase text-center`}>
+                    <NavigationMenuLink 
+                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                    >
                       Pytania
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link href="/kontakt" legacyBehavior passHref>
-                    <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-lg uppercase text-center`}>
+                    <NavigationMenuLink 
+                      className={`text-lg font-medium text-purple-900 hover:text-purple-700 transition-colors px-4 py-2 rounded-md hover:bg-white/20`}
+                    >
                       Kontakt
                     </NavigationMenuLink>
                   </Link>
@@ -235,14 +281,7 @@ const HomePage = () => {
                     'Rok produkcji wpływa na wysokość składki',
                     'fakturowy'
                   )}
-                  {renderInput(
-                    'months',
-                    'Okres ubezpieczenia (miesiące)',
-                    1,
-                    60,
-                    'Wybierz okres ubezpieczenia od 1 do 60 miesięcy',
-                    'fakturowy'
-                  )}
+                  {renderMonthsSlider('fakturowy')}
 
                   <Button 
                     onClick={handleCalculate}
@@ -290,49 +329,23 @@ const HomePage = () => {
               </TabsContent>
               <TabsContent value="cascowy" className="mt-6">
                 <div className="space-y-6">
-                  <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-pink-100/20">
-                    <label htmlFor="carPrice" className="block text-sm font-medium text-gray-700 mb-2">
-                      Wartość samochodu (PLN)
-                    </label>
-                    <input
-                      type="number"
-                      id="carPrice"
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 bg-white/90"
-                      value={calculatorData.carPrice}
-                      onChange={(e) => setCalculatorData({...calculatorData, carPrice: Number(e.target.value)})}
-                      min="0"
-                    />
-                  </div>
-
-                  <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-pink-100/20">
-                    <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-                      Rok produkcji
-                    </label>
-                    <input
-                      type="number"
-                      id="year"
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 bg-white/90"
-                      value={calculatorData.year}
-                      onChange={(e) => setCalculatorData({...calculatorData, year: Number(e.target.value)})}
-                      min="1900"
-                      max={new Date().getFullYear()}
-                    />
-                  </div>
-
-                  <div className="bg-white/80 p-4 rounded-lg shadow-sm border border-pink-100/20">
-                    <label htmlFor="months" className="block text-sm font-medium text-gray-700 mb-2">
-                      Okres ubezpieczenia (miesiące)
-                    </label>
-                    <input
-                      type="number"
-                      id="months"
-                      className="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 bg-white/90"
-                      value={calculatorData.months}
-                      onChange={(e) => setCalculatorData({...calculatorData, months: Number(e.target.value)})}
-                      min="1"
-                      max="60"
-                    />
-                  </div>
+                  {renderInput(
+                    'carPrice',
+                    'Wartość samochodu (PLN)',
+                    0,
+                    undefined,
+                    'Wprowadź wartość samochodu w złotych polskich',
+                    'cascowy'
+                  )}
+                  {renderInput(
+                    'year',
+                    'Rok produkcji',
+                    1900,
+                    new Date().getFullYear(),
+                    'Rok produkcji wpływa na wysokość składki',
+                    'cascowy'
+                  )}
+                  {renderMonthsSlider('cascowy')}
 
                   <Button 
                     onClick={handleCalculate}
@@ -592,6 +605,9 @@ const HomePage = () => {
             </Button>
           </div>
         </div>
+
+        {/* Sekcja O nas */}
+        <AboutUs />
 
         {/* Sekcja zaufania */}
         <div className="max-w-7xl mx-auto mt-20 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-8 border border-purple-100">
