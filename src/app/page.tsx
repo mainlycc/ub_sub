@@ -83,7 +83,7 @@ const HomePage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button className="bg-blue-600 hover:bg-blue-700 absolute right-4 text-lg px-8 py-6 h-auto">
+            <Button className="bg-blue-600 hover:bg-blue-700 absolute right-4 text-lg px-6 py-2">
               Kup ubezpieczenie
             </Button>
           </div>
