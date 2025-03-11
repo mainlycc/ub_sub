@@ -52,7 +52,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
       {/* Nawigacja */}
       <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,7 +83,7 @@ const HomePage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button className="bg-blue-600 hover:bg-blue-700 absolute right-4 text-lg px-8 py-6 h-auto">
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 absolute right-4 text-lg px-6 py-2 transition-all duration-300">
               Kup ubezpieczenie
             </Button>
           </div>
@@ -94,8 +94,10 @@ const HomePage = () => {
       <main className="p-8">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-start">
           {/* Lewa kolumna - Kalkulator */}
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-blue-900 mb-6">Kalkulator ubezpieczenia</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-indigo-50">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6">
+              Kalkulator ubezpieczenia
+            </h2>
             <Tabs defaultValue="fakturowy" className="w-full mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="fakturowy">Fakturowy</TabsTrigger>
@@ -249,7 +251,7 @@ const HomePage = () => {
             <motion.h1 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-5xl font-bold text-blue-900 leading-tight"
+              className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent leading-tight"
             >
               Zabezpiecz swoją podróż z najlepszym ubezpieczeniem
             </motion.h1>
@@ -272,15 +274,15 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-4 text-sm">
               <span className="flex items-center">
-                <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Ponad 100 000 zadowolonych klientów
               </span>
               <span className="flex items-center">
-                <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 15 lat doświadczenia
@@ -291,71 +293,83 @@ const HomePage = () => {
 
         {/* Karty informacyjne o ubezpieczeniach - teraz na pełnej szerokości */}
         <div className="max-w-7xl mx-auto mt-12 grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Ubezpieczenie Fakturowe</CardTitle>
-              <CardDescription>Ochrona wartości fakturowej pojazdu</CardDescription>
+          <Card className="relative overflow-hidden border-none shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 opacity-50" />
+            
+            <CardHeader className="relative">
+              <CardTitle className="text-2xl bg-gradient-to-r from-blue-800 to-indigo-800 bg-clip-text text-transparent">
+                Ubezpieczenie Fakturowe
+              </CardTitle>
+              <CardDescription className="text-indigo-600">
+                Ochrona wartości fakturowej pojazdu
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
+            <CardContent className="relative">
+              <ul className="space-y-4">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Gwarancja wypłaty odszkodowania w wysokości równej wartości z faktury zakupu</span>
+                  <span className="text-gray-700">Gwarancja wypłaty odszkodowania w wysokości równej wartości z faktury zakupu</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Idealne dla nowych pojazdów do 3 lat od daty zakupu</span>
+                  <span className="text-gray-700">Idealne dla nowych pojazdów do 3 lat od daty zakupu</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Brak uwzględnienia amortyzacji pojazdu przy wypłacie odszkodowania</span>
+                  <span className="text-gray-700">Brak uwzględnienia amortyzacji pojazdu przy wypłacie odszkodowania</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-blue-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Ochrona przed utratą wartości pojazdu w czasie</span>
+                  <span className="text-gray-700">Ochrona przed utratą wartości pojazdu w czasie</span>
                 </li>
               </ul>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Ubezpieczenie Casco</CardTitle>
-              <CardDescription>Kompleksowa ochrona pojazdu</CardDescription>
+          <Card className="relative overflow-hidden border-none shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-indigo-50 opacity-50" />
+            
+            <CardHeader className="relative">
+              <CardTitle className="text-2xl bg-gradient-to-r from-purple-800 to-indigo-800 bg-clip-text text-transparent">
+                Ubezpieczenie Casco
+              </CardTitle>
+              <CardDescription className="text-purple-600">
+                Kompleksowa ochrona pojazdu
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
+            <CardContent className="relative">
+              <ul className="space-y-4">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-indigo-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Ochrona przed kradzieżą, wandalizmem i uszkodzeniami</span>
+                  <span className="text-gray-700">Ochrona przed kradzieżą, wandalizmem i uszkodzeniami</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-indigo-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Możliwość wyboru zakresu ochrony i wysokości udziału własnego</span>
+                  <span className="text-gray-700">Możliwość wyboru zakresu ochrony i wysokości udziału własnego</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-indigo-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Assistance 24/7 w standardzie</span>
+                  <span className="text-gray-700">Assistance 24/7 w standardzie</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-green-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-indigo-500 mr-2 mt-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>Możliwość ubezpieczenia pojazdów w każdym wieku</span>
+                  <span className="text-gray-700">Możliwość ubezpieczenia pojazdów w każdym wieku</span>
                 </li>
               </ul>
             </CardContent>
