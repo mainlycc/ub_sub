@@ -1,56 +1,12 @@
 "use client"
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import Link from 'next/link';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import Footer from '@/components/Footer';
+import React from 'react';
+import InsuranceCalculator from '@/components/InsuranceCalculator';
+import InsuranceTypeCards from '@/components/InsuranceTypeCards';
+import AboutUs from '@/components/AboutUs';
+import FAQ from '@/components/FAQ';
 
-type CalculatorData = {
-  carPrice: number;
-  year: number;
-  months: number;
-};
-
-const HomePage = () => {
-  const [calculatorData, setCalculatorData] = useState<CalculatorData>({
-    carPrice: 0,
-    year: new Date().getFullYear(),
-    months: 12,
-  });
-  const [insurance, setInsurance] = useState<number | null>(null);
-
-  const handleCalculate = () => {
-    const baseRate = 0.05;
-    const ageMultiplier = (new Date().getFullYear() - calculatorData.year) * 0.01;
-    const monthsMultiplier = calculatorData.months / 12;
-    
-    const total = calculatorData.carPrice * (baseRate + ageMultiplier) * monthsMultiplier;
-    setInsurance(Math.round(total));
-  };
-
+const HomePage = (): React.ReactNode => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       {/* Nawigacja */}
@@ -83,7 +39,7 @@ const HomePage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button className="bg-blue-600 hover:bg-blue-700 absolute right-4 text-lg px-6 py-2">
+            <Button className="bg-blue-600 hover:bg-blue-700 absolute right-4 text-lg px-8 py-6 h-auto">
               Kup ubezpieczenie
             </Button>
           </div>
