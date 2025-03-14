@@ -11,7 +11,7 @@ type FAQItemProps = {
   bgColor: string;
 };
 
-const FAQItem = ({ question, answer, accentColor, hoverColor, bgColor }: FAQItemProps) => {
+const FAQItem = ({ question, answer, hoverColor, bgColor }: Omit<FAQItemProps, 'accentColor'>) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -68,7 +68,6 @@ const FAQCategory = ({ title, items, accentColor, borderColor, hoverColor, bgCol
             key={index} 
             question={item.question} 
             answer={item.answer}
-            accentColor={accentColor}
             hoverColor={hoverColor}
             bgColor={bgColor}
           />

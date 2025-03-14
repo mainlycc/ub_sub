@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
 
 // Typy danych dla formularza
 interface VehicleData {
@@ -355,8 +354,119 @@ const CheckoutPage = () => {
     }
   };
 
+  // Dodajmy stronę sukcesu po złożeniu zamówienia
+  const renderSuccess = () => {
+    if (!isCompleted) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-green-100 p-4 rounded-full mb-4">
+              <CheckCircle2 size={48} className="text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Zamówienie złożone!</h2>
+            <p className="text-gray-600 mb-6">
+              Twoje ubezpieczenie zostało pomyślnie zamówione. Szczegóły zamówienia zostały wysłane na Twój adres email.
+            </p>
+            <Button 
+              className="bg-[#300FE6] hover:bg-[#2208B0] text-white w-full"
+              onClick={() => router.push('/')}
+            >
+              Powrót do strony głównej
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Zaktualizujmy komponent dla kroku 3 aby wykorzystywał termOptions i claimLimitOptions
+  const renderPaymentStep = () => {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+            <span className="text-[#FF8E3D] font-bold">3</span>
+          </div>
+          Metoda płatności
+        </h2>
+        
+        {/* Opcje okresu ubezpieczenia */}
+        <div className="space-y-2 mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Okres ubezpieczenia
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {termOptions.map((option) => (
+              <div
+                key={option.value}
+                className={`border rounded-lg p-2 text-center cursor-pointer transition-all
+                  ${paymentData.term === option.value 
+                    ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
+                    : 'border-gray-300 hover:border-gray-400'}`}
+                onClick={() => handlePaymentChange({ name: 'term', value: option.value })}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Opcje limitu ubezpieczenia */}
+        <div className="space-y-2 mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Maksymalny limit odszkodowania
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {claimLimitOptions.map((option) => (
+              <div
+                key={option.value}
+                className={`border rounded-lg p-3 text-center cursor-pointer transition-all
+                  ${paymentData.claimLimit === option.value 
+                    ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
+                    : 'border-gray-300 hover:border-gray-400'}`}
+                onClick={() => handlePaymentChange({ name: 'claimLimit', value: option.value })}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Metody płatności */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Metoda płatności
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {paymentMethodOptions.map((option) => (
+              <div 
+                key={option.value}
+                className={`border-2 rounded-xl p-5 cursor-pointer transition-all
+                  ${paymentData.paymentMethod === option.value 
+                    ? 'border-[#300FE6] bg-[#300FE6]/5' 
+                    : 'border-gray-200 hover:border-gray-300'}`}
+                onClick={() => handlePaymentChange({ name: 'paymentMethod', value: option.value })}
+              >
+                <h3 className="font-semibold text-lg mb-2">{option.label}</h3>
+                <p className="text-gray-600 text-sm">
+                  {option.value === 'PM_BT' 
+                    ? 'Otrzymasz dane do przelewu po złożeniu zamówienia' 
+                    : 'Zostaniesz przekierowany do bezpiecznej płatności online'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#E1EDFF]/30">
+      {renderSuccess()}
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Nagłówek strony */}
         <div className="text-center mb-10">
@@ -641,36 +751,7 @@ const CheckoutPage = () => {
                 </div>
               )}
 
-              {currentStep === 3 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-                      <span className="text-[#FF8E3D] font-bold">3</span>
-                    </div>
-                    Metoda płatności
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {paymentMethodOptions.map((option) => (
-                      <div 
-                        key={option.value}
-                        className={`border-2 rounded-xl p-5 cursor-pointer transition-all
-                          ${paymentData.paymentMethod === option.value 
-                            ? 'border-[#300FE6] bg-[#300FE6]/5' 
-                            : 'border-gray-200 hover:border-gray-300'}`}
-                        onClick={() => handlePaymentChange({ name: 'paymentMethod', value: option.value })}
-                      >
-                        <h3 className="font-semibold text-lg mb-2">{option.label}</h3>
-                        <p className="text-gray-600 text-sm">
-                          {option.value === 'PM_BT' 
-                            ? 'Otrzymasz dane do przelewu po złożeniu zamówienia' 
-                            : 'Zostaniesz przekierowany do bezpiecznej płatności online'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {currentStep === 3 && renderPaymentStep()}
 
               {currentStep === 4 && (
                 <div>
