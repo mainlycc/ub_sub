@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, TrendingDown, DollarSign, Calculator, HelpCircle, Info } from 'lucide-react';
+import { ShieldCheck, TrendingDown, DollarSign, Calculator, Info } from 'lucide-react';
 import {
   Tabs,
   TabsContent,

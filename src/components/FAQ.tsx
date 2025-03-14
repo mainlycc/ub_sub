@@ -51,7 +51,7 @@ type FAQCategoryProps = {
   iconBgColor: string;
 };
 
-const FAQCategory = ({ title, items, accentColor, borderColor, hoverColor, bgColor, iconBgColor }: FAQCategoryProps) => {
+const FAQCategory = ({ title, items, borderColor, hoverColor, bgColor, iconBgColor }: Omit<FAQCategoryProps, 'accentColor'>) => {
   return (
     <div className="mb-8">
       <div className="flex items-center mb-4">
@@ -172,7 +172,6 @@ const FAQ = () => {
                 key={index}
                 title={category.title}
                 items={category.items}
-                accentColor={category.accentColor}
                 borderColor={category.borderColor}
                 hoverColor={category.hoverColor}
                 bgColor={category.bgColor}
