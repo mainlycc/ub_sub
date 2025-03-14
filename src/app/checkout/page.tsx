@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 
 // Typy danych dla formularza
 interface VehicleData {
@@ -12,6 +13,8 @@ interface VehicleData {
   firstRegisteredOn: string;
   vin: string;
   vrm: string; // numer rejestracyjny
+  make?: string; // dodane pole marki
+  model?: string; // dodane pole modelu
 }
 
 interface PersonalData {
@@ -31,6 +34,17 @@ interface PaymentData {
   claimLimit: string;
   paymentTerm: string;
   paymentMethod: string;
+}
+
+// Dodaję interfejs dla wyników kalkulacji
+interface CalculationResult {
+  premium: number;
+  details: {
+    productName: string;
+    coveragePeriod: string;
+    vehicleValue: number;
+    maxCoverage: string;
+  };
 }
 
 // Opcje do wyboru
@@ -54,6 +68,7 @@ const paymentMethodOptions = [
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -86,12 +101,60 @@ const CheckoutPage = () => {
     paymentMethod: "PM_BT"
   });
   
+  // Dodaję brakujące stany
+  const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  
   // Walidacja pól formularza
   const [errors, setErrors] = useState<{
     vehicle?: { [key: string]: string };
     personal?: { [key: string]: string };
     payment?: { [key: string]: string };
   }>({});
+  
+  // Pobieranie danych z parametrów URL lub localStorage
+  useEffect(() => {
+    // Pobranie danych z localStorage jeśli są
+    const savedCalculationData = localStorage.getItem('gapCalculationResult');
+    
+    if (savedCalculationData) {
+      try {
+        const parsedData = JSON.parse(savedCalculationData);
+        setCalculationResult(parsedData);
+      } catch (e) {
+        console.error('Błąd parsowania danych kalkulacji:', e);
+      }
+    } else {
+      // Jeśli nie ma danych w localStorage, ustaw przykładowe dane
+      // W rzeczywistej aplikacji powinno to być pobrane z API lub przekazane z poprzedniej strony
+      setCalculationResult({
+        premium: 450,
+        details: {
+          productName: "Ubezpieczenie GAP Fakturowy",
+          coveragePeriod: "36 miesięcy",
+          vehicleValue: 50000,
+          maxCoverage: "100 000 PLN"
+        }
+      });
+      
+      // Można również pobrać parametry z URL, jeśli są tam przekazywane
+      const premiumParam = searchParams.get('premium');
+      if (premiumParam) {
+        setCalculationResult(prev => ({
+          ...prev!,
+          premium: parseInt(premiumParam, 10)
+        }));
+      }
+    }
+    
+    // Dodanie przykładowych danych pojazdu, jeśli nie zostały ustawione
+    setVehicleData(prev => ({
+      ...prev,
+      make: prev.make || "Volkswagen",
+      model: prev.model || "Golf",
+    }));
+    
+  }, [searchParams]);
   
   // Funkcje obsługujące zmiany w formularzu
   const handleVehicleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,9 +167,12 @@ const CheckoutPage = () => {
     setPersonalData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setPaymentData(prev => ({ ...prev, [name]: value }));
+  // Poprawiam funkcję handlePaymentChange
+  const handlePaymentChange = (e: { name: string; value: string }) => {
+    setPaymentData(prev => ({
+      ...prev,
+      [e.name]: e.value
+    }));
   };
   
   // Walidacja danych pojazdu
@@ -290,447 +356,423 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className="py-12 bg-gradient-to-br from-white to-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Zakup ubezpieczenia online</h1>
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#E1EDFF]/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Nagłówek strony */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Formularz zakupu ubezpieczenia GAP</h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Wypełnij poniższy formularz, aby sfinalizować zakup ubezpieczenia
+          </p>
+        </div>
+
+        {/* Proces zakupowy */}
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+          {/* Pasek postępu */}
+          <div className="bg-gradient-to-r from-[#300FE6] to-[#2208B0] h-2 w-full"></div>
           
-          {/* Stepper */}
-          <div className="mb-8">
-            <ol className="flex items-center w-full">
-              <li className={`flex items-center ${currentStep >= 1 ? 'text-red-600' : 'text-gray-500'}`}>
-                <span className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-medium 
-                  ${currentStep >= 1 ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gray-300'}`}>
-                  1
-                </span>
-                <span className="ml-2 text-sm font-medium">Pojazd</span>
-                <span className="flex-grow border-t border-gray-200 mx-4"></span>
-              </li>
-              <li className={`flex items-center ${currentStep >= 2 ? 'text-red-600' : 'text-gray-500'}`}>
-                <span className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-medium 
-                  ${currentStep >= 2 ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gray-300'}`}>
-                  2
-                </span>
-                <span className="ml-2 text-sm font-medium">Dane osobowe</span>
-                <span className="flex-grow border-t border-gray-200 mx-4"></span>
-              </li>
-              <li className={`flex items-center ${currentStep >= 3 ? 'text-red-600' : 'text-gray-500'}`}>
-                <span className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-medium 
-                  ${currentStep >= 3 ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gray-300'}`}>
-                  3
-                </span>
-                <span className="ml-2 text-sm font-medium">Płatność</span>
-                <span className="flex-grow border-t border-gray-200 mx-4"></span>
-              </li>
-              <li className={`flex items-center ${currentStep >= 4 ? 'text-red-600' : 'text-gray-500'}`}>
-                <span className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-medium 
-                  ${currentStep >= 4 ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gray-300'}`}>
-                  4
-                </span>
-                <span className="ml-2 text-sm font-medium">Potwierdzenie</span>
-              </li>
-            </ol>
-          </div>
-          
-          {/* Formularze dla poszczególnych kroków */}
-          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-            {/* Krok 1: Dane pojazdu */}
-            {currentStep === 1 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Dane pojazdu</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Data zakupu *
-                    </label>
-                    <input
-                      type="date"
-                      name="purchasedOn"
-                      className={`w-full p-2 border ${errors.vehicle?.purchasedOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={vehicleData.purchasedOn}
-                      onChange={handleVehicleChange}
-                    />
-                    {errors.vehicle?.purchasedOn && (
-                      <p className="mt-1 text-sm text-red-500">{errors.vehicle.purchasedOn}</p>
-                    )}
+          <div className="p-8">
+            {/* Kroki procesu */}
+            <div className="flex justify-between mb-10 px-4">
+              {[
+                { number: 1, title: "Dane pojazdu" },
+                { number: 2, title: "Dane osobowe" },
+                { number: 3, title: "Metoda płatności" },
+                { number: 4, title: "Podsumowanie" }
+              ].map((step, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <div 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 text-white font-bold 
+                      ${currentStep >= step.number 
+                        ? 'bg-[#300FE6]' 
+                        : 'bg-gray-300'}`}
+                  >
+                    {currentStep > step.number ? <CheckCircle2 size={20} /> : step.number}
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Przebieg (km) *
-                    </label>
-                    <input
-                      type="number"
-                      name="mileage"
-                      min="0"
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      value={vehicleData.mileage}
-                      onChange={handleVehicleChange}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Data pierwszej rejestracji *
-                    </label>
-                    <input
-                      type="date"
-                      name="firstRegisteredOn"
-                      className={`w-full p-2 border ${errors.vehicle?.firstRegisteredOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={vehicleData.firstRegisteredOn}
-                      onChange={handleVehicleChange}
-                    />
-                    {errors.vehicle?.firstRegisteredOn && (
-                      <p className="mt-1 text-sm text-red-500">{errors.vehicle.firstRegisteredOn}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Numer VIN *
-                    </label>
-                    <input
-                      type="text"
-                      name="vin"
-                      maxLength={17}
-                      className={`w-full p-2 border ${errors.vehicle?.vin ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={vehicleData.vin}
-                      onChange={handleVehicleChange}
-                    />
-                    {errors.vehicle?.vin && (
-                      <p className="mt-1 text-sm text-red-500">{errors.vehicle.vin}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Numer rejestracyjny *
-                    </label>
-                    <input
-                      type="text"
-                      name="vrm"
-                      className={`w-full p-2 border ${errors.vehicle?.vrm ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={vehicleData.vrm}
-                      onChange={handleVehicleChange}
-                    />
-                    {errors.vehicle?.vrm && (
-                      <p className="mt-1 text-sm text-red-500">{errors.vehicle.vrm}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Krok 2: Dane osobowe */}
-            {currentStep === 2 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Dane osobowe</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Imię *
-                      </label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        className={`w-full p-2 border ${errors.personal?.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                        value={personalData.firstName}
-                        onChange={handlePersonalChange}
-                      />
-                      {errors.personal?.firstName && (
-                        <p className="mt-1 text-sm text-red-500">{errors.personal.firstName}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nazwisko *
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        className={`w-full p-2 border ${errors.personal?.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                        value={personalData.lastName}
-                        onChange={handlePersonalChange}
-                      />
-                      {errors.personal?.lastName && (
-                        <p className="mt-1 text-sm text-red-500">{errors.personal.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Numer telefonu *
-                    </label>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      placeholder="+48XXXXXXXXX"
-                      className={`w-full p-2 border ${errors.personal?.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={personalData.phoneNumber}
-                      onChange={handlePersonalChange}
-                    />
-                    {errors.personal?.phoneNumber && (
-                      <p className="mt-1 text-sm text-red-500">{errors.personal.phoneNumber}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adres e-mail *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      className={`w-full p-2 border ${errors.personal?.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={personalData.email}
-                      onChange={handlePersonalChange}
-                    />
-                    {errors.personal?.email && (
-                      <p className="mt-1 text-sm text-red-500">{errors.personal.email}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      PESEL *
-                    </label>
-                    <input
-                      type="text"
-                      name="identificationNumber"
-                      maxLength={11}
-                      className={`w-full p-2 border ${errors.personal?.identificationNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={personalData.identificationNumber}
-                      onChange={handlePersonalChange}
-                    />
-                    {errors.personal?.identificationNumber && (
-                      <p className="mt-1 text-sm text-red-500">{errors.personal.identificationNumber}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ulica i numer *
-                    </label>
-                    <input
-                      type="text"
-                      name="street"
-                      className={`w-full p-2 border ${errors.personal?.street ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                      value={personalData.street}
-                      onChange={handlePersonalChange}
-                    />
-                    {errors.personal?.street && (
-                      <p className="mt-1 text-sm text-red-500">{errors.personal.street}</p>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Miasto *
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        className={`w-full p-2 border ${errors.personal?.city ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                        value={personalData.city}
-                        onChange={handlePersonalChange}
-                      />
-                      {errors.personal?.city && (
-                        <p className="mt-1 text-sm text-red-500">{errors.personal.city}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Kod pocztowy *
-                      </label>
-                      <input
-                        type="text"
-                        name="postCode"
-                        placeholder="XX-XXX"
-                        maxLength={6}
-                        className={`w-full p-2 border ${errors.personal?.postCode ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                        value={personalData.postCode}
-                        onChange={handlePersonalChange}
-                      />
-                      {errors.personal?.postCode && (
-                        <p className="mt-1 text-sm text-red-500">{errors.personal.postCode}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Krok 3: Opcje płatności */}
-            {currentStep === 3 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Opcje ubezpieczenia i płatności</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Okres ubezpieczenia
-                    </label>
-                    <select
-                      name="term"
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      value={paymentData.term}
-                      onChange={handlePaymentChange}
-                    >
-                      {termOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Limit odszkodowania
-                    </label>
-                    <select
-                      name="claimLimit"
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      value={paymentData.claimLimit}
-                      onChange={handlePaymentChange}
-                    >
-                      {claimLimitOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Metoda płatności
-                    </label>
-                    <select
-                      name="paymentMethod"
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      value={paymentData.paymentMethod}
-                      onChange={handlePaymentChange}
-                    >
-                      {paymentMethodOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="mt-6 p-4 bg-gradient-to-r from-red-600 to-red-700 rounded-md">
-                    <h3 className="text-lg font-medium text-white mb-2">Podsumowanie płatności</h3>
-                    <p className="text-gray-200">Składka ubezpieczeniowa: <span className="font-bold">1 890,00 zł</span></p>
-                    <p className="text-sm text-gray-300 mt-1">Płatność jednorazowa</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Krok 4: Potwierdzenie */}
-            {currentStep === 4 && (
-              <div className="text-center py-6">
-                {isCompleted ? (
-                  <div>
-                    <div className="mx-auto flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-                      <CheckCircle2 className="w-10 h-10 text-green-600" />
-                    </div>
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">Zamówienie przyjęte!</h2>
-                    <p className="text-gray-600 mb-8">
-                      Dziękujemy za zakup ubezpieczenia. Potwierdzenie zostało wysłane na podany adres email.
+                  <div className="text-center">
+                    <p className={`font-medium ${currentStep >= step.number ? 'text-[#300FE6]' : 'text-gray-400'}`}>
+                      {step.title}
                     </p>
-                    <div className="bg-gray-50 p-4 rounded-md mb-6 text-left">
-                      <h3 className="text-lg font-medium text-gray-800 mb-2">Szczegóły zamówienia</h3>
-                      <p className="text-gray-700">Numer polisy: <span className="font-medium">POL/2023/12345</span></p>
-                      <p className="text-gray-700">Rodzaj ubezpieczenia: <span className="font-medium">GAP MAX</span></p>
-                      <p className="text-gray-700">Okres ochrony: <span className="font-medium">
-                        {termOptions.find(opt => opt.value === paymentData.term)?.label}
-                      </span></p>
-                      <p className="text-gray-700">Kwota: <span className="font-medium">1 890,00 zł</span></p>
-                    </div>
-                    <Button 
-                      className="w-full md:w-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                      onClick={() => router.push('/')}
-                    >
-                      Powrót do strony głównej
-                    </Button>
                   </div>
-                ) : (
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Podsumowanie zamówienia</h2>
-                    
-                    <div className="space-y-4 text-left mb-8">
-                      <div className="bg-gray-50 p-4 rounded-md">
-                        <h3 className="text-md font-medium text-gray-800 mb-2">Pojazd</h3>
-                        <p className="text-gray-700">Data zakupu: <span className="font-medium">{vehicleData.purchasedOn}</span></p>
-                        <p className="text-gray-700">Numer VIN: <span className="font-medium">{vehicleData.vin}</span></p>
-                        <p className="text-gray-700">Numer rejestracyjny: <span className="font-medium">{vehicleData.vrm}</span></p>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-4 rounded-md">
-                        <h3 className="text-md font-medium text-gray-800 mb-2">Ubezpieczający</h3>
-                        <p className="text-gray-700">{personalData.firstName} {personalData.lastName}</p>
-                        <p className="text-gray-700">{personalData.street}</p>
-                        <p className="text-gray-700">{personalData.postCode} {personalData.city}</p>
-                        <p className="text-gray-700">Tel: {personalData.phoneNumber}</p>
-                        <p className="text-gray-700">Email: {personalData.email}</p>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-4 rounded-md">
-                        <h3 className="text-md font-medium text-gray-800 mb-2">Szczegóły ubezpieczenia</h3>
-                        <p className="text-gray-700">Produkt: <span className="font-medium">GAP MAX</span></p>
-                        <p className="text-gray-700">Okres ochrony: <span className="font-medium">
-                          {termOptions.find(opt => opt.value === paymentData.term)?.label}
-                        </span></p>
-                        <p className="text-gray-700">Limit odszkodowania: <span className="font-medium">
-                          {claimLimitOptions.find(opt => opt.value === paymentData.claimLimit)?.label}
-                        </span></p>
-                        <p className="text-gray-700">Metoda płatności: <span className="font-medium">
-                          {paymentMethodOptions.find(opt => opt.value === paymentData.paymentMethod)?.label}
-                        </span></p>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-red-600 to-red-700 p-4 rounded-md">
-                        <h3 className="text-md font-medium text-white mb-2">Płatność</h3>
-                        <p className="text-gray-200">Składka ubezpieczeniowa: <span className="font-bold">1 890,00 zł</span></p>
-                      </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Formularz - treść */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8">
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+                      <span className="text-[#FF8E3D] font-bold">1</span>
                     </div>
-                    
-                    <div className="mt-4 flex justify-center">
-                      <label className="flex items-center">
-                        <input type="checkbox" className="h-4 w-4 text-red-600" required />
-                        <span className="ml-2 text-sm text-gray-700">
-                          Akceptuję <a href="#" className="text-red-600 underline">regulamin</a> i <a href="#" className="text-red-600 underline">politykę prywatności</a>.
-                        </span>
+                    Dane pojazdu
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Data zakupu *
                       </label>
+                      <input
+                        type="date"
+                        name="purchasedOn"
+                        className={`w-full p-2 border ${errors.vehicle?.purchasedOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={vehicleData.purchasedOn}
+                        onChange={handleVehicleChange}
+                      />
+                      {errors.vehicle?.purchasedOn && (
+                        <p className="mt-1 text-sm text-red-500">{errors.vehicle.purchasedOn}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Przebieg (km) *
+                      </label>
+                      <input
+                        type="number"
+                        name="mileage"
+                        min="0"
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        value={vehicleData.mileage}
+                        onChange={handleVehicleChange}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Data pierwszej rejestracji *
+                      </label>
+                      <input
+                        type="date"
+                        name="firstRegisteredOn"
+                        className={`w-full p-2 border ${errors.vehicle?.firstRegisteredOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={vehicleData.firstRegisteredOn}
+                        onChange={handleVehicleChange}
+                      />
+                      {errors.vehicle?.firstRegisteredOn && (
+                        <p className="mt-1 text-sm text-red-500">{errors.vehicle.firstRegisteredOn}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Numer VIN *
+                      </label>
+                      <input
+                        type="text"
+                        name="vin"
+                        maxLength={17}
+                        className={`w-full p-2 border ${errors.vehicle?.vin ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={vehicleData.vin}
+                        onChange={handleVehicleChange}
+                      />
+                      {errors.vehicle?.vin && (
+                        <p className="mt-1 text-sm text-red-500">{errors.vehicle.vin}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Numer rejestracyjny *
+                      </label>
+                      <input
+                        type="text"
+                        name="vrm"
+                        className={`w-full p-2 border ${errors.vehicle?.vrm ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={vehicleData.vrm}
+                        onChange={handleVehicleChange}
+                      />
+                      {errors.vehicle?.vrm && (
+                        <p className="mt-1 text-sm text-red-500">{errors.vehicle.vrm}</p>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-          
-          {/* Przyciski nawigacji */}
-          {currentStep !== 4 || (currentStep === 4 && !isCompleted) ? (
+                </div>
+              )}
+
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+                      <span className="text-[#FF8E3D] font-bold">2</span>
+                    </div>
+                    Dane osobowe
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Imię *
+                        </label>
+                        <input
+                          type="text"
+                          name="firstName"
+                          className={`w-full p-2 border ${errors.personal?.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={personalData.firstName}
+                          onChange={handlePersonalChange}
+                        />
+                        {errors.personal?.firstName && (
+                          <p className="mt-1 text-sm text-red-500">{errors.personal.firstName}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nazwisko *
+                        </label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          className={`w-full p-2 border ${errors.personal?.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={personalData.lastName}
+                          onChange={handlePersonalChange}
+                        />
+                        {errors.personal?.lastName && (
+                          <p className="mt-1 text-sm text-red-500">{errors.personal.lastName}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Numer telefonu *
+                      </label>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        placeholder="+48XXXXXXXXX"
+                        className={`w-full p-2 border ${errors.personal?.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={personalData.phoneNumber}
+                        onChange={handlePersonalChange}
+                      />
+                      {errors.personal?.phoneNumber && (
+                        <p className="mt-1 text-sm text-red-500">{errors.personal.phoneNumber}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Adres e-mail *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        className={`w-full p-2 border ${errors.personal?.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={personalData.email}
+                        onChange={handlePersonalChange}
+                      />
+                      {errors.personal?.email && (
+                        <p className="mt-1 text-sm text-red-500">{errors.personal.email}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        PESEL *
+                      </label>
+                      <input
+                        type="text"
+                        name="identificationNumber"
+                        maxLength={11}
+                        className={`w-full p-2 border ${errors.personal?.identificationNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={personalData.identificationNumber}
+                        onChange={handlePersonalChange}
+                      />
+                      {errors.personal?.identificationNumber && (
+                        <p className="mt-1 text-sm text-red-500">{errors.personal.identificationNumber}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ulica i numer *
+                      </label>
+                      <input
+                        type="text"
+                        name="street"
+                        className={`w-full p-2 border ${errors.personal?.street ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        value={personalData.street}
+                        onChange={handlePersonalChange}
+                      />
+                      {errors.personal?.street && (
+                        <p className="mt-1 text-sm text-red-500">{errors.personal.street}</p>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Miasto *
+                        </label>
+                        <input
+                          type="text"
+                          name="city"
+                          className={`w-full p-2 border ${errors.personal?.city ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={personalData.city}
+                          onChange={handlePersonalChange}
+                        />
+                        {errors.personal?.city && (
+                          <p className="mt-1 text-sm text-red-500">{errors.personal.city}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Kod pocztowy *
+                        </label>
+                        <input
+                          type="text"
+                          name="postCode"
+                          placeholder="XX-XXX"
+                          maxLength={6}
+                          className={`w-full p-2 border ${errors.personal?.postCode ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={personalData.postCode}
+                          onChange={handlePersonalChange}
+                        />
+                        {errors.personal?.postCode && (
+                          <p className="mt-1 text-sm text-red-500">{errors.personal.postCode}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+                      <span className="text-[#FF8E3D] font-bold">3</span>
+                    </div>
+                    Metoda płatności
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {paymentMethodOptions.map((option) => (
+                      <div 
+                        key={option.value}
+                        className={`border-2 rounded-xl p-5 cursor-pointer transition-all
+                          ${paymentData.paymentMethod === option.value 
+                            ? 'border-[#300FE6] bg-[#300FE6]/5' 
+                            : 'border-gray-200 hover:border-gray-300'}`}
+                        onClick={() => handlePaymentChange({ name: 'paymentMethod', value: option.value })}
+                      >
+                        <h3 className="font-semibold text-lg mb-2">{option.label}</h3>
+                        <p className="text-gray-600 text-sm">
+                          {option.value === 'PM_BT' 
+                            ? 'Otrzymasz dane do przelewu po złożeniu zamówienia' 
+                            : 'Zostaniesz przekierowany do bezpiecznej płatności online'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 4 && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+                      <span className="text-[#FF8E3D] font-bold">4</span>
+                    </div>
+                    Podsumowanie zamówienia
+                  </h2>
+                  
+                  {/* Boks podsumowania */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+                    <div className="flex items-start mb-8">
+                      <div className="bg-[#300FE6]/10 p-3 rounded-full mr-4">
+                        <CheckCircle2 className="h-6 w-6 text-[#300FE6]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">
+                          {calculationResult?.details.productName || "Ubezpieczenie GAP"}
+                        </h3>
+                        <p className="text-gray-600">
+                          Ubezpieczenie zapewniające pełną ochronę wartości pojazdu
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Pojazd</p>
+                        <p className="font-medium">{vehicleData.make} {vehicleData.model}</p>
+                        <p className="text-sm text-gray-600">{vehicleData.vrm}</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Wartość pojazdu</p>
+                        <p className="font-medium">{calculationResult?.details.vehicleValue?.toLocaleString('pl-PL')} PLN</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Okres ubezpieczenia</p>
+                        <p className="font-medium">{calculationResult?.details.coveragePeriod}</p>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 mb-1">Maksymalne pokrycie</p>
+                        <p className="font-medium">{calculationResult?.details.maxCoverage}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-200 pt-6 mt-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-gray-600">Składka ubezpieczeniowa</p>
+                        <p className="font-medium">{calculationResult?.premium?.toLocaleString('pl-PL')} PLN</p>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <p className="text-lg font-bold">Łączna kwota do zapłaty</p>
+                        <p className="text-2xl font-bold text-[#300FE6]">{calculationResult?.premium?.toLocaleString('pl-PL')} PLN</p>
+                      </div>
+                      
+                      <div className="mt-6 p-4 bg-[#E1EDFF] rounded-lg">
+                        <p className="text-[#300FE6] font-medium">
+                          Metoda płatności: {paymentData.paymentMethod === 'PM_BT' ? 'Przelew bankowy' : 'Płatność online'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Zgoda na warunki */}
+                  <div className="flex items-start mb-6">
+                    <input
+                      type="checkbox"
+                      id="termsAgreement"
+                      className="mt-1 mr-2"
+                      checked={termsAgreed}
+                      onChange={(e) => setTermsAgreed(e.target.checked)}
+                    />
+                    <label htmlFor="termsAgreement" className="text-gray-700">
+                      Zapoznałem się i akceptuję <a href="#" className="text-[#300FE6] hover:underline">regulamin</a> oraz 
+                      <a href="#" className="text-[#300FE6] hover:underline"> politykę prywatności</a>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Przyciski nawigacyjne */}
             <div className="flex justify-between">
               {currentStep > 1 ? (
                 <Button
                   variant="outline"
                   onClick={goToPrevStep}
                   disabled={isSubmitting}
+                  className="flex items-center"
                 >
-                  Wstecz
+                  <ArrowLeft size={16} className="mr-1" /> Wstecz
                 </Button>
               ) : (
                 <Button
                   variant="outline"
                   onClick={() => router.push('/gap')}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
                 >
                   Anuluj
                 </Button>
@@ -738,22 +780,35 @@ const CheckoutPage = () => {
               
               {currentStep < 4 ? (
                 <Button
-                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
                   onClick={goToNextStep}
                 >
                   Dalej <ChevronRight size={16} className="ml-1" />
                 </Button>
               ) : (
                 <Button
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !termsAgreed}
                 >
                   {isSubmitting ? 'Przetwarzanie...' : 'Zamawiam i płacę'}
                 </Button>
               )}
             </div>
-          ) : null}
+          </div>
+        </div>
+        
+        {/* Informacje o bezpieczeństwie */}
+        <div className="mt-10 text-center">
+          <div className="inline-flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <p className="text-gray-600">Bezpieczne połączenie SSL</p>
+          </div>
+          <p className="text-sm text-gray-500">
+            Twoje dane są chronione i bezpieczne. Używamy najnowszych technologii szyfrowania.
+          </p>
         </div>
       </div>
     </div>

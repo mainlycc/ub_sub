@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, TrendingDown, DollarSign, Calculator } from 'lucide-react';
+import { ShieldCheck, TrendingDown, DollarSign, Calculator, HelpCircle, Info } from 'lucide-react';
 import {
   Tabs,
   TabsContent,
@@ -11,6 +11,12 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { StarBorder } from "@/components/ui/star-border";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Typy danych
 type CalculatorData = {
@@ -36,6 +42,27 @@ interface CalculationResult {
     maxCoverage: string;
   };
 }
+
+// Dodajemy funkcję do formatowania liczb
+const formatPrice = (price: number | undefined): string => {
+  if (!price) return '';
+  return price.toLocaleString('pl-PL');
+};
+
+// Funkcja do parsowania ceny z formatu z separatorami do liczby
+const parsePrice = (input: string): number => {
+  if (!input) return 0;
+  return parseFloat(input.replace(/\s/g, '').replace(/,/g, '.')) || 0;
+};
+
+// Definicje tooltipów
+const tooltips = {
+  gapFakturowy: "Ubezpieczenie, które pokrywa różnicę między wartością fakturową a wartością rynkową pojazdu w momencie szkody.",
+  gapCasco: "Ubezpieczenie, które pokrywa różnicę między wartością początkową pojazdu a wypłatą z AC/OC w przypadku szkody całkowitej.",
+  carPrice: "Podaj aktualną wartość rynkową lub cenę zakupu pojazdu.",
+  year: "Wybierz rok produkcji pojazdu.",
+  months: "Określ na jak długi okres chcesz wykupić ubezpieczenie."
+};
 
 const InsuranceCalculator = () => {
   const router = useRouter();
@@ -93,10 +120,15 @@ const InsuranceCalculator = () => {
       const data = await response.json();
       
       if (data.success && data.premium !== undefined) {
-        setCalculationResult({
+        const calculationResult = {
           premium: data.premium,
           details: data.details
-        });
+        };
+        
+        setCalculationResult(calculationResult);
+        
+        // Zapisz dane w localStorage do wykorzystania w checkout
+        localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
         
         // Przewijamy do wyników po krótkim opóźnieniu
         setTimeout(() => {
@@ -115,6 +147,22 @@ const InsuranceCalculator = () => {
   
   // Funkcja sprawdzająca, czy dany okres jest aktywny
   const isPeriodActive = (period: number) => calculatorData.months === period;
+  
+  // Funkcja renderująca tooltip
+  const renderTooltip = (text: string) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="ml-1 inline-flex cursor-help text-gray-400 hover:text-gray-600">
+            <Info size={16} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs text-sm">{text}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
   
   return (
     <section className="py-12 bg-gradient-to-br from-white to-gray-50">
@@ -145,31 +193,38 @@ const InsuranceCalculator = () => {
                   <TabsList className="grid w-full grid-cols-2 mb-8">
                     <TabsTrigger 
                       value="fakturowy" 
-                      className="py-3 text-base rounded-tl-md rounded-bl-md"
+                      className="py-3 text-base rounded-tl-md rounded-bl-md data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white"
                     >
                       GAP Fakturowy
+                      {renderTooltip(tooltips.gapFakturowy)}
                     </TabsTrigger>
                     <TabsTrigger 
                       value="casco" 
-                      className="py-3 text-base rounded-tr-md rounded-br-md"
+                      className="py-3 text-base rounded-tr-md rounded-br-md data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white"
                     >
                       GAP Casco
+                      {renderTooltip(tooltips.gapCasco)}
                     </TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="fakturowy" className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cena pojazdu (PLN)
+                        Cena pojazdu
+                        {renderTooltip(tooltips.carPrice)}
                       </label>
                       <div className="relative">
                         <input
-                          type="number"
-                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md pl-10`}
-                          value={calculatorData.carPrice || ''}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, carPrice: parseFloat(e.target.value) || 0 }))}
+                          type="text"
+                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={formatPrice(calculatorData.carPrice)}
+                          onChange={(e) => {
+                            const numericValue = parsePrice(e.target.value);
+                            setCalculatorData(prev => ({ ...prev, carPrice: numericValue }));
+                          }}
+                          placeholder="Wprowadź cenę"
                         />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                           <span className="text-gray-500">PLN</span>
                         </div>
                       </div>
@@ -179,6 +234,7 @@ const InsuranceCalculator = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Rok produkcji pojazdu
+                        {renderTooltip(tooltips.year)}
                       </label>
                       <select
                         className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -196,34 +252,28 @@ const InsuranceCalculator = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Okres ubezpieczenia
+                        {renderTooltip(tooltips.months)}
                       </label>
-                      <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                        {[12, 24, 36, 48, 60].map(period => (
-                          <div 
+                      <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-4">
+                        {[12, 24, 36, 48, 60].map((period) => (
+                          <button
                             key={period}
+                            type="button"
                             onClick={() => setCalculatorData(prev => ({ ...prev, months: period }))}
                             className={`
-                              cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg 
-                              transition-all duration-200 border-2
+                              py-2 px-3 rounded-md font-medium text-center
                               ${isPeriodActive(period) 
-                                ? 'bg-[#300FE6]/10 border-[#300FE6] shadow-sm' 
-                                : 'bg-white border-gray-300 hover:border-[#300FE6] hover:bg-[#300FE6]/5'}
+                                ? 'bg-[#300FE6] text-white' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
                             `}
                           >
-                            <div className={`
-                              h-5 w-5 rounded-full border-2 mb-1 flex items-center justify-center
-                              ${isPeriodActive(period) 
-                                ? 'border-[#300FE6] bg-[#300FE6]' 
-                                : 'border-gray-400'}
-                            `}>
-                              {isPeriodActive(period) && (
-                                <div className="h-2 w-2 rounded-full bg-white"></div>
-                              )}
+                            <div className="flex flex-col items-center justify-center">
+                              <span className="text-lg font-bold">{period}</span>
+                              <span className="text-xs">
+                                {period === 12 ? 'miesiąc' : 'miesięcy'}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium">
-                              {period} {period === 12 ? 'miesiąc' : 'miesięcy'}
-                            </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                       {errors.months && <p className="mt-1 text-sm text-red-500">{errors.months}</p>}
@@ -248,16 +298,21 @@ const InsuranceCalculator = () => {
                   <TabsContent value="casco" className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cena pojazdu (PLN)
+                        Cena pojazdu
+                        {renderTooltip(tooltips.carPrice)}
                       </label>
                       <div className="relative">
                         <input
-                          type="number"
-                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md pl-10`}
-                          value={calculatorData.carPrice || ''}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, carPrice: parseFloat(e.target.value) || 0 }))}
+                          type="text"
+                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          value={formatPrice(calculatorData.carPrice)}
+                          onChange={(e) => {
+                            const numericValue = parsePrice(e.target.value);
+                            setCalculatorData(prev => ({ ...prev, carPrice: numericValue }));
+                          }}
+                          placeholder="Wprowadź cenę"
                         />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                           <span className="text-gray-500">PLN</span>
                         </div>
                       </div>
@@ -267,6 +322,7 @@ const InsuranceCalculator = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Rok produkcji pojazdu
+                        {renderTooltip(tooltips.year)}
                       </label>
                       <select
                         className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -284,34 +340,28 @@ const InsuranceCalculator = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Okres ubezpieczenia
+                        {renderTooltip(tooltips.months)}
                       </label>
-                      <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                        {[12, 24, 36, 48, 60].map(period => (
-                          <div 
+                      <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-4">
+                        {[12, 24, 36, 48, 60].map((period) => (
+                          <button
                             key={period}
+                            type="button"
                             onClick={() => setCalculatorData(prev => ({ ...prev, months: period }))}
                             className={`
-                              cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg 
-                              transition-all duration-200 border-2
+                              py-2 px-3 rounded-md font-medium text-center
                               ${isPeriodActive(period) 
-                                ? 'bg-[#300FE6]/10 border-[#300FE6] shadow-sm' 
-                                : 'bg-white border-gray-300 hover:border-[#300FE6] hover:bg-[#300FE6]/5'}
+                                ? 'bg-[#300FE6] text-white' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
                             `}
                           >
-                            <div className={`
-                              h-5 w-5 rounded-full border-2 mb-1 flex items-center justify-center
-                              ${isPeriodActive(period) 
-                                ? 'border-[#300FE6] bg-[#300FE6]' 
-                                : 'border-gray-400'}
-                            `}>
-                              {isPeriodActive(period) && (
-                                <div className="h-2 w-2 rounded-full bg-white"></div>
-                              )}
+                            <div className="flex flex-col items-center justify-center">
+                              <span className="text-lg font-bold">{period}</span>
+                              <span className="text-xs">
+                                {period === 12 ? 'miesiąc' : 'miesięcy'}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium">
-                              {period} {period === 12 ? 'miesiąc' : 'miesięcy'}
-                            </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                       {errors.months && <p className="mt-1 text-sm text-red-500">{errors.months}</p>}
@@ -373,10 +423,14 @@ const InsuranceCalculator = () => {
                     
                     <div className="flex mt-3 space-x-2">
                       <Button 
-                        className="flex-1 bg-green-600 hover:bg-green-700 py-1.5"
-                        onClick={() => router.push('/gap')}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+                        onClick={() => {
+                          // Zapisz dane w localStorage przed przekierowaniem
+                          localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
+                          router.push('/checkout');
+                        }}
                       >
-                        Kup ubezpieczenie
+                        Kup teraz
                       </Button>
                       <Button 
                         variant="outline"

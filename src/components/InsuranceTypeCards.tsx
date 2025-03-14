@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowRight, Shield, FileText, Check } from 'lucide-react';
+import Link from 'next/link';
 
 const InsuranceTypeCards = () => {
   return (
@@ -124,11 +125,11 @@ const InsuranceTypeCards = () => {
         </div>
         
         <div className="mt-16 text-center">
-          <div className="inline-block p-1 bg-gradient-to-r from-[#FF7715] via-[#300FE6] to-[#16AB59] rounded-lg shadow-lg">
-            <button className="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-4 px-12 rounded-md transition-all">
-              Porównaj wszystkie ubezpieczenia GAP
+          <Link href="/gap">
+            <button className="bg-[#300FE6] hover:bg-[#2208B0] text-white font-semibold py-4 px-12 rounded-md transition-all shadow-lg">
+              Wypełnij wniosek
             </button>
-          </div>
+          </Link>
         </div>
       </div>
     </section>

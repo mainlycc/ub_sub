@@ -44,13 +44,13 @@ const AboutUs = () => {
             </p>
           </div>
 
-          <div className="bg-[#16AB59] rounded-xl p-8 shadow-md transform transition hover:scale-105">
-            <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-              <Calculator className="h-8 w-8 text-white" />
+          <div className="bg-[#FFBAC4] rounded-xl p-8 shadow-md transform transition hover:scale-105">
+            <div className="bg-black/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <Calculator className="h-8 w-8 text-gray-900" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-3">Księgowość</h3>
-            <p className="text-white">
-              Specjalizujemy się w obsłudze jednoosobowych działalności gospodarczych, zapewniając zgodność z przepisami.
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Księgowość</h3>
+            <p className="text-gray-800">
+              Profesjonalne usługi księgowe dla firm każdej wielkości, prowadzone przez doświadczonych specjalistów.
             </p>
           </div>
         </div>
@@ -117,16 +117,14 @@ const AboutUs = () => {
         </div>
 
         {/* Wezwanie do działania */}
-        <div className="text-center">
-          <div className="inline-block p-1 bg-gradient-to-r from-red-600 via-blue-600 to-red-600 rounded-lg">
-            <button className="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-4 px-12 rounded-md transition-all">
-              Skontaktuj się z nami
-            </button>
-          </div>
-          <p className="mt-4 text-gray-600">
-            Zadbaj o bezpieczeństwo swojej firmy i finanse dzięki Business Care
-          </p>
+        <div className="mt-8 text-center">
+          <button className="bg-[#300FE6] hover:bg-[#2208B0] text-white font-semibold py-4 px-12 rounded-md transition-all shadow-lg">
+            Skontaktuj się z nami
+          </button>
         </div>
+        <p className="mt-4 text-gray-600">
+          Zadbaj o bezpieczeństwo swojej firmy i finanse dzięki Business Care
+        </p>
       </div>
     </section>
   );

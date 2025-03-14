@@ -49,7 +49,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <nav className="flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-[#300FE6]">Ubezpieczenia</span>
+            <span className="text-2xl font-bold text-[#300FE6]">Business Care</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-6">
