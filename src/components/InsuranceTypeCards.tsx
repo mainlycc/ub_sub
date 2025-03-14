@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Shield, FileText, Car, Check } from 'lucide-react';
+import { ArrowRight, Shield, FileText, Check } from 'lucide-react';
 
 const InsuranceTypeCards = () => {
   return (

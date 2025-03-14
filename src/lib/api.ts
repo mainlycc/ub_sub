@@ -1,13 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { getAuthToken } from './auth';
 
 // Stałe konfiguracyjne
 const API_BASE_URL = 'https://test.v2.idefend.eu/api/jwt-token';
-const AUTH_CREDENTIALS = {
-  username: "GAP_2025_PL",
-  password: "LEaBY4TXgWa4QJX"
-};
-const SELLER_NODE_CODE = 'PL_TEST_GAP_25';
 
 // Interfejsy dla typów danych
 interface AuthResponse {
@@ -15,18 +10,12 @@ interface AuthResponse {
   expiresIn?: number;
 }
 
-interface VehicleData {
-  price: number;
-  year: number;
-  months: number;
-  modelCode?: string;
-}
-
-interface CalculateOfferResponse {
-  premiumSuggested: number;
-  premiumNet: number;
-  premiumGross: number;
-  // Inne pola, które mogą być zwrócone przez API
+interface ApiError {
+  message: string;
+  response?: {
+    data: unknown;
+    status: number;
+  };
 }
 
 interface GapOfferParams {
@@ -42,6 +31,25 @@ interface GapOfferResponse {
   options?: {
     CLAIM_LIMIT?: string;
   };
+}
+
+interface VehicleModel {
+  code: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface PolicyData {
+  sellerNodeCode: string;
+  productCode: string;
+  // Pozostałe pola zgodne z wymaganiami API
+  [key: string]: unknown;
+}
+
+interface PolicyResponse {
+  policyId?: string;
+  status?: string;
+  [key: string]: unknown;
 }
 
 // Cache dla tokenu JWT
@@ -90,27 +98,28 @@ export async function authenticate(): Promise<string | null> {
 
     return cachedToken;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
     console.error('Błąd autoryzacji:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
+      message: apiError.message,
+      response: (apiError.response as AxiosResponse)?.data,
+      status: (apiError.response as AxiosResponse)?.status
     });
     
     // Resetuj cache w przypadku błędu
     cachedToken = null;
     tokenExpiration = null;
     
-    throw new Error('Błąd autoryzacji: ' + error.message);
+    throw new Error('Błąd autoryzacji: ' + apiError.message);
   }
 }
 
 // Funkcja pomocnicza do wykonywania zapytań API z autoryzacją
-export async function callApiWithAuth(
+export async function callApiWithAuth<T>(
   endpoint: string, 
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-  data?: any
-): Promise<any> {
+  data?: Record<string, unknown>
+): Promise<T> {
   try {
     // Pobierz token autoryzacyjny
     const token = await authenticate();
@@ -119,7 +128,7 @@ export async function callApiWithAuth(
       throw new Error('Brak tokenu autoryzacyjnego');
     }
     
-    const response = await axios({
+    const response = await axios<T>({
       method,
       url: `https://test.v2.idefend.eu/api/${endpoint}`,
       headers: {
@@ -131,14 +140,15 @@ export async function callApiWithAuth(
     });
     
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
     console.error(`Błąd wywołania API (${endpoint}):`, {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
+      message: apiError.message,
+      response: (apiError.response as AxiosResponse)?.data,
+      status: (apiError.response as AxiosResponse)?.status
     });
     
-    throw new Error(`Błąd wywołania API: ${error.message}`);
+    throw new Error(`Błąd wywołania API: ${apiError.message}`);
   }
 }
 
@@ -197,18 +207,19 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Błąd kalkulacji oferty:', error);
-    throw new Error(error.response?.data?.message || error.message);
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
+    console.error('Błąd kalkulacji oferty:', apiError);
+    throw new Error((apiError.response as AxiosResponse)?.data?.message || apiError.message);
   }
 }
 
 // Funkcja do pobierania dostępnych modeli pojazdów
-export async function getVehicleModels(): Promise<any> {
+export async function getVehicleModels(): Promise<VehicleModel[]> {
   try {
     const token = await authenticate();
     
-    const response = await axios.get(
+    const response = await axios.get<VehicleModel[]>(
       `${API_BASE_URL}/vehicles/makes?pagination=false`,
       {
         headers: {
@@ -218,18 +229,19 @@ export async function getVehicleModels(): Promise<any> {
     );
     
     return response.data;
-  } catch (error) {
-    console.error('Błąd pobierania modeli pojazdów:', error);
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
+    console.error('Błąd pobierania modeli pojazdów:', apiError);
     throw new Error('Nie udało się pobrać listy modeli pojazdów');
   }
 }
 
 // Funkcja do rejestracji polisy (lock)
-export async function registerPolicy(policyData: any): Promise<any> {
+export async function registerPolicy(policyData: PolicyData): Promise<PolicyResponse> {
   try {
     const token = await authenticate();
     
-    const response = await axios.post(
+    const response = await axios.post<PolicyResponse>(
       `${API_BASE_URL}/policies/creation/lock`,
       policyData,
       {
@@ -241,8 +253,9 @@ export async function registerPolicy(policyData: any): Promise<any> {
     );
     
     return response.data;
-  } catch (error) {
-    console.error('Błąd rejestracji polisy:', error);
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
+    console.error('Błąd rejestracji polisy:', apiError);
     throw new Error('Nie udało się zarejestrować polisy');
   }
 } 

@@ -105,8 +105,9 @@ const InsuranceCalculator = () => {
       } else {
         alert(`Błąd kalkulacji: ${data.error || 'Nieznany błąd'}`);
       }
-    } catch (error: any) {
-      alert(`Błąd kalkulacji: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Nieoczekiwany błąd';
+      alert(`Błąd kalkulacji: ${errorMessage}`);
     } finally {
       setIsCalculating(false);
     }
