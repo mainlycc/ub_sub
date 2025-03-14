@@ -17,11 +17,12 @@ export async function GET() {
       token: token.substring(0, 10) + '...' // Pokazujemy tylko część tokenu dla bezpieczeństwa
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Błąd w auth-test:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return Response.json({
       success: false,
-      message: error.message
+      message: errorMessage
     }, { status: 500 });
   }
 } 

@@ -111,10 +111,11 @@ export async function POST(request: NextRequest) {
       }
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Błąd podczas kalkulacji:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return NextResponse.json(
-      { error: error.message || 'Wystąpił błąd podczas kalkulacji' },
+      { error: errorMessage || 'Wystąpił błąd podczas kalkulacji' },
       { status: 500 }
     );
   }

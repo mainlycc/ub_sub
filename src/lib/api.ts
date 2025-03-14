@@ -10,14 +10,6 @@ interface AuthResponse {
   expiresIn?: number;
 }
 
-interface ApiError {
-  message: string;
-  response?: {
-    data: unknown;
-    status: number;
-  };
-}
-
 interface GapOfferParams {
   price: number;
   year: number;

@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight, Car, User, CreditCard, FileCheck } from 'lucide-react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
 
 // Typy danych dla formularza
 interface VehicleData {

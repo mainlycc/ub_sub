@@ -9,11 +9,12 @@ export async function GET() {
       isAuthorized,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Błąd sprawdzania statusu:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return Response.json({
       success: false,
-      error: error.message,
+      error: errorMessage,
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
