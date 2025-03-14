@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, TrendingDown, DollarSign, Calculator } from 'lucide-react';
@@ -48,6 +48,9 @@ const InsuranceCalculator = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isCalculating, setIsCalculating] = useState(false);
   
+  // Dodajemy referencję do sekcji wynikowej
+  const resultRef = useRef<HTMLDivElement>(null);
+  
   const handleCalculate = async () => {
     // Walidacja przed wysłaniem
     const errors: ValidationErrors = {};
@@ -93,6 +96,11 @@ const InsuranceCalculator = () => {
           premium: data.premium,
           details: data.details
         });
+        
+        // Przewijamy do wyników po krótkim opóźnieniu
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
       } else {
         alert(`Błąd kalkulacji: ${data.error || 'Nieznany błąd'}`);
       }
@@ -119,14 +127,14 @@ const InsuranceCalculator = () => {
         <div className="md:flex md:space-x-8 md:items-stretch">
           <div className="md:w-1/2">
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 
-                          relative h-full transform transition-all duration-300 hover:shadow-xl
+                          transform transition-all duration-300 hover:shadow-xl
                           bg-gradient-to-br from-white via-white to-gray-50">
-              <div className="bg-gradient-to-r from-red-600 to-red-700 h-2 w-full"></div>
+              <div className="bg-gradient-to-r from-[#300FE6] to-[#2208B0] h-2 w-full"></div>
               
               <div className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="bg-red-100 p-3 rounded-full mr-4">
-                    <Calculator className="h-6 w-6 text-red-600" />
+                  <div className="bg-[#300FE6]/10 p-3 rounded-full mr-4">
+                    <Calculator className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">Kalkulator składki</h3>
                 </div>
@@ -196,14 +204,14 @@ const InsuranceCalculator = () => {
                               cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg 
                               transition-all duration-200 border-2
                               ${isPeriodActive(period) 
-                                ? 'bg-red-50 border-red-500 shadow-sm' 
-                                : 'bg-white border-gray-300 hover:border-red-300 hover:bg-red-50'}
+                                ? 'bg-[#300FE6]/10 border-[#300FE6] shadow-sm' 
+                                : 'bg-white border-gray-300 hover:border-[#300FE6] hover:bg-[#300FE6]/5'}
                             `}
                           >
                             <div className={`
                               h-5 w-5 rounded-full border-2 mb-1 flex items-center justify-center
                               ${isPeriodActive(period) 
-                                ? 'border-red-500 bg-red-500' 
+                                ? 'border-[#300FE6] bg-[#300FE6]' 
                                 : 'border-gray-400'}
                             `}>
                               {isPeriodActive(period) && (
@@ -221,7 +229,7 @@ const InsuranceCalculator = () => {
                     
                     <div className="pt-4">
                       <Button 
-                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
+                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
                         onClick={handleCalculate}
                         disabled={isCalculating}
                       >
@@ -279,14 +287,14 @@ const InsuranceCalculator = () => {
                               cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg 
                               transition-all duration-200 border-2
                               ${isPeriodActive(period) 
-                                ? 'bg-red-50 border-red-500 shadow-sm' 
-                                : 'bg-white border-gray-300 hover:border-red-300 hover:bg-red-50'}
+                                ? 'bg-[#300FE6]/10 border-[#300FE6] shadow-sm' 
+                                : 'bg-white border-gray-300 hover:border-[#300FE6] hover:bg-[#300FE6]/5'}
                             `}
                           >
                             <div className={`
                               h-5 w-5 rounded-full border-2 mb-1 flex items-center justify-center
                               ${isPeriodActive(period) 
-                                ? 'border-red-500 bg-red-500' 
+                                ? 'border-[#300FE6] bg-[#300FE6]' 
                                 : 'border-gray-400'}
                             `}>
                               {isPeriodActive(period) && (
@@ -304,7 +312,7 @@ const InsuranceCalculator = () => {
                     
                     <div className="pt-4">
                       <Button 
-                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
+                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
                         onClick={handleCalculate}
                         disabled={isCalculating}
                       >
@@ -317,47 +325,50 @@ const InsuranceCalculator = () => {
             </div>
             
             {calculationResult && (
-              <div className="max-w-2xl mx-auto">
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-red-500 transform transition-all duration-300 hover:shadow-xl">
-                  <div className="flex items-center bg-gradient-to-r from-red-600 to-red-700 px-4 py-3">
-                    <div className="bg-white rounded-full p-2 mr-3">
-                      <span className="text-red-600 font-bold">PLN</span>
+              <div 
+                ref={resultRef} 
+                className="mx-auto mb-4 transform transition-all duration-500 animate-fade-in-down"
+              >
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-[#300FE6] animate-pulse-once">
+                  <div className="flex items-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-4 py-2">
+                    <div className="bg-white rounded-full p-1.5 mr-3">
+                      <span className="text-[#300FE6] font-bold">PLN</span>
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Twoja składka: {calculationResult.premium.toFixed(2)} zł</h3>
                     </div>
                   </div>
                   
-                  <div className="p-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 p-3 rounded">
-                        <div className="text-sm text-gray-500">Produkt</div>
+                  <div className="p-3">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-xs text-gray-500">Produkt</div>
                         <div className="font-medium">{calculationResult.details.productName}</div>
                       </div>
-                      <div className="bg-gray-50 p-3 rounded">
-                        <div className="text-sm text-gray-500">Okres ochrony</div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-xs text-gray-500">Okres ochrony</div>
                         <div className="font-medium">{calculationResult.details.coveragePeriod}</div>
                       </div>
-                      <div className="bg-gray-50 p-3 rounded">
-                        <div className="text-sm text-gray-500">Wartość pojazdu</div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-xs text-gray-500">Wartość pojazdu</div>
                         <div className="font-medium">{calculationResult.details.vehicleValue.toLocaleString()} zł</div>
                       </div>
-                      <div className="bg-gray-50 p-3 rounded">
-                        <div className="text-sm text-gray-500">Maksymalny limit</div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-xs text-gray-500">Maksymalny limit</div>
                         <div className="font-medium">{calculationResult.details.maxCoverage}</div>
                       </div>
                     </div>
                     
-                    <div className="flex mt-4 space-x-3">
+                    <div className="flex mt-3 space-x-2">
                       <Button 
-                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        className="flex-1 bg-green-600 hover:bg-green-700 py-1.5"
                         onClick={() => router.push('/gap')}
                       >
                         Kup ubezpieczenie
                       </Button>
                       <Button 
                         variant="outline"
-                        className="flex-shrink-0 border-red-600 text-red-600 hover:bg-red-50"
+                        className="flex-shrink-0 border-[#300FE6] text-[#300FE6] hover:bg-[#300FE6]/10 py-1.5"
                         onClick={() => setCalculationResult(null)}
                       >
                         Nowa kalkulacja
@@ -367,20 +378,12 @@ const InsuranceCalculator = () => {
                 </div>
               </div>
             )}
-            
-            {!calculationResult && (
-              <div className="text-center p-6 text-gray-500 md:hidden">
-                <p>
-                  Wprowadź dane pojazdu w formularzu i kliknij "Oblicz składkę", aby zobaczyć wysokość składki.
-                </p>
-              </div>
-            )}
           </div>
           
           <div className="md:w-1/2 mt-8 md:mt-0">
             <div className="hidden md:block">
               <h2 className="text-4xl font-bold text-gray-900 leading-tight">
-                Nie daj się <span className="text-red-600">zaskoczyć</span> utratą wartości swojego auta
+                Nie daj się <span className="text-orange-600">zaskoczyć</span> utratą wartości swojego auta
               </h2>
               
               <p className="mt-6 text-xl text-gray-600">
@@ -390,8 +393,8 @@ const InsuranceCalculator = () => {
               
               <div className="mt-8 space-y-4">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-red-100 p-2 rounded-full mr-4">
-                    <ShieldCheck className="h-6 w-6 text-red-600" />
+                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
+                    <ShieldCheck className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">Pełna ochrona finansowa</h3>
@@ -400,8 +403,8 @@ const InsuranceCalculator = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-red-100 p-2 rounded-full mr-4">
-                    <TrendingDown className="h-6 w-6 text-red-600" />
+                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
+                    <TrendingDown className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">Ochrona przed spadkiem wartości</h3>
@@ -410,8 +413,8 @@ const InsuranceCalculator = () => {
                 </div>
                 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-red-100 p-2 rounded-full mr-4">
-                    <DollarSign className="h-6 w-6 text-red-600" />
+                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
+                    <DollarSign className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">Niska składka, wysoka ochrona</h3>
@@ -421,7 +424,7 @@ const InsuranceCalculator = () => {
               </div>
               
               {!calculationResult && (
-                <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg md:block hidden">
                   <p className="text-gray-600 italic">
                     Oblicz składkę ubezpieczenia GAP, wprowadzając dane pojazdu w formularzu po lewej stronie.
                   </p>

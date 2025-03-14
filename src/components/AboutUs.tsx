@@ -15,12 +15,12 @@ const AboutUs = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Nagłówek sekcji */}
         <div className="text-center mb-16">
-          <span className="inline-block py-1 px-3 bg-red-100 text-red-800 rounded-full text-sm font-semibold mb-3">
+          <span className="inline-block py-1 px-3 bg-[#E1EDFF] text-[#300FE6] rounded-full text-sm font-semibold mb-3">
             O nas
           </span>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Business Care 
-            <span className="bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent"> 
+            <span className="text-[#300FE6]"> 
               - Twój partner w biznesie
             </span>
           </h2>
@@ -31,32 +31,32 @@ const AboutUs = () => {
 
         {/* Wizualizacja głównych obszarów działalności */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-8 shadow-md transform transition hover:scale-105">
-            <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-              <Shield className="h-8 w-8 text-red-600" />
+          <div className="bg-[#E1EDFF] rounded-xl p-8 shadow-md transform transition hover:scale-105">
+            <div className="bg-black/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <Shield className="h-8 w-8 text-gray-900" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Ubezpieczenia</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-800">
               Oferujemy szeroki zakres ubezpieczeń dla firm i osób prywatnych, w tym OC, CASCO i ubezpieczenia mienia.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 shadow-md transform transition hover:scale-105">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+          <div className="bg-[#FF8E3D] rounded-xl p-8 shadow-md transform transition hover:scale-105">
+            <div className="bg-black/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <TrendingUp className="h-8 w-8 text-gray-900" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Leasing</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-900">
               Dopasowane rozwiązania leasingowe dla małych i średnich firm, umożliwiające rozwój bez obciążania budżetu.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 shadow-md transform transition hover:scale-105">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-              <Calculator className="h-8 w-8 text-green-600" />
+          <div className="bg-[#16AB59] rounded-xl p-8 shadow-md transform transition hover:scale-105">
+            <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <Calculator className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Księgowość</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-bold text-white mb-3">Księgowość</h3>
+            <p className="text-white">
               Specjalizujemy się w obsłudze jednoosobowych działalności gospodarczych, zapewniając zgodność z przepisami.
             </p>
           </div>
@@ -72,11 +72,11 @@ const AboutUs = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-red-600 to-blue-600 p-0.5 rounded-xl mb-16">
-          <div className="bg-white rounded-xl p-8 sm:p-10 text-center">
-            <HeartHandshake className="h-16 w-16 text-gray-900 mx-auto mb-6" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Kompleksowa obsługa na najwyższym poziomie</h3>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <div className="bg-[#300FE6] rounded-xl mb-16">
+          <div className="p-8 sm:p-10 text-center">
+            <HeartHandshake className="h-16 w-16 text-white mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-white mb-4">Kompleksowa obsługa na najwyższym poziomie</h3>
+            <p className="text-lg text-white/90 max-w-3xl mx-auto">
               Business Care to firma, która stawia na profesjonalizm, transparentność i pełne zrozumienie potrzeb swoich klientów.
               Zaufaj ekspertom i zadbaj o bezpieczeństwo swojego biznesu z naszą pomocą!
             </p>

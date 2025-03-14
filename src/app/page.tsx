@@ -1,29 +1,25 @@
 "use client"
 
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
 import InsuranceCalculator from '@/components/InsuranceCalculator';
 import InsuranceTypeCards from '@/components/InsuranceTypeCards';
 import AboutUs from '@/components/AboutUs';
+import FAQ from '@/components/FAQ';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-
-      <main className="flex-1">
-        {/* Kalkulator - importowany jako komponent */}
-        <InsuranceCalculator />
-        
-        {/* Karty informacyjne o typach ubezpieczeń GAP */}
-        <InsuranceTypeCards />
-        
-        {/* Sekcja O nas */}
-        <AboutUs />
-      </main>
-
-      <Footer />
-    </div>
+    <>
+      {/* Kalkulator - importowany jako komponent */}
+      <InsuranceCalculator />
+      
+      {/* Karty informacyjne o typach ubezpieczeń GAP */}
+      <InsuranceTypeCards />
+      
+      {/* Sekcja O nas */}
+      <AboutUs />
+      
+      {/* Sekcja FAQ - przeniesiona na koniec */}
+      <FAQ />
+    </>
   );
 };
 
