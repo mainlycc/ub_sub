@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Suspense } from 'react';
 
 // Typy danych dla formularza
 interface VehicleData {
@@ -65,9 +66,17 @@ const paymentMethodOptions = [
   { value: "PM_PBC", label: "Płatność online" }
 ];
 
-const CheckoutPage = () => {
+// Komponent wewnętrzny, który będzie używał useSearchParams
+const CheckoutContent = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
+  
+  // Ustawiamy searchParams dopiero po załadowaniu na kliencie
+  useEffect(() => {
+    // Używamy natywnego API przeglądarki zamiast hooka Next.js
+    setSearchParams(new URLSearchParams(window.location.search));
+  }, []);
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -111,7 +120,7 @@ const CheckoutPage = () => {
     payment?: { [key: string]: string };
   }>({});
   
-  // Pobieranie danych z parametrów URL lub localStorage
+  // Pobieranie danych z parametrów URL
   useEffect(() => {
     // Pobranie danych z localStorage jeśli są
     const savedCalculationData = localStorage.getItem('gapCalculationResult');
@@ -124,8 +133,7 @@ const CheckoutPage = () => {
         console.error('Błąd parsowania danych kalkulacji:', e);
       }
     } else {
-      // Jeśli nie ma danych w localStorage, ustaw przykładowe dane
-      // W rzeczywistej aplikacji powinno to być pobrane z API lub przekazane z poprzedniej strony
+      // Domyślne dane
       setCalculationResult({
         premium: 450,
         details: {
@@ -136,17 +144,19 @@ const CheckoutPage = () => {
         }
       });
       
-      // Można również pobrać parametry z URL, jeśli są tam przekazywane
-      const premiumParam = searchParams.get('premium');
-      if (premiumParam) {
-        setCalculationResult(prev => ({
-          ...prev!,
-          premium: parseInt(premiumParam, 10)
-        }));
+      // Pobieramy parametry z URL tylko jeśli searchParams zostało ustawione
+      if (searchParams) {
+        const premiumParam = searchParams.get('premium');
+        if (premiumParam) {
+          setCalculationResult(prev => ({
+            ...prev!,
+            premium: parseInt(premiumParam, 10)
+          }));
+        }
       }
     }
     
-    // Dodanie przykładowych danych pojazdu, jeśli nie zostały ustawione
+    // Dodanie przykładowych danych pojazdu
     setVehicleData(prev => ({
       ...prev,
       make: prev.make || "Volkswagen",
@@ -893,6 +903,22 @@ const CheckoutPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Główny komponent strony - uproszczony
+const CheckoutPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-t-[#300FE6] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg font-medium text-gray-600">Ładowanie formularza...</p>
+        </div>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 };
 
