@@ -10,6 +10,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { StarBorder } from "@/components/ui/star-border";
 
 // Typy danych
 type CalculatorData = {
@@ -228,13 +229,18 @@ const InsuranceCalculator = () => {
                     </div>
                     
                     <div className="pt-4">
-                      <Button 
-                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
+                      <StarBorder 
+                        as="button"
+                        className="w-full text-lg font-medium transition-all duration-200"
+                        color="#3311EE"
+                        speed="3s"
                         onClick={handleCalculate}
                         disabled={isCalculating}
                       >
-                        {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
-                      </Button>
+                        <div className="flex items-center justify-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] py-4 text-white font-medium rounded-[20px] shadow-md hover:shadow-lg">
+                          {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
+                        </div>
+                      </StarBorder>
                     </div>
                   </TabsContent>
                   
@@ -311,13 +317,18 @@ const InsuranceCalculator = () => {
                     </div>
                     
                     <div className="pt-4">
-                      <Button 
-                        className="w-full py-6 text-lg font-medium bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] shadow-md hover:shadow-lg transition-all duration-200 rounded-lg" 
+                      <StarBorder 
+                        as="button"
+                        className="w-full text-lg font-medium transition-all duration-200"
+                        color="#3311EE"
+                        speed="3s"
                         onClick={handleCalculate}
                         disabled={isCalculating}
                       >
-                        {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
-                      </Button>
+                        <div className="flex items-center justify-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] py-4 text-white font-medium rounded-[20px] shadow-md hover:shadow-lg">
+                          {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
+                        </div>
+                      </StarBorder>
                     </div>
                   </TabsContent>
                 </Tabs>
