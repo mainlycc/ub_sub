@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Book, Users, FileText, CreditCard, ArrowLeftCircle, MessageSquare, Scale } from 'lucide-react';
+import { ArrowLeft, Book, Users, FileText, Scale } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
