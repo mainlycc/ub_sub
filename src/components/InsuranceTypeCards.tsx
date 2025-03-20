@@ -15,12 +15,12 @@ const InsuranceTypeCards = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* GAP Fakturowy - pomarańczowa karta z czarnymi napisami */}
-          <div className="rounded-xl overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#FF7715] text-black">
+          {/* GAP Fakturowy - pomarańczowa karta z białymi napisami */}
+          <div className="rounded-xl overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#FF7715] text-white">
             <div className="p-6">
               <div className="flex items-center mb-4">
-                <div className="bg-black/10 p-3 rounded-full mr-4">
-                  <FileText className="h-8 w-8 text-black" />
+                <div className="bg-white/10 p-3 rounded-full mr-4">
+                  <FileText className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold">GAP Fakturowy</h3>
               </div>
@@ -31,31 +31,31 @@ const InsuranceTypeCards = () => {
               
               <div className="space-y-3 mb-8">
                 <div className="flex items-start">
-                  <Check className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p>Chroni przed stratą finansową wynikającą z amortyzacji pojazdu</p>
                 </div>
                 <div className="flex items-start">
-                  <Check className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p>Idealne rozwiązanie dla nowych pojazdów lub do 6 miesięcy od zakupu</p>
                 </div>
                 <div className="flex items-start">
-                  <Check className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p>Wypłata dodatkowego odszkodowania do 100% wartości fakturowej</p>
                 </div>
                 <div className="flex items-start">
-                  <Check className="h-5 w-5 text-black mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p>Ubezpieczenie dostępne dla samochodów osobowych i dostawczych</p>
                 </div>
               </div>
               
               <div className="mt-auto text-center">
-                <button className="inline-flex items-center bg-black/10 hover:bg-black/20 px-4 py-2 rounded-lg text-black font-medium transition-colors">
+                <button className="inline-flex items-center bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white font-medium transition-colors">
                   Sprawdź szczegóły <ArrowRight className="ml-1 h-4 w-4" />
                 </button>
               </div>
             </div>
             
-            <div className="border-t border-black/10 py-4 px-6">
+            <div className="border-t border-white/10 py-4 px-6">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium">Ochrona do</p>

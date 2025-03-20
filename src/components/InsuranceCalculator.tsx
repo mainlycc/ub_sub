@@ -393,11 +393,8 @@ const InsuranceCalculator = () => {
               >
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-[#300FE6] animate-pulse-once">
                   <div className="flex items-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-4 py-2">
-                    <div className="bg-white rounded-full p-1.5 mr-3">
-                      <span className="text-[#300FE6] font-bold">PLN</span>
-                    </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">Twoja składka: {calculationResult.premium.toFixed(2)} zł</h3>
+                      <h3 className="text-xl font-bold text-white">Twoja jednorazowa składka: {calculationResult.premium.toFixed(2)} zł</h3>
                     </div>
                   </div>
                   
