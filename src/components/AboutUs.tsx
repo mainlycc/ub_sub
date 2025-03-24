@@ -122,7 +122,7 @@ const AboutUs = () => {
             Skontaktuj się z nami
           </button>
         </div>
-        <p className="mt-4 text-gray-600">
+        <p className="mt-4 text-gray-600 text-center">
           Zadbaj o bezpieczeństwo swojej firmy i finanse dzięki Business Care
         </p>
       </div>

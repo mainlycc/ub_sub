@@ -225,7 +225,7 @@ const InsuranceCalculator = () => {
                           placeholder="Wprowadź cenę"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <span className="text-gray-500">PLN</span>
+                          <span className="text-gray-500">zł</span>
                         </div>
                       </div>
                       {errors.carPrice && <p className="mt-1 text-sm text-red-500">{errors.carPrice}</p>}
@@ -313,7 +313,7 @@ const InsuranceCalculator = () => {
                           placeholder="Wprowadź cenę"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <span className="text-gray-500">PLN</span>
+                          <span className="text-gray-500">zł</span>
                         </div>
                       </div>
                       {errors.carPrice && <p className="mt-1 text-sm text-red-500">{errors.carPrice}</p>}

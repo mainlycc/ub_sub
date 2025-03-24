@@ -1,9 +1,10 @@
 "use client"
 
+import React from 'react';
 import { ArrowRight, Shield, FileText, Check } from 'lucide-react';
 import Link from 'next/link';
 
-const InsuranceTypeCards = () => {
+const InsuranceTypeCards = (): React.ReactElement => {
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,7 +16,7 @@ const InsuranceTypeCards = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* GAP Fakturowy - pomarańczowa karta z białymi napisami */}
+          {/* GAP Fakturowy - pomarańczowa karta z czarnymi napisami */}
           <div className="rounded-xl overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#FF7715] text-white">
             <div className="p-6">
               <div className="flex items-center mb-4">
