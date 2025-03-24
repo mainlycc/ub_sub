@@ -1,62 +1,48 @@
 "use client"
 
-import { useState } from 'react';
-import { Check, ArrowLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
 interface VehicleFormProps {
-  data: VehicleData;
-  onChange: (data: VehicleData) => void;
-  errors?: { [key: string]: string };
+  data: {
+    purchasedOn: string;
+    categoryCode: string;
+    firstRegisteredOn: string;
+    vin: string;
+    vrm: string;
+  };
+  onChange: (data: any) => void;
+  errors?: {
+    purchasedOn?: string;
+    categoryCode?: string;
+    firstRegisteredOn?: string;
+    vin?: string;
+    vrm?: string;
+  };
 }
 
-interface VehicleData {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: string;
-  usageCode: string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: string;
-  vin: string;
-  vrm: string;
-  make?: string;
-  model?: string;
+interface Category {
+  value: string;
+  label: string;
 }
 
-const vehicleCategories = [
-  { value: "PC", label: "Samochód osobowy" },
-  { value: "LCV", label: "Samochód dostawczy" }
-];
-
-const usageTypes = [
-  { value: "STANDARD", label: "Standardowy" },
-  { value: "TAXI", label: "Taxi" },
-  { value: "RENT", label: "Wynajem" }
-];
-
-const vatOptions = [
-  { value: "NO", label: "Nie odliczam VAT" },
-  { value: "YES", label: "Odliczam VAT" },
-  { value: "PARTIAL", label: "Odliczam częściowo" }
-];
-
-export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
+export const VehicleForm = (props: VehicleFormProps): React.ReactElement => {
   const router = useRouter();
 
+  const categories: Category[] = [
+    { value: 'PC', label: 'Samochód osobowy' },
+    { value: 'LCV', label: 'Samochód dostawczy' }
+  ];
+
   const isFormValid = () => {
-    return data.purchasedOn && 
-           data.categoryCode && 
-           data.firstRegisteredOn && 
-           data.vin && 
-           data.vin.length === 17 &&
-           data.vrm;
+    return props.data.purchasedOn && 
+           props.data.categoryCode && 
+           props.data.firstRegisteredOn && 
+           props.data.vin && 
+           props.data.vin.length === 17 &&
+           props.data.vrm;
   };
 
   const handleNext = () => {
@@ -82,12 +68,12 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
           <input
             type="date"
             name="purchasedOn"
-            className={`w-full p-2 border ${errors?.purchasedOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-            value={data.purchasedOn}
-            onChange={(e) => onChange({ ...data, purchasedOn: e.target.value })}
+            className={`w-full p-2 border ${props.errors?.purchasedOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+            value={props.data.purchasedOn}
+            onChange={(e) => props.onChange({ ...props.data, purchasedOn: e.target.value })}
           />
-          {errors?.purchasedOn && (
-            <p className="mt-1 text-sm text-red-500">{errors.purchasedOn}</p>
+          {props.errors?.purchasedOn && (
+            <p className="mt-1 text-sm text-red-500">{props.errors.purchasedOn}</p>
           )}
         </div>
 
@@ -97,17 +83,17 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
           </label>
           <select
             name="categoryCode"
-            className={`w-full p-2 border ${errors?.categoryCode ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-            value={data.categoryCode}
-            onChange={(e) => onChange({ ...data, categoryCode: e.target.value })}
+            className={`w-full p-2 border ${props.errors?.categoryCode ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+            value={props.data.categoryCode}
+            onChange={(e) => props.onChange({ ...props.data, categoryCode: e.target.value })}
           >
             <option value="">Wybierz kategorię</option>
-            {vehicleCategories.map(cat => (
+            {categories.map(cat => (
               <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
-          {errors?.categoryCode && (
-            <p className="mt-1 text-sm text-red-500">{errors.categoryCode}</p>
+          {props.errors?.categoryCode && (
+            <p className="mt-1 text-sm text-red-500">{props.errors.categoryCode}</p>
           )}
         </div>
 
@@ -118,12 +104,12 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
           <input
             type="date"
             name="firstRegisteredOn"
-            className={`w-full p-2 border ${errors?.firstRegisteredOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-            value={data.firstRegisteredOn}
-            onChange={(e) => onChange({ ...data, firstRegisteredOn: e.target.value })}
+            className={`w-full p-2 border ${props.errors?.firstRegisteredOn ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+            value={props.data.firstRegisteredOn}
+            onChange={(e) => props.onChange({ ...props.data, firstRegisteredOn: e.target.value })}
           />
-          {errors?.firstRegisteredOn && (
-            <p className="mt-1 text-sm text-red-500">{errors.firstRegisteredOn}</p>
+          {props.errors?.firstRegisteredOn && (
+            <p className="mt-1 text-sm text-red-500">{props.errors.firstRegisteredOn}</p>
           )}
         </div>
 
@@ -135,13 +121,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
             type="text"
             name="vin"
             maxLength={17}
-            className={`w-full p-2 border ${errors?.vin ? 'border-red-500' : 'border-gray-300'} rounded-md uppercase`}
-            value={data.vin}
-            onChange={(e) => onChange({ ...data, vin: e.target.value.toUpperCase() })}
+            className={`w-full p-2 border ${props.errors?.vin ? 'border-red-500' : 'border-gray-300'} rounded-md uppercase`}
+            value={props.data.vin}
+            onChange={(e) => props.onChange({ ...props.data, vin: e.target.value.toUpperCase() })}
             placeholder="np. WBA1234567890XXXX"
           />
-          {errors?.vin && (
-            <p className="mt-1 text-sm text-red-500">{errors.vin}</p>
+          {props.errors?.vin && (
+            <p className="mt-1 text-sm text-red-500">{props.errors.vin}</p>
           )}
         </div>
 
@@ -152,13 +138,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps) => {
           <input
             type="text"
             name="vrm"
-            className={`w-full p-2 border ${errors?.vrm ? 'border-red-500' : 'border-gray-300'} rounded-md uppercase`}
-            value={data.vrm}
-            onChange={(e) => onChange({ ...data, vrm: e.target.value.toUpperCase() })}
+            className={`w-full p-2 border ${props.errors?.vrm ? 'border-red-500' : 'border-gray-300'} rounded-md uppercase`}
+            value={props.data.vrm}
+            onChange={(e) => props.onChange({ ...props.data, vrm: e.target.value.toUpperCase() })}
             placeholder="np. WA12345"
           />
-          {errors?.vrm && (
-            <p className="mt-1 text-sm text-red-500">{errors.vrm}</p>
+          {props.errors?.vrm && (
+            <p className="mt-1 text-sm text-red-500">{props.errors.vrm}</p>
           )}
         </div>
       </div>
