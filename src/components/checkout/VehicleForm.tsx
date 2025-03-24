@@ -5,15 +5,28 @@ import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
+interface VehicleData {
+  purchasedOn: string;
+  modelCode: string;
+  categoryCode: string;
+  usageCode: string;
+  mileage: number;
+  firstRegisteredOn: string;
+  evaluationDate: string;
+  purchasePrice: number;
+  purchasePriceNet: number;
+  purchasePriceVatReclaimableCode: string;
+  usageTypeCode: string;
+  purchasePriceInputType: string;
+  vin: string;
+  vrm: string;
+  make?: string;
+  model?: string;
+}
+
 interface VehicleFormProps {
-  data: {
-    purchasedOn: string;
-    categoryCode: string;
-    firstRegisteredOn: string;
-    vin: string;
-    vrm: string;
-  };
-  onChange: (data: any) => void;
+  data: VehicleData;
+  onChange: (data: VehicleData) => void;
   errors?: {
     purchasedOn?: string;
     categoryCode?: string;

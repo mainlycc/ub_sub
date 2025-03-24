@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { User, Mail, Phone, CreditCard } from 'lucide-react';
+import { User, Mail, CreditCard } from 'lucide-react';
 
 interface PersonalFormProps {
   data: PersonalData;
@@ -25,6 +25,9 @@ interface PersonalData {
   };
 }
 
+type AddressData = PersonalData['address'];
+type AddressField = keyof AddressData;
+
 export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): React.ReactElement => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,13 +35,15 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
     if (name.includes('.')) {
       // Obsługa pól zagnieżdżonych (adres)
       const [parent, child] = name.split('.');
-      onChange({
-        ...data,
-        [parent]: {
-          ...data[parent as keyof PersonalData] as Record<string, any>,
-          [child]: value
-        }
-      });
+      if (parent === 'address' && isAddressField(child)) {
+        onChange({
+          ...data,
+          address: {
+            ...data.address,
+            [child]: value
+          }
+        });
+      }
     } else {
       // Obsługa pól bezpośrednich
       onChange({
@@ -46,6 +51,10 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         [name]: value
       });
     }
+  };
+
+  const isAddressField = (field: string): field is AddressField => {
+    return field in data.address;
   };
 
   return (

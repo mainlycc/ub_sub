@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { Calculator, Car, Calendar, DollarSign, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Car, Calendar, DollarSign, ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
