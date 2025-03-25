@@ -1,9 +1,11 @@
 "use client"
 
+import React from 'react';
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, TrendingDown, DollarSign, Calculator, Info } from 'lucide-react';
+import Image from 'next/image';
 import {
   Tabs,
   TabsContent,
@@ -445,45 +447,18 @@ const InsuranceCalculator = () => {
           
           <div className="md:w-1/2 mt-8 md:mt-0">
             <div className="hidden md:block">
-              <h2 className="text-4xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-4xl font-bold text-gray-900 leading-tight mb-8">
                 Nie daj się <span className="text-orange-600">zaskoczyć</span> utratą wartości swojego auta
               </h2>
               
-              <p className="mt-6 text-xl text-gray-600">
-                Każdy nowy samochód traci nawet do 60% swojej wartości w ciągu pierwszych 3 lat. 
-                <span className="font-semibold"> Ubezpieczenie GAP</span> chroni Cię przed finansowymi konsekwencjami tej utraty.
-              </p>
-              
-              <div className="mt-8 space-y-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
-                    <ShieldCheck className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Pełna ochrona finansowa</h3>
-                    <p className="text-gray-600">Otrzymasz dodatkowe odszkodowanie pokrywające różnicę między wartością początkową a aktualną pojazdu</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
-                    <TrendingDown className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Ochrona przed spadkiem wartości</h3>
-                    <p className="text-gray-600">Zabezpieczenie przed naturalną utratą wartości pojazdu, która najszybciej postępuje w pierwszych latach</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-[#300FE6]/10 p-2 rounded-full mr-4">
-                    <DollarSign className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Niska składka, wysoka ochrona</h3>
-                    <p className="text-gray-600">Za niewielką cenę otrzymujesz zabezpieczenie przed potencjalną stratą dziesiątek tysięcy złotych</p>
-                  </div>
-                </div>
+              <div className="relative w-full h-[400px]">
+                <Image
+                  src="/front.png"
+                  alt="Ubezpieczenie samochodu"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
               </div>
               
               {!calculationResult && (

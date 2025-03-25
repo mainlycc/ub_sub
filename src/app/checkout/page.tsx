@@ -70,6 +70,28 @@ interface CalculationResult {
   };
 }
 
+// Funkcja do wysyłania emaila z danymi
+const sendFormDataEmail = async (formData: any) => {
+  try {
+    const response = await fetch('/api/send-form-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ formData }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Błąd podczas wysyłania emaila');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Błąd wysyłania emaila:', error);
+    throw error;
+  }
+};
+
 // CheckoutContent component
 const CheckoutContent = () => {
   const router = useRouter();
@@ -329,7 +351,7 @@ const CheckoutContent = () => {
           mileage: vehicleData.mileage,
           firstRegisteredOn: new Date(vehicleData.firstRegisteredOn).toISOString(),
           evaluationDate: vehicleData.evaluationDate,
-          purchasePrice: Math.round(vehicleData.purchasePrice * 100), // Convert to pennies
+          purchasePrice: Math.round(vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
           purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
           usageTypeCode: vehicleData.usageTypeCode,
@@ -373,7 +395,8 @@ const CheckoutContent = () => {
         premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
       };
       
-      console.log('Dane do wysłania:', policyData);
+      // Wysyłanie danych na email
+      await sendFormDataEmail(policyData);
       
       // Symulacja odpowiedzi z API
       await new Promise(resolve => setTimeout(resolve, 1500));
