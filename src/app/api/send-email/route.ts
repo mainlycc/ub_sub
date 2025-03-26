@@ -2,84 +2,116 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
+  console.log('Rozpoczynam obsługę żądania wysłania maila');
+  
   try {
     const body = await request.json();
-    const { personalData, vehicleData, paymentData, calculationResult } = body;
+    console.log('Otrzymane dane:', JSON.stringify(body, null, 2));
+    
+    const { personalData, vehicleData, paymentData, calculationResult, policyData } = body;
 
     // Konfiguracja transportera dla Gmail
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: true, // Gmail wymaga SSL
+      service: 'gmail',
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+        user: 'stanislaw.blich@gmail.com',
+        pass: 'viqa wtok gxwj cwhq'
+      }
     });
 
-    // Dodajemy logowanie dla debugowania
-    console.log('Konfiguracja SMTP:', {
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      user: process.env.SMTP_USER ? 'Ustawiony' : 'Brak',
-      pass: process.env.SMTP_PASS ? 'Ustawione' : 'Brak',
-    });
+    console.log('Transporter skonfigurowany, weryfikuję połączenie...');
+
+    // Weryfikacja połączenia
+    try {
+      await transporter.verify();
+      console.log('Połączenie z serwerem SMTP zweryfikowane pomyślnie');
+    } catch (verifyError: any) {
+      console.error('Błąd weryfikacji połączenia SMTP:', verifyError);
+      throw new Error(`Błąd weryfikacji SMTP: ${verifyError.message}`);
+    }
 
     // Przygotowanie treści maila
     const mailOptions = {
-      from: process.env.SMTP_FROM,
+      from: 'stanislaw.blich@gmail.com',
       to: personalData.email,
       subject: 'Potwierdzenie zamówienia ubezpieczenia GAP',
-      html: `
-        <h1>Dziękujemy za zamówienie ubezpieczenia GAP</h1>
-        <p>Szanowny/a ${personalData.firstName} ${personalData.lastName},</p>
-        <p>Potwierdzamy otrzymanie Twojego zamówienia ubezpieczenia GAP.</p>
-        
-        <h2>Szczegóły zamówienia:</h2>
-        <h3>Dane pojazdu:</h3>
-        <ul>
-          <li>VIN: ${vehicleData.vin}</li>
-          <li>Nr rejestracyjny: ${vehicleData.vrm}</li>
-          <li>Data zakupu: ${new Date(vehicleData.purchasedOn).toLocaleDateString()}</li>
-        </ul>
+      text: `
+Dziękujemy za zamówienie ubezpieczenia GAP
 
-        <h3>Szczegóły ubezpieczenia:</h3>
-        <ul>
-          <li>Składka: ${calculationResult.premium.toLocaleString()} zł</li>
-          <li>Okres ochrony: ${calculationResult.details.coveragePeriod}</li>
-          <li>Maksymalna ochrona: ${calculationResult.details.maxCoverage}</li>
-        </ul>
+Szanowny/a ${personalData.firstName} ${personalData.lastName},
 
-        ${paymentData.paymentMethod === 'PM_PBC' ? `
-          <h3>Dane do przelewu:</h3>
-          <ul>
-            <li>Nr konta: XX XXXX XXXX XXXX XXXX XXXX XXXX</li>
-            <li>Tytuł przelewu: GAP-${vehicleData.vin}</li>
-            <li>Kwota: ${calculationResult.premium.toLocaleString()} zł</li>
-          </ul>
-        ` : ''}
+Potwierdzamy otrzymanie Twojego zamówienia ubezpieczenia GAP.
 
-        <p>Nasz konsultant skontaktuje się z Tobą w ciągu 24 godzin w celu potwierdzenia zamówienia.</p>
-        
-        <p>Pozdrawiamy,<br>Zespół Ubezpieczeń</p>
-      `,
+Dane osobowe:
+- Imię i nazwisko: ${personalData.firstName} ${personalData.lastName}
+- Email: ${personalData.email}
+- Telefon: ${personalData.phoneNumber}
+- Adres: ${personalData.address.street}, ${personalData.address.postCode} ${personalData.address.city}
+
+Dane pojazdu:
+- VIN: ${vehicleData.vin}
+- Nr rejestracyjny: ${vehicleData.vrm}
+- Data zakupu: ${new Date(vehicleData.purchasedOn).toLocaleDateString()}
+- Przebieg: ${vehicleData.mileage} km
+- Cena zakupu: ${(vehicleData.purchasePrice / 100).toLocaleString()} zł
+
+Szczegóły ubezpieczenia:
+- Wariant produktu: ${policyData.productCode}
+- Okres ochrony: ${paymentData.term} miesięcy
+- Limit roszczeń: ${paymentData.claimLimit}
+- Składka: ${(policyData.premium / 100).toLocaleString()} zł
+- Forma płatności: ${paymentData.paymentMethod === 'PM_PBC' ? 'Przelew bankowy' : 'Karta płatnicza'}
+
+${paymentData.paymentMethod === 'PM_PBC' ? `
+Dane do przelewu:
+- Nr konta: XX XXXX XXXX XXXX XXXX XXXX XXXX
+- Tytuł przelewu: GAP-${vehicleData.vin}
+- Kwota: ${(policyData.premium / 100).toLocaleString()} zł
+` : ''}
+
+Nasz konsultant skontaktuje się z Tobą w ciągu 24 godzin w celu potwierdzenia zamówienia.
+
+Pozdrawiamy,
+Zespół Ubezpieczeń
+      `
     };
 
-    console.log('Próba wysłania maila do:', personalData.email);
+    console.log('Przygotowano opcje maila:', {
+      to: mailOptions.to,
+      from: mailOptions.from,
+      subject: mailOptions.subject
+    });
 
     try {
-      // Wysłanie maila
+      console.log('Próba wysłania maila...');
       const info = await transporter.sendMail(mailOptions);
-      console.log('Mail wysłany:', info.messageId);
-      return NextResponse.json({ success: true, messageId: info.messageId });
+      console.log('Mail wysłany pomyślnie:', {
+        messageId: info.messageId,
+        response: info.response
+      });
+      return NextResponse.json({ 
+        success: true, 
+        messageId: info.messageId,
+        response: info.response 
+      });
     } catch (sendError: any) {
-      console.error('Błąd podczas wysyłania:', sendError);
+      console.error('Szczegóły błędu wysyłania:', {
+        code: sendError.code,
+        command: sendError.command,
+        response: sendError.response,
+        responseCode: sendError.responseCode,
+        stack: sendError.stack
+      });
       throw new Error(`Błąd wysyłania: ${sendError.message}`);
     }
   } catch (error: any) {
-    console.error('Błąd podczas wysyłania maila:', error);
+    console.error('Błąd główny:', error);
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas wysyłania maila', details: error.message },
+      { 
+        error: 'Wystąpił błąd podczas wysyłania maila', 
+        details: error.message,
+        stack: error.stack 
+      },
       { status: 500 }
     );
   }

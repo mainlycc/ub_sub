@@ -400,8 +400,7 @@ const CheckoutContent = () => {
         premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
       };
       
-      // Wysyłanie danych na email
-      await sendFormDataEmail(policyData);
+      console.log('Wysyłanie danych formularza...');
       
       // Wysyłanie maila z potwierdzeniem
       const emailResponse = await fetch('/api/send-email', {
@@ -413,12 +412,14 @@ const CheckoutContent = () => {
           personalData,
           vehicleData,
           paymentData,
-          calculationResult
+          calculationResult,
+          policyData // dodajemy pełne dane polisy
         }),
       });
 
       if (!emailResponse.ok) {
-        throw new Error('Błąd podczas wysyłania maila');
+        const errorData = await emailResponse.json();
+        throw new Error(errorData.details || 'Błąd podczas wysyłania maila');
       }
       
       // Sukces
