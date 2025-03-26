@@ -1,8 +1,6 @@
 "use client"
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
 
 interface VehicleData {
   purchasedOn: string;
@@ -45,15 +43,6 @@ export const VehicleForm = (props: VehicleFormProps): React.ReactElement => {
     { value: 'PC', label: 'Samochód osobowy' },
     { value: 'LCV', label: 'Samochód dostawczy' }
   ];
-
-  const isFormValid = () => {
-    return props.data.purchasedOn && 
-           props.data.categoryCode && 
-           props.data.firstRegisteredOn && 
-           props.data.vin && 
-           props.data.vin.length === 17 &&
-           props.data.vrm;
-  };
 
   return (
     <div className="space-y-6">

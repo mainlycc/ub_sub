@@ -74,29 +74,6 @@ interface CalculationResult {
   };
 }
 
-// Funkcja do wysyłania emaila z danymi
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sendFormDataEmail = async (formData: any) => {
-  try {
-    const response = await fetch('/api/send-form-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ formData }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Błąd podczas wysyłania emaila');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Błąd wysyłania emaila:', error);
-    throw error;
-  }
-};
-
 // CheckoutContent component
 const CheckoutContent = () => {
   const router = useRouter();

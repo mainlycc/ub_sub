@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
+// Interfejsy dla typów błędów
+interface SMTPError extends Error {
+  code?: string;
+  command?: string;
+  response?: string;
+  responseCode?: number;
+}
+
 export async function POST(request: Request) {
   console.log('Rozpoczynam obsługę żądania wysłania maila');
   
@@ -8,7 +16,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Otrzymane dane:', JSON.stringify(body, null, 2));
     
-    const { personalData, vehicleData, paymentData, calculationResult, policyData } = body;
+    const { personalData, vehicleData, paymentData, policyData } = body;
 
     // Konfiguracja transportera dla Gmail
     const transporter = nodemailer.createTransport({
@@ -25,9 +33,10 @@ export async function POST(request: Request) {
     try {
       await transporter.verify();
       console.log('Połączenie z serwerem SMTP zweryfikowane pomyślnie');
-    } catch (verifyError: any) {
-      console.error('Błąd weryfikacji połączenia SMTP:', verifyError);
-      throw new Error(`Błąd weryfikacji SMTP: ${verifyError.message}`);
+    } catch (verifyError) {
+      const smtpError = verifyError as SMTPError;
+      console.error('Błąd weryfikacji połączenia SMTP:', smtpError);
+      throw new Error(`Błąd weryfikacji SMTP: ${smtpError.message}`);
     }
 
     // Przygotowanie treści maila
@@ -94,23 +103,25 @@ Zespół Ubezpieczeń
         messageId: info.messageId,
         response: info.response 
       });
-    } catch (sendError: any) {
+    } catch (sendError) {
+      const smtpError = sendError as SMTPError;
       console.error('Szczegóły błędu wysyłania:', {
-        code: sendError.code,
-        command: sendError.command,
-        response: sendError.response,
-        responseCode: sendError.responseCode,
-        stack: sendError.stack
+        code: smtpError.code,
+        command: smtpError.command,
+        response: smtpError.response,
+        responseCode: smtpError.responseCode,
+        stack: smtpError.stack
       });
-      throw new Error(`Błąd wysyłania: ${sendError.message}`);
+      throw new Error(`Błąd wysyłania: ${smtpError.message}`);
     }
-  } catch (error: any) {
-    console.error('Błąd główny:', error);
+  } catch (error) {
+    const serverError = error as Error;
+    console.error('Błąd główny:', serverError);
     return NextResponse.json(
       { 
         error: 'Wystąpił błąd podczas wysyłania maila', 
-        details: error.message,
-        stack: error.stack 
+        details: serverError.message,
+        stack: serverError.stack 
       },
       { status: 500 }
     );
