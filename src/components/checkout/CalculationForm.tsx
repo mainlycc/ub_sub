@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { Car, Calendar, DollarSign, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Car, Calendar, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
 
 interface CalculationFormProps {
   vehicleData: VehicleData;
@@ -90,7 +89,6 @@ export const CalculationForm = ({
   calculationResult, 
   errors 
 }: CalculationFormProps): React.ReactElement => {
-  const router = useRouter();
   const [isCalculating, setIsCalculating] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(vehicleData.purchasePrice || 0);
   
@@ -322,28 +320,6 @@ export const CalculationForm = ({
           </div>
         </div>
       )}
-
-      {/* Przyciski nawigacji */}
-      <div className="flex justify-between mt-8">
-        <Button
-          onClick={() => window.history.back()}
-          variant="outline"
-          className="flex items-center text-gray-600"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Wróć
-        </Button>
-
-        {calculationResult && (
-          <Button
-            onClick={() => router.push('/checkout')}
-            className="bg-[#300FE6] hover:bg-[#2208B0] text-white flex items-center"
-          >
-            Dalej
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
-        )}
-      </div>
     </div>
   );
 }; 

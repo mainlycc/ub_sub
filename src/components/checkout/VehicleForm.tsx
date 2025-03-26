@@ -1,7 +1,6 @@
 "use client"
 
 import React from 'react';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
@@ -42,8 +41,6 @@ interface Category {
 }
 
 export const VehicleForm = (props: VehicleFormProps): React.ReactElement => {
-  const router = useRouter();
-
   const categories: Category[] = [
     { value: 'PC', label: 'Samochód osobowy' },
     { value: 'LCV', label: 'Samochód dostawczy' }
@@ -56,12 +53,6 @@ export const VehicleForm = (props: VehicleFormProps): React.ReactElement => {
            props.data.vin && 
            props.data.vin.length === 17 &&
            props.data.vrm;
-  };
-
-  const handleNext = () => {
-    if (isFormValid()) {
-      router.push('/checkout/calculation');
-    }
   };
 
   return (
@@ -160,27 +151,6 @@ export const VehicleForm = (props: VehicleFormProps): React.ReactElement => {
             <p className="mt-1 text-sm text-red-500">{props.errors.vrm}</p>
           )}
         </div>
-      </div>
-
-      {/* Przyciski nawigacji */}
-      <div className="flex justify-between mt-8">
-        <Button
-          onClick={() => router.back()}
-          variant="outline"
-          className="flex items-center text-gray-600"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Wróć
-        </Button>
-
-        <Button
-          onClick={handleNext}
-          disabled={!isFormValid()}
-          className="bg-[#300FE6] hover:bg-[#2208B0] text-white flex items-center"
-        >
-          Dalej
-          <ChevronRight className="w-4 h-4 ml-2" />
-        </Button>
       </div>
     </div>
   );

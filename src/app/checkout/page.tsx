@@ -375,13 +375,28 @@ const CheckoutContent = () => {
       
       console.log('Dane do wysłania:', policyData);
       
-      // Symulacja odpowiedzi z API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Wysyłanie maila z potwierdzeniem
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalData,
+          vehicleData,
+          paymentData,
+          calculationResult
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        throw new Error('Błąd podczas wysyłania maila');
+      }
       
       // Sukces
       setIsCompleted(true);
     } catch (error) {
-      console.error('Błąd podczas rejestracji polisy:', error);
+      console.error('Błąd podczas przetwarzania zamówienia:', error);
       alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
     } finally {
       setIsSubmitting(false);
