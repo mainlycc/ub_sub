@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, TrendingDown, DollarSign, Calculator, Info } from 'lucide-react';
+import { Calculator, Info } from 'lucide-react';
 import Image from 'next/image';
 import {
   Tabs,
