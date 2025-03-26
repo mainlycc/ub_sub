@@ -11,6 +11,10 @@ import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
+/* eslint-enable @typescript-eslint/no-unused-vars */
+
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
   productCode: string;
