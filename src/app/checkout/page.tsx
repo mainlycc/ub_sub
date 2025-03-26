@@ -71,6 +71,7 @@ interface CalculationResult {
 }
 
 // Funkcja do wysyłania emaila z danymi
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sendFormDataEmail = async (formData: any) => {
   try {
     const response = await fetch('/api/send-form-email', {
