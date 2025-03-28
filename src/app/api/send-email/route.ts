@@ -18,16 +18,31 @@ export async function POST(request: Request) {
     
     const { personalData, vehicleData, paymentData, policyData } = body;
 
-    // Konfiguracja transportera dla Gmail
+    console.log('Sprawdzam zmienne środowiskowe:', {
+      SMTP_HOST: process.env.SMTP_HOST,
+      SMTP_PORT: process.env.SMTP_PORT,
+      SMTP_USER: process.env.SMTP_USER,
+      SMTP_FROM: process.env.SMTP_FROM,
+      HAS_SMTP_PASS: !!process.env.SMTP_PASS
+    });
+
+    // Konfiguracja transportera
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '465'),
+      secure: true,
       auth: {
-        user: 'stanislaw.blich@gmail.com',
-        pass: 'viqa wtok gxwj cwhq'
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
       }
     });
 
-    console.log('Transporter skonfigurowany, weryfikuję połączenie...');
+    console.log('Konfiguracja SMTP:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      user: process.env.SMTP_USER
+    });
 
     // Weryfikacja połączenia
     try {
@@ -41,7 +56,7 @@ export async function POST(request: Request) {
 
     // Przygotowanie treści maila
     const mailOptions = {
-      from: 'stanislaw.blich@gmail.com',
+      from: process.env.SMTP_FROM,
       to: personalData.email,
       subject: 'Potwierdzenie zamówienia ubezpieczenia GAP',
       text: `
