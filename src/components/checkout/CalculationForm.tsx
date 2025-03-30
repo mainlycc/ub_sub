@@ -1,10 +1,10 @@
 "use client"
 
-import React from 'react';
-import { useState } from 'react';
-import { Car, Calendar, DollarSign } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { VehicleData, InsuranceVariant, CalculationResult } from "@/types/insurance";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { InsuranceVariant, VehicleData, CalculationResult } from '@/types/insurance';
 
 interface CalculationFormProps {
   vehicleData: VehicleData;

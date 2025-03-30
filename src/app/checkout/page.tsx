@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Suspense } from 'react';
-import { InsuranceVariantForm } from '@/components/checkout/InsuranceVariantForm';
 import { CalculationForm } from '@/components/checkout/CalculationForm';
 import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
@@ -18,17 +17,8 @@ import {
   InsuranceVariant,
   PaymentData,
   CalculationResult,
-  NeedsAnalysisData,
-  PolicyRequest
+  NeedsAnalysisData
 } from '@/types/insurance';
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-// Usuń wszystkie interfejsy, które są już zaimportowane
-type SignatureType = "AUTHORIZED_BY_SMS" | "SIGNED_BY_PAYMENT";
-type PaymentMethodType = "PM_PAYU" | "PM_BT" | "PM_BY_DLR" | "PM_PBC" | "PM_PAYU_M" | "PM_BLIK";
 
 const STEPS = [
   'introduction',
@@ -54,7 +44,6 @@ const CheckoutContent = () => {
   
   const [currentStep, setCurrentStep] = useState<Step>('introduction');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
   
   // Initial states
   const [vehicleData, setVehicleData] = useState<VehicleData>({
@@ -119,7 +108,6 @@ const CheckoutContent = () => {
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  const [termsAgreed, setTermsAgreed] = useState(false);
   
   // Walidacja
   const [errors, setErrors] = useState<{
