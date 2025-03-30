@@ -431,38 +431,18 @@ const CheckoutContent = () => {
   
   // Submit function
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     try {
-      // Przygotuj dane do wysłania
-      const requestData = {
-        vehicleData: {
-          ...vehicleData,
-          firstRegisteredOn: formatDate(vehicleData.firstRegisteredOn),
-          purchasedOn: formatDate(vehicleData.purchasedOn),
-          evaluationDate: formatDate(vehicleData.evaluationDate)
-        },
-        personalData,
-        variant,
-        calculationResult
-      };
-
-      const response = await fetch('/api/defend/lock', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Błąd podczas rejestracji polisy');
-      }
-
-      const data = await response.json();
-      window.location.href = `/checkout/success?policyId=${data.policyId}`;
+      // Symulacja opóźnienia
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Symulacja sukcesu
+      setIsCompleted(true);
+      router.push('/checkout/success');
     } catch (error) {
-      console.error('Błąd podczas przetwarzania zamówienia:', error);
-      alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
+      console.error('Błąd podczas przetwarzania:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

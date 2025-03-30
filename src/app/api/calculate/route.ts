@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
-import { VehicleData, InsuranceVariant } from '@/types/insurance';
 
 export async function POST(request: NextRequest) {
   try {

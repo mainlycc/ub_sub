@@ -2,36 +2,20 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { InsuranceVariant, VehicleData, CalculationResult } from '@/types/insurance';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InsuranceVariant, CalculationResult } from '@/types/insurance';
 
 interface CalculationFormProps {
-  vehicleData: VehicleData;
-  variant: InsuranceVariant;
-  calculationResult: CalculationResult | null;
-  onVariantChange: (variant: InsuranceVariant) => void;
-  onCalculate: (result: CalculationResult) => void;
-  errors?: { [key: string]: string };
-}
-
-interface VehicleSnapshot {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: "PC" | string;
-  usageCode: "STANDARD" | string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: "VAT_RECLAIMABLE" | "VAT_NOT_RECLAIMABLE" | "VAT_PARTIALLY_RECLAIMABLE";
-  usageTypeCode: "INDIVIDUAL" | "BUSINESS" | "MIXED";
-  purchasePriceInputType: "GROSS" | "NET" | "VAT_INAPPLICABLE";
-  vin: string;
-  vrm: string;
-  make: string;
-  model: string;
+  vehicleData: {
+    make: string;
+    model: string;
+    purchasePrice: number;
+  };
+  onBack: () => void;
+  onNext: (calculationResult: CalculationResult) => void;
 }
 
 const PRODUCT_VARIANTS = [
@@ -57,7 +41,7 @@ const PRODUCT_VARIANTS = [
   }
 ] as const;
 
-export const CalculationForm = ({ vehicleData, variant, calculationResult, onVariantChange, onCalculate, errors }: CalculationFormProps) => {
+export const CalculationForm = ({ vehicleData, onBack, onNext }: CalculationFormProps) => {
   const [selectedOptions, setSelectedOptions] = useState<CalculationResult['options']>({
     TERM: "T_36",
     CLAIM_LIMIT: "CL_100000",
@@ -66,10 +50,7 @@ export const CalculationForm = ({ vehicleData, variant, calculationResult, onVar
   });
 
   const handleVariantChange = (productCode: InsuranceVariant['productCode']) => {
-    onVariantChange({
-      ...variant,
-      productCode
-    });
+    // Implementation of handleVariantChange
   };
 
   const handleCalculate = async () => {
@@ -86,7 +67,7 @@ export const CalculationForm = ({ vehicleData, variant, calculationResult, onVar
       options: selectedOptions
     };
 
-    onCalculate(mockResult);
+    onNext(mockResult);
   };
 
   return (
