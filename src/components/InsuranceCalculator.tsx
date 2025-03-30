@@ -106,39 +106,35 @@ const InsuranceCalculator = () => {
     setErrors({});
     
     try {
-      const response = await fetch('/api/calculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          price: calculatorData.carPrice,
-          year: calculatorData.year,
-          months: calculatorData.months,
-          type: activeInsuranceType
-        }),
-      });
+      // Symulacja obliczeń lokalnych
+      const baseRate = 0.05; // 5% wartości pojazdu jako podstawa
+      const yearFactor = (new Date().getFullYear() - calculatorData.year) * 0.002; // 0.2% za każdy rok
+      const monthsFactor = calculatorData.months / 12 * 0.01; // 1% za każdy rok okresu ubezpieczenia
       
-      const data = await response.json();
+      // Obliczenie składki
+      const premium = calculatorData.carPrice * (baseRate + yearFactor + monthsFactor);
       
-      if (data.success && data.premium !== undefined) {
-        const calculationResult = {
-          premium: data.premium,
-          details: data.details
-        };
-        
-        setCalculationResult(calculationResult);
-        
-        // Zapisz dane w localStorage do wykorzystania w checkout
-        localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
-        
-        // Przewijamy do wyników po krótkim opóźnieniu
-        setTimeout(() => {
-          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      } else {
-        alert(`Błąd kalkulacji: ${data.error || 'Nieznany błąd'}`);
-      }
+      // Przygotowanie szczegółów kalkulacji
+      const calculationResult = {
+        premium: Math.round(premium * 100) / 100,
+        details: {
+          productName: activeInsuranceType === 'fakturowy' ? 'GAP Fakturowy' : 'GAP Casco',
+          coveragePeriod: `${calculatorData.months} miesięcy`,
+          vehicleValue: calculatorData.carPrice,
+          maxCoverage: `${Math.round(calculatorData.carPrice * 0.4).toLocaleString()} zł`,
+        }
+      };
+      
+      setCalculationResult(calculationResult);
+      
+      // Zapisz dane w localStorage do wykorzystania w checkout
+      localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
+      
+      // Przewijamy do wyników po krótkim opóźnieniu
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Nieoczekiwany błąd';
       alert(`Błąd kalkulacji: ${errorMessage}`);

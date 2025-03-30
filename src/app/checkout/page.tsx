@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
@@ -10,69 +10,38 @@ import { CalculationForm } from '@/components/checkout/CalculationForm';
 import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
+import { NeedsAnalysisForm } from '@/components/checkout/NeedsAnalysisForm';
+import { SignatureForm } from '@/components/checkout/SignatureForm';
+import {
+  VehicleData,
+  PersonalData,
+  InsuranceVariant,
+  PaymentData,
+  CalculationResult,
+  NeedsAnalysisData,
+  PolicyRequest
+} from '@/types/insurance';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
-// Zaktualizowane interfejsy 
-interface InsuranceVariant {
-  productCode: string;
-  sellerNodeCode: string;
-  signatureTypeCode: string;
-}
+// Usuń wszystkie interfejsy, które są już zaimportowane
+type SignatureType = "AUTHORIZED_BY_SMS" | "SIGNED_BY_PAYMENT";
+type PaymentMethodType = "PM_PAYU" | "PM_BT" | "PM_BY_DLR" | "PM_PBC" | "PM_PAYU_M" | "PM_BLIK";
 
-interface VehicleData {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: string;
-  usageCode: string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: string;
-  vin: string;
-  vrm: string;
-  make?: string;
-  model?: string;
-}
+const STEPS = [
+  'introduction',
+  'needs-analysis',
+  'recommendation',
+  'calculation',
+  'vehicle',
+  'personal',
+  'payment',
+  'summary'
+] as const;
 
-interface PersonalData {
-  type: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  identificationNumber: string;
-  address: {
-    addressLine1: string;
-    street: string;
-    city: string;
-    postCode: string;
-    countryCode: string;
-  };
-}
-
-interface PaymentData {
-  term: string;
-  claimLimit: string;
-  paymentTerm: string;
-  paymentMethod: string;
-}
-
-interface CalculationResult {
-  premium: number;
-  details: {
-    productName: string;
-    coveragePeriod: string;
-    vehicleValue: number;
-    maxCoverage: string;
-  };
-}
+type Step = typeof STEPS[number];
 
 // CheckoutContent component
 const CheckoutContent = () => {
@@ -83,58 +52,70 @@ const CheckoutContent = () => {
     setSearchParams(new URLSearchParams(window.location.search));
   }, []);
   
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<Step>('introduction');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   
-  // Nowy stan dla wariantu ubezpieczenia
-  const [insuranceVariant, setInsuranceVariant] = useState<InsuranceVariant>({
-    productCode: "5_DCGAP_MG25_GEN",
-    sellerNodeCode: "PL_TEST_GAP_25",
-    signatureTypeCode: "AUTHORIZED_BY_SMS"
-  });
-  
-  // Stany dla pozostałych formularzy
+  // Initial states
   const [vehicleData, setVehicleData] = useState<VehicleData>({
-    purchasedOn: new Date().toISOString().split('T')[0],
-    modelCode: "",
-    categoryCode: "PC",
-    usageCode: "STANDARD",
-    mileage: 1000,
-    firstRegisteredOn: "",
+    make: '',
+    model: '',
+    modelCode: '342',
+    categoryCode: 'PC',
+    usageCode: 'STANDARD',
     evaluationDate: new Date().toISOString().split('T')[0],
-    purchasePrice: 0,
-    purchasePriceNet: 0,
-    purchasePriceVatReclaimableCode: "NO",
-    usageTypeCode: "INDIVIDUAL",
-    purchasePriceInputType: "VAT_INAPPLICABLE",
-    vin: "",
-    vrm: "",
-    make: "",
-    model: ""
+    vehicleCategory: 'CAR',
+    usageType: 'PRIVATE',
+    registrationNumber: '',
+    vinNumber: '',
+    productionYear: new Date().getFullYear(),
+    mileage: 1000,
+    purchasePrice: 150000,
+    purchasePriceNet: 150000,
+    purchasePriceType: 'brutto',
+    purchasePriceVatReclaimable: 'nie',
+    firstRegisteredOn: new Date().toISOString().split('T')[0],
+    purchasedOn: new Date().toISOString().split('T')[0],
+    vin: '',
+    vrm: ''
   });
   
   const [personalData, setPersonalData] = useState<PersonalData>({
-    type: "person",
-    phoneNumber: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    identificationNumber: "",
+    type: 'person',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    identificationNumber: '',
+    phone: '',
+    pesel: '',
+    street: '',
+    houseNumber: '',
+    apartmentNumber: '',
+    postalCode: '',
+    city: '',
     address: {
-      addressLine1: "",
-      street: "",
-      city: "",
-      postCode: "",
-      countryCode: "PL"
+      addressLine1: '',
+      street: '',
+      city: '',
+      postCode: '',
+      countryCode: 'PL'
     }
   });
   
+  const [variant, setVariant] = useState<InsuranceVariant>({
+    productCode: '5_DCGAP_MG25_GEN',
+    sellerNodeCode: 'PL_TEST_GAP_25',
+    signatureTypeCode: 'AUTHORIZED_BY_SMS',
+    name: '',
+    description: ''
+  });
+  
   const [paymentData, setPaymentData] = useState<PaymentData>({
-    term: "T_36",
-    claimLimit: "CL_150000",
-    paymentTerm: "PT_LS",
-    paymentMethod: "PM_PBC"
+    productCode: '5_DCGAP_F25_GEN',
+    sellerNodeCode: 'PL_TEST_GAP_25',
+    signatureTypeCode: 'AUTHORIZED_BY_SMS',
+    paymentMethod: 'PM_PBC'
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
@@ -147,39 +128,116 @@ const CheckoutContent = () => {
     personal?: { [key: string]: string };
     vehicle?: { [key: string]: string };
     payment?: { [key: string]: string };
+    needsAnalysis?: { [key: string]: string };
   }>({});
   
+  // Stan dla analizy potrzeb
+  const [needsAnalysisData, setNeedsAnalysisData] = useState<NeedsAnalysisData>({
+    isInterestedInGapInsurance: false,
+    hasValidAcPolicy: false,
+    isVehiclePrivileged: false,
+    isVehicleLeased: false,
+    isVehicleFinanced: false,
+    isVehicleUsedCommercially: false
+  });
+  
   // Handle variant change
-  const handleVariantChange = (newVariant: InsuranceVariant) => {
-    setInsuranceVariant(newVariant);
+  const handleVariantChange = (data: InsuranceVariant) => {
+    setVariant({
+      ...data,
+      name: data.name || '',
+      description: data.description || ''
+    });
   };
   
+  const formatDate = (date: string | Date): string => {
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    return date;
+  };
+
   // Handle vehicle change
-  const handleVehicleChange = (newData: VehicleData) => {
-    setVehicleData(newData);
+  const handleVehicleDataChange = (data: VehicleData) => {
+    setVehicleData({
+      ...data,
+      make: data.make || '',
+      model: data.model || '',
+      modelCode: data.modelCode || '',
+      categoryCode: data.categoryCode || 'PC',
+      usageCode: data.usageCode || 'STANDARD',
+      evaluationDate: formatDate(data.evaluationDate || new Date()),
+      vehicleCategory: data.vehicleCategory || 'CAR',
+      usageType: data.usageType || 'PRIVATE',
+      registrationNumber: data.registrationNumber || '',
+      vinNumber: data.vinNumber || '',
+      productionYear: data.productionYear || new Date().getFullYear(),
+      firstRegisteredOn: formatDate(data.firstRegisteredOn || new Date()),
+      purchasedOn: formatDate(data.purchasedOn || new Date()),
+      vin: data.vin || '',
+      vrm: data.vrm || '',
+      purchasePrice: data.purchasePrice || 0,
+      purchasePriceNet: data.purchasePriceNet || 0,
+      purchasePriceType: data.purchasePriceType || 'brutto',
+      purchasePriceVatReclaimable: data.purchasePriceVatReclaimable || 'nie',
+      mileage: data.mileage || 0
+    });
   };
   
   // Handle personal data change
-  const handlePersonalDataChange = (newData: PersonalData) => {
-    setPersonalData(newData);
+  const handlePersonalDataChange = (data: PersonalData) => {
+    setPersonalData({
+      ...data,
+      type: 'person',
+      phoneNumber: data.phoneNumber || '',
+      identificationNumber: data.identificationNumber || '',
+      address: {
+        addressLine1: data.address?.addressLine1 || '',
+        street: data.address?.street || '',
+        city: data.address?.city || '',
+        postCode: data.address?.postCode || '',
+        countryCode: 'PL'
+      }
+    });
   };
   
   // Handle payment data change
-  const handlePaymentDataChange = (newData: PaymentData) => {
-    setPaymentData(newData);
+  const handlePaymentDataChange = (data: PaymentData) => {
+    setPaymentData({
+      ...data,
+      productCode: data.productCode || '5_DCGAP_F25_GEN',
+      sellerNodeCode: data.sellerNodeCode || 'PL_TEST_GAP_25',
+      signatureTypeCode: data.signatureTypeCode || 'AUTHORIZED_BY_SMS',
+      paymentMethod: data.paymentMethod || 'PM_PBC'
+    });
   };
   
   // Handle calculation
-  const handleCalculation = (result: CalculationResult) => {
-    setCalculationResult(result);
+  const handleCalculationResult = (result: CalculationResult) => {
+    if (result) {
+      setCalculationResult(result);
+    }
+  };
+  
+  // Handle needs analysis change
+  const handleNeedsAnalysisChange = (newData: NeedsAnalysisData) => {
+    setNeedsAnalysisData(newData);
   };
   
   // Validation functions
   const validateVariant = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     
-    if (!insuranceVariant.productCode) {
+    if (!variant.productCode) {
       newErrors.productCode = "Wybór wariantu ubezpieczenia jest wymagany";
+    }
+    
+    if (!variant.sellerNodeCode) {
+      newErrors.sellerNodeCode = "Kod sprzedawcy jest wymagany";
+    }
+
+    if (!variant.signatureTypeCode) {
+      newErrors.signatureTypeCode = "Typ podpisu jest wymagany";
     }
     
     setErrors(prev => ({ ...prev, variant: newErrors }));
@@ -197,48 +255,55 @@ const CheckoutContent = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const validatePersonalData = (): boolean => {
+  const validatePersonalData = (data: PersonalData) => {
     const newErrors: { [key: string]: string } = {};
     
-    if (!personalData.firstName) {
+    if (!data.firstName) {
       newErrors.firstName = "Imię jest wymagane";
     }
     
-    if (!personalData.lastName) {
+    if (!data.lastName) {
       newErrors.lastName = "Nazwisko jest wymagane";
     }
     
-    if (!personalData.phoneNumber) {
-      newErrors.phoneNumber = "Numer telefonu jest wymagany";
-    }
-    
-    if (!personalData.email || !/\S+@\S+\.\S+/.test(personalData.email)) {
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       newErrors.email = "Wymagany poprawny adres email";
     }
     
-    if (!personalData.identificationNumber || personalData.identificationNumber.length !== 11) {
-      newErrors.identificationNumber = "Wymagany poprawny numer PESEL (11 cyfr)";
+    if (!data.phone || !/^\+?\d{9,}$/.test(data.phone)) {
+      newErrors.phone = "Wymagany poprawny numer telefonu";
     }
     
-    if (!personalData.address.street) {
+    if (!data.address.street) {
       newErrors.street = "Ulica jest wymagana";
     }
     
-    if (!personalData.address.city) {
+    if (!data.address.city) {
       newErrors.city = "Miasto jest wymagane";
     }
     
-    if (!personalData.address.postCode || !/^\d{2}-\d{3}$/.test(personalData.address.postCode)) {
+    if (!data.address.postCode || !/^\d{2}-\d{3}$/.test(data.address.postCode)) {
       newErrors.postCode = "Wymagany poprawny kod pocztowy (format: XX-XXX)";
     }
     
-    setErrors(prev => ({ ...prev, personal: newErrors }));
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
   
   const validateVehicleData = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     
+    if (!vehicleData.make) {
+      newErrors.make = "Marka pojazdu jest wymagana";
+    }
+    
+    if (!vehicleData.model) {
+      newErrors.model = "Model pojazdu jest wymagany";
+    }
+
+    if (!vehicleData.modelCode) {
+      newErrors.modelCode = "Kod modelu jest wymagany";
+    }
+
     if (!vehicleData.purchasedOn) {
       newErrors.purchasedOn = "Data zakupu jest wymagana";
     }
@@ -246,8 +311,12 @@ const CheckoutContent = () => {
     if (!vehicleData.firstRegisteredOn) {
       newErrors.firstRegisteredOn = "Data pierwszej rejestracji jest wymagana";
     }
+
+    if (!vehicleData.evaluationDate) {
+      newErrors.evaluationDate = "Data wyceny jest wymagana";
+    }
     
-    if (!vehicleData.vin || vehicleData.vin.length < 17) {
+    if (!vehicleData.vin || vehicleData.vin.length !== 17) {
       newErrors.vin = "Wymagany poprawny numer VIN (17 znaków)";
     }
     
@@ -256,43 +325,106 @@ const CheckoutContent = () => {
     }
     
     if (!vehicleData.purchasePrice || vehicleData.purchasePrice <= 0) {
-      newErrors.purchasePrice = "Cena zakupu pojazdu jest wymagana";
+      newErrors.purchasePrice = "Cena zakupu pojazdu jest wymagana i musi być większa od 0";
+    }
+
+    if (!vehicleData.purchasePriceNet || vehicleData.purchasePriceNet <= 0) {
+      newErrors.purchasePriceNet = "Cena zakupu netto jest wymagana i musi być większa od 0";
+    }
+
+    if (!vehicleData.mileage || vehicleData.mileage < 0) {
+      newErrors.mileage = "Przebieg jest wymagany i nie może być ujemny";
+    }
+
+    if (!vehicleData.vehicleCategory) {
+      newErrors.vehicleCategory = "Kategoria pojazdu jest wymagana";
+    }
+
+    if (!vehicleData.usageType) {
+      newErrors.usageType = "Typ użytkowania jest wymagany";
     }
     
     setErrors(prev => ({ ...prev, vehicle: newErrors }));
     return Object.keys(newErrors).length === 0;
   };
   
+  const validateNeedsAnalysis = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!needsAnalysisData.isInterestedInGapInsurance) {
+      newErrors.isInterestedInGapInsurance = "Musisz być zainteresowany ubezpieczeniem GAP, aby kontynuować";
+    }
+    
+    if (!needsAnalysisData.hasValidAcPolicy) {
+      newErrors.hasValidAcPolicy = "Musisz posiadać ważną polisę AC, aby kontynuować";
+    }
+
+    // Określanie dostępnych produktów
+    if (needsAnalysisData.isVehiclePrivileged) {
+      newErrors.isVehiclePrivileged = "Przepraszamy, ale pojazdy uprzywilejowane nie mogą zostać objęte ubezpieczeniem GAP";
+    } else {
+      // Aktualizacja wariantu ubezpieczenia na podstawie analizy potrzeb
+      const newVariant: InsuranceVariant = {
+        productCode: needsAnalysisData.isVehicleLeased ? "5_DCGAP_FG25_GEN" : "5_DCGAP_F25_GEN",
+        sellerNodeCode: "PL_TEST_GAP_25",
+        name: '',
+        description: '',
+        signatureTypeCode: 'AUTHORIZED_BY_SMS'
+      };
+      setVariant(newVariant);
+    }
+    
+    setErrors(prev => ({ ...prev, needsAnalysis: newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
+  
   // Navigation functions
   const goToNextStep = () => {
-    if (currentStep === 1 && !validateVariant()) {
-      return;
-    }
-    
-    if (currentStep === 2 && !validateCalculation()) {
-      return;
-    }
-    
-    if (currentStep === 3 && !validateVehicleData()) {
-      return;
-    }
-    
-    if (currentStep === 4 && !validatePersonalData()) {
-      return;
-    }
-    
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
-      // Update URL without page reload
-      router.push(`/checkout?step=${currentStep + 1}`);
+    const currentIndex = STEPS.indexOf(currentStep);
+    if (currentIndex < STEPS.length - 1) {
+      const nextStep = STEPS[currentIndex + 1];
+      
+      // Walidacja przed przejściem do następnego kroku
+      switch (currentStep) {
+        case 'needs-analysis':
+          if (validateNeedsAnalysis()) {
+            setCurrentStep(nextStep);
+          }
+          break;
+        case 'recommendation':
+          setCurrentStep(nextStep);
+          break;
+        case 'calculation':
+          if (validateCalculation()) {
+            setCurrentStep(nextStep);
+          }
+          break;
+        case 'vehicle':
+          if (validateVehicleData()) {
+            setCurrentStep(nextStep);
+          }
+          break;
+        case 'personal':
+          if (validatePersonalData(personalData)) {
+            setCurrentStep(nextStep);
+          }
+          break;
+        case 'payment':
+          if (validateVariant()) {
+            setCurrentStep(nextStep);
+          }
+          break;
+        default:
+          setCurrentStep(nextStep);
+      }
     }
   };
   
   const goToPrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (currentStep !== 'introduction') {
+      setCurrentStep(STEPS[STEPS.indexOf(currentStep) - 1]);
       // Update URL without page reload
-      router.push(`/checkout?step=${currentStep - 1}`);
+      router.push(`/checkout?step=${STEPS.indexOf(currentStep)}`);
     }
   };
   
@@ -302,8 +434,8 @@ const CheckoutContent = () => {
       const step = searchParams.get('step');
       if (step) {
         const stepNumber = parseInt(step);
-        if (stepNumber >= 1 && stepNumber <= 5) {
-          setCurrentStep(stepNumber);
+        if (stepNumber >= 1 && stepNumber <= 8) {
+          setCurrentStep(STEPS[stepNumber - 1]);
         }
       }
     }
@@ -311,101 +443,38 @@ const CheckoutContent = () => {
   
   // Submit function
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    
     try {
-      // Przygotowanie danych w odpowiednim formacie
-      const policyData = {
-        extApiNo: null,
-        extReferenceNo: null,
-        extTenderNo: null,
-        sellerNodeCode: insuranceVariant.sellerNodeCode,
-        productCode: insuranceVariant.productCode,
-        saleInitiatedOn: new Date().toISOString().split('T')[0],
-        signatureTypeCode: insuranceVariant.signatureTypeCode,
-        confirmedByDefault: null,
-        
-        vehicleSnapshot: {
-          purchasedOn: vehicleData.purchasedOn,
-          modelCode: vehicleData.modelCode,
-          categoryCode: vehicleData.categoryCode,
-          usageCode: vehicleData.usageCode,
-          mileage: vehicleData.mileage,
-          firstRegisteredOn: new Date(vehicleData.firstRegisteredOn).toISOString(),
-          evaluationDate: vehicleData.evaluationDate,
-          purchasePrice: Math.round(vehicleData.purchasePrice * 100),
-          purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
-          purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
-          usageTypeCode: vehicleData.usageTypeCode,
-          purchasePriceInputType: vehicleData.purchasePriceInputType,
-          vin: vehicleData.vin,
-          vrm: vehicleData.vrm,
-          owners: [{contact: {inheritFrom: "policyHolder"}}]
+      // Przygotuj dane do wysłania
+      const requestData = {
+        vehicleData: {
+          ...vehicleData,
+          firstRegisteredOn: formatDate(vehicleData.firstRegisteredOn),
+          purchasedOn: formatDate(vehicleData.purchasedOn),
+          evaluationDate: formatDate(vehicleData.evaluationDate)
         },
-        
-        client: {
-          policyHolder: {
-            type: personalData.type,
-            phoneNumber: personalData.phoneNumber,
-            firstName: personalData.firstName,
-            lastName: personalData.lastName,
-            email: personalData.email,
-            identificationNumber: personalData.identificationNumber,
-            address: {
-              addressLine1: personalData.address.addressLine1 || `${personalData.firstName} ${personalData.lastName}`,
-              street: personalData.address.street,
-              city: personalData.address.city,
-              postCode: personalData.address.postCode,
-              countryCode: personalData.address.countryCode
-            }
-          },
-          insured: {
-            inheritFrom: "policyHolder"
-          },
-          beneficiary: {
-            inheritFrom: "policyHolder"
-          }
-        },
-        
-        options: {
-          TERM: paymentData.term,
-          CLAIM_LIMIT: paymentData.claimLimit,
-          PAYMENT_TERM: paymentData.paymentTerm,
-          PAYMENT_METHOD: paymentData.paymentMethod
-        },
-        
-        premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
+        personalData,
+        variant,
+        calculationResult
       };
-      
-      console.log('Wysyłanie danych formularza...');
-      
-      // Wysyłanie maila z potwierdzeniem
-      const emailResponse = await fetch('/api/send-email', {
+
+      const response = await fetch('/api/defend/lock', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          personalData,
-          vehicleData,
-          paymentData,
-          calculationResult,
-          policyData // dodajemy pełne dane polisy
-        }),
+        body: JSON.stringify(requestData),
       });
 
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        throw new Error(errorData.details || 'Błąd podczas wysyłania maila');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Błąd podczas rejestracji polisy');
       }
-      
-      // Sukces
-      setIsCompleted(true);
+
+      const data = await response.json();
+      window.location.href = `/checkout/success?policyId=${data.policyId}`;
     } catch (error) {
       console.error('Błąd podczas przetwarzania zamówienia:', error);
       alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -455,6 +524,165 @@ const CheckoutContent = () => {
     );
   };
 
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 'introduction':
+        return (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-gray-900">Przygotuj się do zakupu ubezpieczenia GAP</h2>
+            
+            <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-6">
+              <h3 className="text-lg font-semibold">Potrzebne dokumenty:</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>Kopia dowodu rejestracyjnego pojazdu</li>
+                <li>Kopia aktualnej polisy AC</li>
+                <li>Kopia faktury zakupu pojazdu</li>
+              </ul>
+              
+              <div className="bg-blue-50 p-4 rounded-md">
+                <p className="text-sm text-blue-800">
+                  W następnym kroku przeprowadzimy krótką analizę Twoich potrzeb, 
+                  aby dobrać najlepszy wariant ubezpieczenia GAP dla Ciebie.
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => setCurrentStep('needs-analysis')}
+                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                >
+                  Rozpocznij
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'needs-analysis':
+        return (
+          <NeedsAnalysisForm
+            data={needsAnalysisData}
+            onChange={handleNeedsAnalysisChange}
+            errors={errors.needsAnalysis}
+          />
+        );
+
+      case 'recommendation':
+        return (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-gray-900">Rekomendowany wariant ubezpieczenia</h2>
+            
+            <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-6">
+              {needsAnalysisData.isVehicleUsedCommercially ? (
+                <div>
+                  <h3 className="text-xl font-semibold text-[#300FE6] mb-4">GAP FLEX GO</h3>
+                  <p className="text-gray-700">
+                    Na podstawie analizy Twoich potrzeb rekomendujemy wariant GAP FLEX GO, 
+                    który jest idealny dla pojazdów używanych w celach zarobkowych.
+                  </p>
+                </div>
+              ) : needsAnalysisData.isVehicleLeased || needsAnalysisData.isVehicleFinanced ? (
+                <div>
+                  <h3 className="text-xl font-semibold text-[#300FE6] mb-4">GAP FLEX</h3>
+                  <p className="text-gray-700">
+                    Ze względu na finansowanie zewnętrzne pojazdu, rekomendujemy wariant GAP FLEX, 
+                    który zapewni optymalną ochronę w przypadku kredytu lub leasingu.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-xl font-semibold text-[#300FE6] mb-4">GAP MAX</h3>
+                  <p className="text-gray-700">
+                    Dla Twojego pojazdu rekomendujemy wariant GAP MAX, 
+                    który zapewni najszerszą ochronę wartości pojazdu.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-4">
+                <Button
+                  onClick={() => setCurrentStep('needs-analysis')}
+                  variant="outline"
+                >
+                  Wróć
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Ustaw rekomendowany wariant
+                    const recommendedVariant = needsAnalysisData.isVehicleUsedCommercially
+                      ? "5_DCGAP_FG25_GEN"
+                      : needsAnalysisData.isVehicleLeased || needsAnalysisData.isVehicleFinanced
+                      ? "5_DCGAP_F25_GEN"
+                      : "5_DCGAP_M25_GEN";
+                    
+                    handleVariantChange({
+                      ...variant,
+                      productCode: recommendedVariant
+                    });
+                    setCurrentStep('calculation');
+                  }}
+                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                >
+                  Przejdź do kalkulacji
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'calculation':
+        return (
+          <CalculationForm
+            vehicleData={vehicleData}
+            variant={variant}
+            calculationResult={calculationResult}
+            onVariantChange={handleVariantChange}
+            onCalculate={handleCalculationResult}
+            errors={errors.calculation}
+          />
+        );
+
+      case 'vehicle':
+        return (
+          <VehicleForm
+            data={vehicleData}
+            onChange={handleVehicleDataChange}
+            errors={errors.vehicle}
+          />
+        );
+
+      case 'personal':
+        return (
+          <PersonalForm
+            data={personalData}
+            onChange={handlePersonalDataChange}
+            errors={errors.personal}
+          />
+        );
+
+      case 'payment':
+        return (
+          <SignatureForm
+            data={paymentData}
+            onChange={handlePaymentDataChange}
+            errors={errors?.payment}
+          />
+        );
+
+      case 'summary':
+        return (
+          <Summary
+            variant={variant}
+            vehicleData={vehicleData}
+            personalData={personalData}
+            onSubmit={handleSubmit}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#E1EDFF]/30">
       {renderSuccess()}
@@ -480,28 +708,27 @@ const CheckoutContent = () => {
               <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200" />
               <div 
                 className="absolute top-5 left-0 right-0 h-[2px] bg-[#300FE6] transition-all duration-500"
-                style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
+                style={{ width: `${((STEPS.indexOf(currentStep) + 1) / 8) * 100}%` }}
               />
 
-              {[
-                { number: 1, title: "Określenie wariantu" },
-                { number: 2, title: "Poznaj cenę" },
-                { number: 3, title: "Dane pojazdu" },
-                { number: 4, title: "Twoje dane" },
-                { number: 5, title: "Podsumowanie" }
-              ].map((step, index) => (
-                <div key={index} className="flex flex-col items-center relative z-10">
+              {STEPS.map((step, index) => (
+                <div key={step} className="flex flex-col items-center relative z-10">
                   <div 
                     className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 text-white font-bold transition-all duration-300
-                      ${currentStep >= step.number 
-                        ? 'bg-[#300FE6] scale-110' 
-                        : 'bg-gray-300'}`}
+                      ${currentStep === step ? 'bg-[#300FE6] scale-110' : 'bg-gray-300'}`}
                   >
-                    {currentStep > step.number ? <CheckCircle2 size={20} /> : step.number}
+                    {currentStep > step ? <CheckCircle2 size={20} /> : index + 1}
                   </div>
                   <div className="text-center">
-                    <p className={`font-medium ${currentStep >= step.number ? 'text-[#300FE6]' : 'text-gray-400'}`}>
-                      {step.title}
+                    <p className={`font-medium ${currentStep >= step ? 'text-[#300FE6]' : 'text-gray-400'}`}>
+                      {step === 'introduction' && 'Wstęp'}
+                      {step === 'needs-analysis' && 'Analiza potrzeb'}
+                      {step === 'recommendation' && 'Rekomendacja'}
+                      {step === 'calculation' && 'Kalkulacja'}
+                      {step === 'vehicle' && 'Dane pojazdu'}
+                      {step === 'personal' && 'Dane osobowe'}
+                      {step === 'payment' && 'Podpis'}
+                      {step === 'summary' && 'Podsumowanie'}
                     </p>
                   </div>
                 </div>
@@ -510,61 +737,12 @@ const CheckoutContent = () => {
 
             {/* Formularz - treść */}
             <div className="bg-gray-50 rounded-xl p-6 mb-8">
-              {currentStep === 1 && (
-                <InsuranceVariantForm 
-                  data={insuranceVariant} 
-                  onChange={handleVariantChange} 
-                  errors={errors.variant} 
-                />
-              )}
-
-              {currentStep === 2 && (
-                <CalculationForm 
-                  vehicleData={vehicleData}
-                  insuranceVariant={insuranceVariant}
-                  paymentData={paymentData}
-                  onCalculate={handleCalculation}
-                  onVehicleChange={handleVehicleChange}
-                  onPaymentChange={handlePaymentDataChange}
-                  calculationResult={calculationResult}
-                  errors={errors.calculation}
-                />
-              )}
-
-              {currentStep === 3 && (
-                <VehicleForm 
-                  data={vehicleData} 
-                  onChange={handleVehicleChange} 
-                  errors={errors.vehicle} 
-                />
-              )}
-
-              {currentStep === 4 && (
-                <PersonalForm 
-                  data={personalData} 
-                  onChange={handlePersonalDataChange} 
-                  errors={errors.personal} 
-                />
-              )}
-
-              {currentStep === 5 && (
-                <Summary 
-                  vehicleData={vehicleData}
-                  personalData={personalData}
-                  paymentData={paymentData}
-                  calculationResult={calculationResult}
-                  onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                  termsAgreed={termsAgreed}
-                  onTermsChange={setTermsAgreed}
-                  onPaymentChange={handlePaymentDataChange}
-                />
-              )}
+              {renderCurrentStep()}
             </div>
 
             {/* Przyciski nawigacyjne */}
             <div className="flex justify-between">
-              {currentStep > 1 ? (
+              {currentStep !== 'introduction' && (
                 <Button
                   variant="outline"
                   onClick={goToPrevStep}
@@ -573,30 +751,14 @@ const CheckoutContent = () => {
                 >
                   <ArrowLeft size={16} className="mr-1" /> Wstecz
                 </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/gap')}
-                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                >
-                  Anuluj
-                </Button>
               )}
               
-              {currentStep < 5 ? (
+              {currentStep !== 'summary' && currentStep !== 'introduction' && (
                 <Button
                   className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
                   onClick={goToNextStep}
                 >
                   Dalej <ChevronRight size={16} className="ml-1" />
-                </Button>
-              ) : (
-                <Button
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !termsAgreed}
-                >
-                  {isSubmitting ? 'Przetwarzanie...' : 'Zamawiam i płacę'}
                 </Button>
               )}
             </div>

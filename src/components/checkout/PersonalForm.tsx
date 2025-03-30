@@ -1,7 +1,9 @@
 "use client"
 
 import React from 'react';
-import { User, Mail, CreditCard } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PersonalData } from '@/types/insurance';
 
 interface PersonalFormProps {
   data: PersonalData;
@@ -9,227 +11,168 @@ interface PersonalFormProps {
   errors?: { [key: string]: string };
 }
 
-interface PersonalData {
-  type: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  identificationNumber: string;
-  address: {
-    addressLine1: string;
-    street: string;
-    city: string;
-    postCode: string;
-    countryCode: string;
-  };
-}
-
-type AddressData = PersonalData['address'];
-type AddressField = keyof AddressData;
-
-export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): React.ReactElement => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      // Obsługa pól zagnieżdżonych (adres)
-      const [parent, child] = name.split('.');
-      if (parent === 'address' && isAddressField(child)) {
-        onChange({
-          ...data,
-          address: {
-            ...data.address,
-            [child]: value
-          }
-        });
-      }
-    } else {
-      // Obsługa pól bezpośrednich
+export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps) => {
+  const handleChange = (field: keyof PersonalData | `address.${keyof PersonalData['address']}`, value: string) => {
+    if (field.startsWith('address.')) {
+      const addressField = field.split('.')[1] as keyof PersonalData['address'];
       onChange({
         ...data,
-        [name]: value
+        address: {
+          ...data.address,
+          [addressField]: value
+        }
+      });
+    } else {
+      onChange({
+        ...data,
+        [field]: value
       });
     }
   };
 
-  const isAddressField = (field: string): field is AddressField => {
-    return field in data.address;
-  };
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-          <span className="text-[#FF8E3D] font-bold">3</span>
-        </div>
-        Twoje dane
-      </h2>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <User className="mr-2 text-blue-600" size={20} />
-          Dane osobowe
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Imię *
-            </label>
-            <input
-              type="text"
-              name="firstName"
-              className={`w-full p-2 border ${errors?.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-              value={data.firstName}
-              onChange={handleChange}
-            />
-            {errors?.firstName && (
-              <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nazwisko *
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              className={`w-full p-2 border ${errors?.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-              value={data.lastName}
-              onChange={handleChange}
-            />
-            {errors?.lastName && (
-              <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Mail className="mr-2 text-blue-600" size={20} />
-          Dane kontaktowe
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              name="email"
-              className={`w-full p-2 border ${errors?.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-              value={data.email}
-              onChange={handleChange}
-              placeholder="np. jan.kowalski@example.com"
-            />
-            {errors?.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Telefon *
-            </label>
-            <input
-              type="tel"
-              name="phoneNumber"
-              className={`w-full p-2 border ${errors?.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-              value={data.phoneNumber}
-              onChange={handleChange}
-              placeholder="+48XXXXXXXXX"
-            />
-            {errors?.phoneNumber && (
-              <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <CreditCard className="mr-2 text-blue-600" size={20} />
-          Dane identyfikacyjne
-        </h3>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            PESEL *
-          </label>
-          <input
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-gray-900">Dane osobowe</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">Imię</Label>
+          <Input
+            id="firstName"
             type="text"
-            name="identificationNumber"
-            maxLength={11}
-            className={`w-full p-2 border ${errors?.identificationNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-            value={data.identificationNumber}
-            onChange={handleChange}
+            value={data.firstName}
+            onChange={(e) => handleChange('firstName', e.target.value)}
+            className={errors?.firstName ? 'border-red-500' : ''}
           />
-          {errors?.identificationNumber && (
-            <p className="mt-1 text-sm text-red-500">{errors.identificationNumber}</p>
+          {errors?.firstName && (
+            <p className="text-sm text-red-600">{errors.firstName}</p>
           )}
         </div>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4">
-          Adres zamieszkania
-        </h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ulica i numer *
-            </label>
-            <input
-              type="text"
-              name="address.street"
-              className={`w-full p-2 border ${errors?.street ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-              value={data.address.street}
-              onChange={handleChange}
-            />
-            {errors?.street && (
-              <p className="mt-1 text-sm text-red-500">{errors.street}</p>
-            )}
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Miasto *
-              </label>
-              <input
-                type="text"
-                name="address.city"
-                className={`w-full p-2 border ${errors?.city ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                value={data.address.city}
-                onChange={handleChange}
-              />
-              {errors?.city && (
-                <p className="mt-1 text-sm text-red-500">{errors.city}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Kod pocztowy *
-              </label>
-              <input
-                type="text"
-                name="address.postCode"
-                className={`w-full p-2 border ${errors?.postCode ? 'border-red-500' : 'border-gray-300'} rounded-md`}
-                value={data.address.postCode}
-                onChange={handleChange}
-                placeholder="XX-XXX"
-              />
-              {errors?.postCode && (
-                <p className="mt-1 text-sm text-red-500">{errors.postCode}</p>
-              )}
-            </div>
-          </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Nazwisko</Label>
+          <Input
+            id="lastName"
+            type="text"
+            value={data.lastName}
+            onChange={(e) => handleChange('lastName', e.target.value)}
+            className={errors?.lastName ? 'border-red-500' : ''}
+          />
+          {errors?.lastName && (
+            <p className="text-sm text-red-600">{errors.lastName}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={data.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            className={errors?.email ? 'border-red-500' : ''}
+          />
+          {errors?.email && (
+            <p className="text-sm text-red-600">{errors.email}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">Telefon</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={data.phone}
+            onChange={(e) => handleChange('phone', e.target.value)}
+            className={errors?.phone ? 'border-red-500' : ''}
+          />
+          {errors?.phone && (
+            <p className="text-sm text-red-600">{errors.phone}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pesel">PESEL</Label>
+          <Input
+            id="pesel"
+            type="text"
+            value={data.pesel}
+            onChange={(e) => handleChange('pesel', e.target.value)}
+            className={errors?.pesel ? 'border-red-500' : ''}
+          />
+          {errors?.pesel && (
+            <p className="text-sm text-red-600">{errors.pesel}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="street">Ulica</Label>
+          <Input
+            id="street"
+            type="text"
+            value={data.address.street}
+            onChange={(e) => handleChange('address.street', e.target.value)}
+            className={errors?.['address.street'] ? 'border-red-500' : ''}
+          />
+          {errors?.['address.street'] && (
+            <p className="text-sm text-red-600">{errors['address.street']}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="houseNumber">Numer domu</Label>
+          <Input
+            id="houseNumber"
+            type="text"
+            value={data.houseNumber}
+            onChange={(e) => handleChange('houseNumber', e.target.value)}
+            className={errors?.houseNumber ? 'border-red-500' : ''}
+          />
+          {errors?.houseNumber && (
+            <p className="text-sm text-red-600">{errors.houseNumber}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="apartmentNumber">Numer mieszkania (opcjonalnie)</Label>
+          <Input
+            id="apartmentNumber"
+            type="text"
+            value={data.apartmentNumber || ''}
+            onChange={(e) => handleChange('apartmentNumber', e.target.value)}
+            className={errors?.apartmentNumber ? 'border-red-500' : ''}
+          />
+          {errors?.apartmentNumber && (
+            <p className="text-sm text-red-600">{errors.apartmentNumber}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="postCode">Kod pocztowy</Label>
+          <Input
+            id="postCode"
+            type="text"
+            value={data.address.postCode}
+            onChange={(e) => handleChange('address.postCode', e.target.value)}
+            className={errors?.['address.postCode'] ? 'border-red-500' : ''}
+          />
+          {errors?.['address.postCode'] && (
+            <p className="text-sm text-red-600">{errors['address.postCode']}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">Miasto</Label>
+          <Input
+            id="city"
+            type="text"
+            value={data.address.city}
+            onChange={(e) => handleChange('address.city', e.target.value)}
+            className={errors?.['address.city'] ? 'border-red-500' : ''}
+          />
+          {errors?.['address.city'] && (
+            <p className="text-sm text-red-600">{errors['address.city']}</p>
+          )}
         </div>
       </div>
     </div>

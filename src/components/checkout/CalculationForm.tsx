@@ -4,322 +4,206 @@ import React from 'react';
 import { useState } from 'react';
 import { Car, Calendar, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { VehicleData, InsuranceVariant, CalculationResult } from "@/types/insurance";
 
 interface CalculationFormProps {
   vehicleData: VehicleData;
-  insuranceVariant: InsuranceVariant;
-  paymentData: PaymentData;
-  onCalculate: (result: CalculationResult) => void;
-  onVehicleChange: (data: VehicleData) => void;
-  onPaymentChange: (data: PaymentData) => void;
+  variant: InsuranceVariant;
   calculationResult: CalculationResult | null;
+  onVariantChange: (variant: InsuranceVariant) => void;
+  onCalculate: (result: CalculationResult) => void;
   errors?: { [key: string]: string };
 }
 
-interface VehicleData {
+interface VehicleSnapshot {
   purchasedOn: string;
   modelCode: string;
-  categoryCode: string;
-  usageCode: string;
+  categoryCode: "PC" | string;
+  usageCode: "STANDARD" | string;
   mileage: number;
   firstRegisteredOn: string;
   evaluationDate: string;
   purchasePrice: number;
   purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: string;
+  purchasePriceVatReclaimableCode: "VAT_RECLAIMABLE" | "VAT_NOT_RECLAIMABLE" | "VAT_PARTIALLY_RECLAIMABLE";
+  usageTypeCode: "INDIVIDUAL" | "BUSINESS" | "MIXED";
+  purchasePriceInputType: "GROSS" | "NET" | "VAT_INAPPLICABLE";
   vin: string;
   vrm: string;
-  make?: string;
-  model?: string;
+  make: string;
+  model: string;
 }
 
-interface InsuranceVariant {
-  productCode: string;
-  sellerNodeCode: string;
-  signatureTypeCode: string;
-}
+const PRODUCT_VARIANTS = [
+  {
+    code: "5_DCGAP_M25_GEN",
+    name: "GAP MAX",
+    description: "Ochrona wartości pojazdu w przypadku szkody całkowitej lub kradzieży"
+  },
+  {
+    code: "5_DCGAP_MG25_GEN",
+    name: "GAP MAX AC",
+    description: "Rozszerzona ochrona wartości pojazdu z uwzględnieniem polisy AC"
+  },
+  {
+    code: "5_DCGAP_F25_GEN",
+    name: "GAP FLEX",
+    description: "Elastyczna ochrona dopasowana do Twoich potrzeb"
+  },
+  {
+    code: "5_DCGAP_FG25_GEN",
+    name: "GAP FLEX GO",
+    description: "Specjalny wariant dla przedsiębiorców i przedstawicieli handlowych"
+  }
+] as const;
 
-interface PaymentData {
-  term: string;
-  claimLimit: string;
-  paymentTerm: string;
-  paymentMethod: string;
-}
+export const CalculationForm = ({ vehicleData, variant, calculationResult, onVariantChange, onCalculate, errors }: CalculationFormProps) => {
+  const [selectedOptions, setSelectedOptions] = useState<CalculationResult['options']>({
+    TERM: "T_36",
+    CLAIM_LIMIT: "CL_100000",
+    PAYMENT_TERM: "PT_LS",
+    PAYMENT_METHOD: "PM_BT"
+  });
 
-interface CalculationResult {
-  premium: number;
-  details: {
-    productName: string;
-    coveragePeriod: string;
-    vehicleValue: number;
-    maxCoverage: string;
-  };
-}
-
-const termOptions = [
-  { value: "T_12", label: "12 miesięcy" },
-  { value: "T_24", label: "24 miesiące" },
-  { value: "T_36", label: "36 miesięcy" },
-  { value: "T_48", label: "48 miesięcy" },
-  { value: "T_60", label: "60 miesięcy" }
-];
-const claimLimitOptions = [
-  { value: "CL_50000", label: "50 000 PLN" },
-  { value: "CL_100000", label: "100 000 PLN" },
-  { value: "CL_150000", label: "150 000 PLN" },
-  { value: "CL_200000", label: "200 000 PLN" },
-  { value: "CL_250000", label: "250 000 PLN" },
-  { value: "CL_300000", label: "300 000 PLN" }
-];
-
-const paymentTermOptions = [
-  { value: "PT_LS", label: "Płatność jednorazowa" },
-  { value: "PT_M", label: "Płatność miesięczna" }
-];
-
-export const CalculationForm = ({ 
-  vehicleData, 
-  insuranceVariant, 
-  paymentData, 
-  onCalculate, 
-  onVehicleChange, 
-  onPaymentChange, 
-  calculationResult, 
-  errors 
-}: CalculationFormProps): React.ReactElement => {
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [vehicleValue, setVehicleValue] = useState(vehicleData.purchasePrice || 0);
-  
-  // Handler do zmiany ceny pojazdu
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const price = parseFloat(e.target.value);
-    setVehicleValue(price);
-    onVehicleChange({
-      ...vehicleData,
-      purchasePrice: price,
-      purchasePriceNet: price * 0.8, // przykładowa wartość netto (80% wartości brutto)
+  const handleVariantChange = (productCode: InsuranceVariant['productCode']) => {
+    onVariantChange({
+      ...variant,
+      productCode
     });
   };
-  
-  // Handler do zmiany opcji płatności
-  const handleOptionChange = (name: string, value: string) => {
-    onPaymentChange({
-      ...paymentData,
-      [name]: value
-    });
-  };
-  
-  // Wykonanie kalkulacji
-  const calculatePremium = () => {
-    setIsCalculating(true);
-    
-    // Symulacja kalkulacji - w rzeczywistej aplikacji byłoby to zapytanie do API
-    setTimeout(() => {
-      // Przykładowy algorytm obliczania składki
-      const baseRate = 0.03; // 3% ceny pojazdu
-      const termMultiplier = {
-        T_12: 0.6,
-        T_24: 0.8,
-        T_36: 1.0,
-        T_48: 1.2,
-        T_60: 1.4
-      }[paymentData.term] || 1.0;
-      
-      const limitMultiplier = paymentData.claimLimit === "CL_150000" ? 1.2 : 1.0;
-      
-      // Obliczanie składki
-      const premium = Math.round(vehicleValue * baseRate * termMultiplier * limitMultiplier);
-      
-      // Mapowanie okresu do tekstu
-      const coveragePeriodMap = {
-        T_12: "12 miesięcy",
-        T_24: "24 miesiące",
-        T_36: "36 miesięcy",
-        T_48: "48 miesięcy",
-        T_60: "60 miesięcy"
-      };
-      
-      // Ustalenie nazwy produktu
-      const productName = insuranceVariant.productCode.includes("MG25") 
-        ? "GAP Fakturowy" 
-        : "GAP Wartości Pojazdu";
-      
-      // Wynik kalkulacji
-      const result: CalculationResult = {
-        premium: premium,
-        details: {
-          productName: productName,
-          coveragePeriod: coveragePeriodMap[paymentData.term as keyof typeof coveragePeriodMap] || "36 miesięcy",
-          vehicleValue: vehicleValue,
-          maxCoverage: paymentData.claimLimit === "CL_150000" ? "150 000 PLN" : "100 000 PLN"
-        }
-      };
-      
-      onCalculate(result);
-      setIsCalculating(false);
-    }, 800);
+
+  const handleCalculate = async () => {
+    // Symulacja wyniku kalkulacji bez wysyłania do API
+    const mockResult: CalculationResult = {
+      premium: 2500,
+      premiumNet: 2032.52,
+      premiumTax: 467.48,
+      productName: PRODUCT_VARIANTS.find(v => v.code === variant.productCode)?.name || "GAP MAX",
+      coveragePeriod: parseInt(selectedOptions.TERM.replace('T_', '')),
+      vehicleValue: vehicleData.purchasePrice,
+      maxCoverage: parseInt(selectedOptions.CLAIM_LIMIT.replace('CL_', '')),
+      currency: "PLN",
+      options: selectedOptions
+    };
+
+    onCalculate(mockResult);
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-          <span className="text-[#FF8E3D] font-bold">2</span>
-        </div>
-        Poznaj cenę ubezpieczenia
-      </h2>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Car className="mr-2 text-blue-600" size={20} />
-          Dane pojazdu do kalkulacji
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wartość pojazdu (PLN) *
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                className="w-full p-2 pr-10 border border-gray-300 rounded-md"
-                value={vehicleValue || ""}
-                onChange={handlePriceChange}
-                placeholder="np. 50000"
-              />
-              <DollarSign className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Calendar className="mr-2 text-blue-600" size={20} />
-          Opcje ubezpieczenia
-        </h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Okres ubezpieczenia
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {termOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-2 text-center cursor-pointer transition-all
-                    ${paymentData.term === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('term', option.value)}
-                >
-                  {option.label}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Maksymalny limit odszkodowania
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {claimLimitOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-3 text-center cursor-pointer transition-all
-                    ${paymentData.claimLimit === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('claimLimit', option.value)}
-                >
-                  {option.label}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sposób płatności
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {paymentTermOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-3 text-center cursor-pointer transition-all
-                    ${paymentData.paymentTerm === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('paymentTerm', option.value)}
-                >
-                  {option.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-gray-900">Kalkulacja składki</h2>
 
-      {/* Przycisk do kalkulacji */}
-      <div className="flex justify-end mt-6">
-        <Button
-          onClick={calculatePremium}
-          disabled={isCalculating || !vehicleValue || vehicleValue <= 0}
-          className="bg-[#300FE6] hover:bg-[#2208B0] text-white px-8 py-3 rounded-md transition-all"
-        >
-          {isCalculating ? (
-            <>
-              <span className="animate-spin mr-2">⌛</span>
-              Obliczanie...
-            </>
-          ) : (
-            'Oblicz składkę'
+      <div className="space-y-6">
+        <section className="bg-white p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4">Wybierz wariant ubezpieczenia</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {PRODUCT_VARIANTS.map((product) => (
+              <Button
+                key={product.code}
+                type="button"
+                variant={variant.productCode === product.code ? "default" : "outline"}
+                className={`w-full h-auto p-4 flex flex-col items-start space-y-2 ${
+                  variant.productCode === product.code ? 'bg-[#300FE6] text-white' : ''
+                }`}
+                onClick={() => handleVariantChange(product.code)}
+              >
+                <span className="text-lg font-semibold">{product.name}</span>
+                <span className="text-sm font-normal">{product.description}</span>
+              </Button>
+            ))}
+          </div>
+          {errors?.productCode && (
+            <p className="mt-2 text-sm text-red-600">{errors.productCode}</p>
           )}
-        </Button>
-      </div>
+        </section>
 
-      {/* Wyświetlanie błędów */}
-      {errors?.vehicleValue && (
-        <p className="text-red-500 text-sm mt-2">{errors.vehicleValue}</p>
-      )}
-
-      {/* Wyświetlanie wyniku kalkulacji */}
-      {calculationResult && (
-        <div className="bg-[#300FE6]/5 p-6 rounded-xl border border-[#300FE6]/20 mt-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Wynik kalkulacji</h3>
-          <div className="space-y-2">
-            <p className="text-lg">
-              <span className="font-medium">Składka:</span>{' '}
-              <span className="text-[#300FE6] font-bold">
-                {calculationResult.premium.toLocaleString()} PLN
-              </span>
-            </p>
-            <p>
-              <span className="font-medium">Produkt:</span>{' '}
-              {calculationResult.details.productName}
-            </p>
-            <p>
-              <span className="font-medium">Okres ochrony:</span>{' '}
-              {calculationResult.details.coveragePeriod}
-            </p>
-            <p>
-              <span className="font-medium">Wartość pojazdu:</span>{' '}
-              {calculationResult.details.vehicleValue.toLocaleString()} PLN
-            </p>
-            <p>
-              <span className="font-medium">Maksymalna ochrona:</span>{' '}
-              {calculationResult.details.maxCoverage}
-            </p>
+        <section className="bg-white p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4">Opcje ubezpieczenia</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Okres ubezpieczenia</label>
+              <select
+                className="w-full border border-gray-300 rounded-md p-2"
+                value={selectedOptions.TERM}
+                onChange={(e) => setSelectedOptions({...selectedOptions, TERM: e.target.value as CalculationResult['options']['TERM']})}
+              >
+                <option value="T_24">24 miesiące</option>
+                <option value="T_36">36 miesięcy</option>
+                <option value="T_48">48 miesięcy</option>
+                <option value="T_60">60 miesięcy</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Limit odszkodowania</label>
+              <select
+                className="w-full border border-gray-300 rounded-md p-2"
+                value={selectedOptions.CLAIM_LIMIT}
+                onChange={(e) => setSelectedOptions({...selectedOptions, CLAIM_LIMIT: e.target.value as CalculationResult['options']['CLAIM_LIMIT']})}
+              >
+                <option value="CL_100000">100 000 PLN</option>
+                <option value="CL_150000">150 000 PLN</option>
+                <option value="CL_200000">200 000 PLN</option>
+              </select>
+            </div>
           </div>
+        </section>
+
+        {calculationResult && (
+          <section className="bg-white p-6 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold mb-4">Wynik kalkulacji</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Składka brutto</p>
+                <p className="text-2xl font-bold text-[#300FE6]">
+                  {calculationResult.premium.toLocaleString()} {calculationResult.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Składka netto</p>
+                <p className="font-medium">
+                  {calculationResult.premiumNet.toLocaleString()} {calculationResult.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Podatek</p>
+                <p className="font-medium">
+                  {calculationResult.premiumTax.toLocaleString()} {calculationResult.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Produkt</p>
+                <p className="font-medium">{calculationResult.productName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Okres ochrony</p>
+                <p className="font-medium">{calculationResult.coveragePeriod} miesięcy</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Wartość pojazdu</p>
+                <p className="font-medium">
+                  {calculationResult.vehicleValue.toLocaleString()} {calculationResult.currency}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Maksymalna ochrona</p>
+                <p className="font-medium">
+                  {calculationResult.maxCoverage.toLocaleString()} {calculationResult.currency}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={handleCalculate}
+            className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+          >
+            Oblicz składkę
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 }; 
