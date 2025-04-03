@@ -38,13 +38,11 @@ export const CalculationForm = ({ vehicleData, onNext }: CalculationFormProps) =
   };
 
   const handleCalculate = async () => {
-    // Symulacja kalkulacji
     const mockResult: CalculationResult = {
       premium: 1500,
       maxCoverage: vehicleData.purchasePrice * 1.2,
       coveragePeriod: 36,
       currency: 'PLN',
-      status: 'success',
       options: selectedOptions
     };
 

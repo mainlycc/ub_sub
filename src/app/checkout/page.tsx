@@ -44,6 +44,7 @@ const CheckoutContent = () => {
   
   const [currentStep, setCurrentStep] = useState<Step>('introduction');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   
   // Initial states
   const [vehicleData, setVehicleData] = useState<VehicleData>({
@@ -601,12 +602,12 @@ const CheckoutContent = () => {
       case 'calculation':
         return (
           <CalculationForm
-            vehicleData={vehicleData}
-            variant={variant}
-            calculationResult={calculationResult}
-            onVariantChange={handleVariantChange}
-            onCalculate={handleCalculationResult}
-            errors={errors.calculation}
+            vehicleData={{
+              make: vehicleData.make,
+              model: vehicleData.model,
+              purchasePrice: vehicleData.purchasePrice
+            }}
+            onNext={handleCalculationResult}
           />
         );
 
