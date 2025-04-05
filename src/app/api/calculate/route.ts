@@ -54,27 +54,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Brak autoryzacji' }, { status: 401 });
     }
 
-    const apiUrl = 'https://test.v2.idefend.eu/api/premium-calculator/calculate';
+    const apiUrl = 'https://test.v2.idefend.eu/api/policies/creation/calculate-offer';
+
+    // Data pierwszej rejestracji - ustawiamy na 2 lata wstecz
+    const firstRegistrationDate = new Date();
+    firstRegistrationDate.setFullYear(firstRegistrationDate.getFullYear() - 2);
+
+    // Data zakupu - ustawiamy na 200 dni po pierwszej rejestracji (spełnia wymóg +181 dni)
+    const purchaseDate = new Date(firstRegistrationDate);
+    purchaseDate.setDate(purchaseDate.getDate() + 200);
 
     const requestPayload = {
       sellerNodeCode: 'PL_TEST_GAP_25',
-      productCode: body.productCode,
-      price: {
-        amount: body.price ? body.price * 100 : 0,
-        currency: 'PLN'
-      },
+      productCode: body.productCode || '5_DCGAP_MG25_GEN',
+      saleInitiatedOn: formatDate(purchaseDate),
       vehicleSnapshot: {
-        categoryCode: body.categoryCode,
-        modelCode: body.modelCode,
-        firstRegisteredOn: body.firstRegisteredOn,
-        purchasedOn: body.purchasedOn,
-        usageCode: body.usageCode,
+        purchasedOn: formatDate(purchaseDate),
+        modelCode: body.modelCode || '342',
+        categoryCode: body.categoryCode || 'PC',
+        usageCode: body.usageCode || 'STANDARD',
+        mileage: body.mileage || 1000,
+        firstRegisteredOn: `${formatDate(firstRegistrationDate)}T07:38:46+02:00`,
+        evaluationDate: formatDate(purchaseDate),
+        purchasePrice: body.price ? Math.round(body.price * 100) : 15000000,
+        purchasePriceNet: body.price ? Math.round(body.price * 100) : 15000000,
+        purchasePriceVatReclaimableCode: 'NO',
+        usageTypeCode: 'INDIVIDUAL',
+        purchasePriceInputType: 'VAT_INAPPLICABLE'
       },
       options: {
         TERM: body.term || 'T_36',
-        CLAIM_LIMIT: body.claimLimit || 'CL_50000'
+        CLAIM_LIMIT: body.claimLimit || 'CL_150000',
+        PAYMENT_TERM: 'PT_LS',
+        PAYMENT_METHOD: 'PM_PAYU'
       }
     };
+
+    // Dodajemy logowanie dat dla debugowania
+    console.log('Daty w żądaniu:', {
+      firstRegistration: formatDate(firstRegistrationDate),
+      purchase: formatDate(purchaseDate),
+      daysDifference: Math.floor((purchaseDate.getTime() - firstRegistrationDate.getTime()) / (1000 * 60 * 60 * 24))
+    });
 
     console.log('==> /api/calculate: Wysyłanie do iDefend payload:', JSON.stringify(requestPayload, null, 2));
 
