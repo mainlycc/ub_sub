@@ -101,7 +101,7 @@ const GapPurchasePage = () => {
             <CardFooter>
               <Button 
                 className="w-full text-lg py-6 bg-[#300FE6] hover:bg-[#2208B0] text-white"
-                onClick={() => router.push('/checkout')}
+                onClick={() => router.push('/new-policy')}
               >
                 Wypełnij formularz online
               </Button>
