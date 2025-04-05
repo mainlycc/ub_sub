@@ -1,8 +1,11 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { getAuthToken } from './auth';
+import { VehicleData, PersonalData, InsuranceVariant, PaymentData, CalculationResult } from '@/types/insurance';
 
 // Stałe konfiguracyjne
-const API_BASE_URL = 'https://test.v2.idefend.eu/api/jwt-token';
+const API_BASE_URL = 'https://test.v2.idefend.eu/api';
+const LOGIN = 'GAP_2025_PL';
+const PASSWORD = 'LEaBY4TXgWa4QJX';
 
 // Interfejsy dla typów danych
 interface AuthResponse {
@@ -147,7 +150,7 @@ export async function callApiWithAuth<T>(
 // Funkcja do obliczania oferty GAP
 export async function calculateGapOffer(params: GapOfferParams): Promise<GapOfferResponse> {
   try {
-    const token = await getAuthToken();
+    const token = await authenticate();
     if (!token) {
       throw new Error('Brak tokenu autoryzacji');
     }
@@ -249,5 +252,271 @@ export async function registerPolicy(policyData: PolicyData): Promise<PolicyResp
     const apiError = error as AxiosError;
     console.error('Błąd rejestracji polisy:', apiError);
     throw new Error('Nie udało się zarejestrować polisy');
+  }
+}
+
+// Funkcja do formatowania daty w formacie ISO
+function formatDate(date: string): string {
+  return new Date(date).toISOString().split('T')[0];
+}
+
+// Funkcja do przygotowania danych polisy
+function preparePolicyData(
+  vehicleData: VehicleData,
+  personalData: PersonalData,
+  variant: InsuranceVariant,
+  paymentData: PaymentData,
+  calculationResult: CalculationResult
+) {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Konwersja składki na grosze (liczba całkowita)
+  const premiumInCents = Math.round(calculationResult.premium * 100);
+
+  return {
+    extApiNo: "GAP_API",
+    extReferenceNo: `GAP_${Date.now()}`,
+    extTenderNo: null,
+    sellerNodeCode: variant.sellerNodeCode,
+    productCode: variant.productCode,
+    saleInitiatedOn: today,
+    signatureTypeCode: variant.signatureTypeCode,
+    confirmedByDefault: null,
+
+    vehicleSnapshot: {
+      purchasedOn: vehicleData.purchasedOn,
+      modelCode: vehicleData.modelCode,
+      categoryCode: vehicleData.categoryCode,
+      usageCode: vehicleData.usageCode,
+      mileage: vehicleData.mileage,
+      firstRegisteredOn: formatDate(vehicleData.firstRegisteredOn),
+      evaluationDate: vehicleData.evaluationDate,
+      purchasePrice: Math.round(vehicleData.purchasePrice * 100),
+      purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
+      purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
+      usageTypeCode: vehicleData.usageTypeCode,
+      purchasePriceInputType: vehicleData.purchasePriceInputType,
+      vin: vehicleData.vin,
+      vrm: vehicleData.vrm,
+      owners: [{contact: {inheritFrom: "policyHolder"}}]
+    },
+
+    client: {
+      policyHolder: {
+        type: personalData.type,
+        phoneNumber: personalData.phoneNumber,
+        firstName: personalData.firstName,
+        lastName: personalData.lastName,
+        email: personalData.email,
+        identificationNumber: personalData.identificationNumber,
+        address: {
+          addressLine1: personalData.address.addressLine1 || `${personalData.firstName} ${personalData.lastName}`,
+          street: personalData.address.street,
+          city: personalData.address.city,
+          postCode: personalData.address.postCode,
+          countryCode: personalData.address.countryCode
+        }
+      },
+      insured: {
+        inheritFrom: "policyHolder"
+      },
+      beneficiary: {
+        inheritFrom: "policyHolder"
+      }
+    },
+
+    options: {
+      TERM: paymentData.term,
+      CLAIM_LIMIT: paymentData.claimLimit,
+      PAYMENT_TERM: paymentData.paymentTerm,
+      PAYMENT_METHOD: paymentData.paymentMethod
+    },
+
+    premium: premiumInCents,
+    term: paymentData.term,
+    claimLimit: paymentData.claimLimit,
+    vehicle: {
+      make: vehicleData.make,
+      model: vehicleData.model,
+      vin: vehicleData.vin,
+      vrm: vehicleData.vrm,
+      purchasePrice: vehicleData.purchasePrice,
+      purchaseDate: vehicleData.purchaseDate,
+      mileage: vehicleData.mileage
+    },
+    owners: [
+      {
+        firstName: personalData.firstName,
+        lastName: personalData.lastName,
+        email: personalData.email,
+        phoneNumber: personalData.phoneNumber,
+        identificationNumber: personalData.identificationNumber,
+        address: {
+          street: personalData.address.street,
+          city: personalData.address.city,
+          postCode: personalData.address.postCode,
+          addressLine1: personalData.address.addressLine1 || undefined
+        }
+      }
+    ]
+  };
+}
+
+// Funkcja do wystawiania polisy
+export async function createPolicy(
+  vehicleData: VehicleData,
+  personalData: PersonalData,
+  variant: InsuranceVariant,
+  paymentData: PaymentData,
+  calculationResult: CalculationResult
+): Promise<PolicyResponse> {
+  try {
+    console.log('=== Rozpoczynam proces tworzenia polisy ===');
+    
+    const token = await authenticate();
+    if (!token) {
+      throw new Error('Brak tokenu autoryzacji');
+    }
+
+    // Przygotowanie danych polisy zgodnie z wymaganym formatem
+    const policyData = {
+      extApiNo: "GAP_API",
+      extReferenceNo: `GAP_${Date.now()}`,
+      extTenderNo: null,
+      sellerNodeCode: variant.sellerNodeCode,
+      productCode: variant.productCode,
+      saleInitiatedOn: new Date().toISOString().split('T')[0],
+      signatureTypeCode: "AUTHORIZED_BY_SMS",
+      confirmedByDefault: null,
+
+      vehicleSnapshot: {
+        purchasedOn: vehicleData.purchasedOn,
+        modelCode: vehicleData.modelCode,
+        categoryCode: vehicleData.categoryCode,
+        usageCode: vehicleData.usageCode,
+        mileage: vehicleData.mileage,
+        firstRegisteredOn: vehicleData.firstRegisteredOn,
+        evaluationDate: vehicleData.evaluationDate,
+        purchasePrice: Math.round(vehicleData.purchasePrice * 100), // Konwersja na grosze
+        purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100), // Konwersja na grosze
+        purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
+        usageTypeCode: vehicleData.usageTypeCode,
+        purchasePriceInputType: vehicleData.purchasePriceInputType,
+        vin: vehicleData.vin,
+        vrm: vehicleData.vrm,
+        owners: [{ contact: { inheritFrom: "policyHolder" } }]
+      },
+
+      client: {
+        policyHolder: {
+          type: "person",
+          phoneNumber: personalData.phoneNumber,
+          firstName: personalData.firstName,
+          lastName: personalData.lastName,
+          email: personalData.email,
+          identificationNumber: personalData.identificationNumber,
+          address: {
+            addressLine1: `${personalData.firstName} ${personalData.lastName}`,
+            street: personalData.address.street,
+            city: personalData.address.city,
+            postCode: personalData.address.postCode,
+            countryCode: "PL"
+          }
+        },
+        insured: {
+          inheritFrom: "policyHolder"
+        },
+        beneficiary: {
+          inheritFrom: "policyHolder"
+        }
+      },
+
+      options: {
+        TERM: paymentData.term,
+        CLAIM_LIMIT: paymentData.claimLimit,
+        PAYMENT_TERM: "PT_LS",
+        PAYMENT_METHOD: "PM_PBC"
+      },
+
+      premium: Math.round(calculationResult.premium * 100) // Konwersja na grosze
+    };
+
+    console.log('Przygotowane dane do wysłania:', JSON.stringify(policyData, null, 2));
+
+    const response = await axios.post(
+      `${API_BASE_URL}/policies/creation/lock`,
+      policyData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-NODE-JWT-AUTH-TOKEN': token
+        }
+      }
+    );
+
+    console.log('Odpowiedź z API:', response.data);
+
+    if (!response.data) {
+      throw new Error('Brak danych w odpowiedzi API');
+    }
+
+    return {
+      policyId: response.data.policyId || response.data.id,
+      status: response.data.status || 'POLICY_CREATED'
+    };
+
+  } catch (error) {
+    console.error('Błąd podczas tworzenia polisy:', error);
+    throw error;
+  }
+}
+
+// Funkcja do autoryzacji polisy przez SMS
+export async function authorizePolicy(policyId: string, smsCode: string): Promise<void> {
+  try {
+    const token = await authenticate();
+    if (!token) {
+      throw new Error('Brak tokenu autoryzacji');
+    }
+
+    await axios.post(
+      `${API_BASE_URL}/policies/${policyId}/authorize`,
+      { code: smsCode },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-NODE-JWT-AUTH-TOKEN': token
+        }
+      }
+    );
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
+    console.error('Błąd autoryzacji polisy:', apiError);
+    throw new Error('Nie udało się autoryzować polisy');
+  }
+}
+
+// Funkcja do pobierania dokumentów polisy
+export async function getPolicyDocuments(policyId: string): Promise<{ [key: string]: string }> {
+  try {
+    const token = await authenticate();
+    if (!token) {
+      throw new Error('Brak tokenu autoryzacji');
+    }
+
+    const response = await axios.get(
+      `${API_BASE_URL}/policies/${policyId}/documents`,
+      {
+        headers: {
+          'X-NODE-JWT-AUTH-TOKEN': token
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error: unknown) {
+    const apiError = error as AxiosError;
+    console.error('Błąd pobierania dokumentów:', apiError);
+    throw new Error('Nie udało się pobrać dokumentów polisy');
   }
 } 

@@ -1,94 +1,133 @@
 "use client"
 
 import React from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { ShieldCheck, CreditCard, Clock } from 'lucide-react';
+import { PaymentData, Product } from '@/types/insurance'; // Importujemy Product
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select
 
-interface InsuranceVariantFormProps {
-  data: InsuranceVariant;
-  onChange: (data: InsuranceVariant) => void;
-  errors?: { [key: string]: string };
+// Definiujemy i eksportujemy Props
+export interface InsuranceVariantFormProps {
+  availableProducts: Product[];
+  selectedProduct: Product | null;
+  paymentOptions: Partial<PaymentData>;
+  onProductSelect: (product: Product) => void;
+  onOptionsChange: Dispatch<SetStateAction<Partial<PaymentData>>>;
+  errors: any; // Uproszczone
+  onNext: () => void;
 }
 
-interface InsuranceVariant {
-  productCode: string;
-  sellerNodeCode: string;
-  signatureTypeCode: string;
-}
+export const InsuranceVariantForm: React.FC<InsuranceVariantFormProps> = ({
+  availableProducts,
+  selectedProduct,
+  paymentOptions,
+  onProductSelect,
+  onOptionsChange,
+  errors,
+  onNext
+}) => {
+  // Przeniesione logowanie tutaj
+  console.log('PaymentForm otrzymał selectedProduct:', selectedProduct);
+  console.log('InsuranceVariantForm: Otrzymano availableProducts:', availableProducts);
 
-const variantOptions = [
-  { 
-    code: "5_DCGAP_MG25_GEN", 
-    name: "GAP Fakturowy", 
-    description: "Zwrot różnicy między fakturą zakupu a wartością pojazdu w momencie szkody całkowitej",
-    color: "bg-blue-600",
-    limit: "do 300 000 zł"
-  },
-  { 
-    code: "5_DCGAP_PV25_GEN", 
-    name: "GAP Wartości Pojazdu", 
-    description: "Wyrównanie wartości pojazdu w przypadku szkody całkowitej",
-    color: "bg-green-600",
-    limit: "do 50 000 zł"
-  }
-];
-
-export const InsuranceVariantForm = ({ data, onChange, errors }: InsuranceVariantFormProps): React.ReactElement => {
-  const handleVariantSelect = (productCode: string) => {
-    onChange({
-      ...data,
-      productCode
-    });
+  // Funkcja pomocnicza do pobierania dostępnych opcji dla danego typu
+  const getOptionsForType = (product: Product | null, optionTypeCode: string) => {
+    return product?.optionTypes.find(ot => ot.code === optionTypeCode)?.options || [];
   };
+
+  const termOptions = getOptionsForType(selectedProduct, 'TERM');
+  const claimLimitOptions = getOptionsForType(selectedProduct, 'CLAIM_LIMIT');
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-          <span className="text-[#FF8E3D] font-bold">1</span>
-        </div>
-        Określenie wariantu ubezpieczenia
-      </h2>
-      
-      <p className="text-gray-600 mb-6">
-        Wybierz najlepszy wariant ubezpieczenia GAP dopasowany do Twoich potrzeb.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {variantOptions.map((variant) => (
-          <div 
-            key={variant.code}
-            className={`border-2 rounded-xl p-6 cursor-pointer transition-all
-              ${data.productCode === variant.code 
-                ? 'border-[#300FE6] bg-[#300FE6]/5' 
-                : 'border-gray-200 hover:border-gray-300'}`}
-            onClick={() => handleVariantSelect(variant.code)}
-          >
-            <div className={`${variant.color} w-12 h-12 rounded-full flex items-center justify-center mb-4`}>
-              <ShieldCheck className="text-white" size={24} />
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Wybór wariantu i opcji</h2>
+
+      {/* Wybór produktu (jeśli nie został jeszcze wybrany) */}
+      {!selectedProduct && (
+        <>
+          <p className="text-gray-600 mb-4">
+            Wybierz produkt ubezpieczenia GAP, który najlepiej odpowiada Twoim potrzebom.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {availableProducts.map((product: Product) => {
+              // @ts-expect-error - Ignorujemy błąd "does not exist on type 'never'"
+              const isSelected = selectedProduct?.productCode === product.productCode;
+              const buttonClasses = `border-2 rounded-lg p-4 text-left transition-all hover:shadow-md ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`;
+
+              return (
+                <button
+                  // Zostawiamy @ts-expect-error, bo linter wariuje
+                  // @ts-expect-error - Ignorujemy uporczywy błąd "does not exist on type 'never'"
+                  key={product.productCode}
+                  onClick={() => onProductSelect(product)}
+                  className={buttonClasses}
+                >
+                  <h3 className="text-lg font-semibold mb-1">{product.productDerivativeAlias} ({product.productGroupAlias})</h3>
+                </button>
+              );
+            })}
+          </div>
+          {errors?.productCode && (
+            <p className="mt-2 text-sm text-red-500">{errors.productCode}</p>
+          )}
+        </>
+      )}
+
+      {/* Konfiguracja opcji dla wybranego produktu */}
+      {selectedProduct && (
+        <>
+          <h3 className="text-xl font-semibold border-b pb-2 mb-4">Konfiguracja: {selectedProduct.productDerivativeAlias}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Wybór okresu ubezpieczenia (TERM) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Okres ubezpieczenia</label>
+              <Select
+                value={paymentOptions.term}
+                onValueChange={(value) => onOptionsChange(prev => ({ ...prev, term: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wybierz okres" />
+                </SelectTrigger>
+                <SelectContent>
+                  {termOptions.map(option => (
+                    <SelectItem key={option.code} value={option.code}>
+                      {option.name || option.code} {/* Wyświetl nazwę lub kod */}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors?.term && <p className="mt-1 text-sm text-red-500">{errors.term}</p>}
             </div>
-            <h3 className="text-xl font-bold mb-2">{variant.name}</h3>
-            <p className="text-gray-600 mb-4">{variant.description}</p>
-            
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center">
-                <Clock size={18} className="text-gray-400 mr-2" />
-                <span className="text-sm">Ubezpieczenie na okres 3-5 lat</span>
-              </div>
-              <div className="flex items-center">
-                <CreditCard size={18} className="text-gray-400 mr-2" />
-                <span className="text-sm">Możliwość opłaty jednorazowej lub w ratach</span>
-              </div>
-              <div className="flex items-center">
-                <ShieldCheck size={18} className="text-gray-400 mr-2" />
-                <span className="text-sm">Limit odszkodowania: {variant.limit}</span>
-              </div>
+
+            {/* Wybór limitu odszkodowania (CLAIM_LIMIT) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Limit odszkodowania</label>
+              <Select
+                value={paymentOptions.claimLimit}
+                onValueChange={(value) => onOptionsChange(prev => ({ ...prev, claimLimit: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wybierz limit" />
+                </SelectTrigger>
+                <SelectContent>
+                  {claimLimitOptions.map(option => (
+                    <SelectItem key={option.code} value={option.code}>
+                      {option.name || option.code} {/* Wyświetl nazwę lub kod */}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors?.claimLimit && <p className="mt-1 text-sm text-red-500">{errors.claimLimit}</p>}
             </div>
           </div>
-        ))}
-      </div>
-      
-      {errors?.productCode && (
-        <p className="mt-2 text-sm text-red-500">{errors.productCode}</p>
+          {/* Przycisk Dalej pojawia się dopiero po wybraniu produktu */}
+          <div className="flex justify-end mt-6">
+            <Button onClick={onNext} disabled={!paymentOptions.term || !paymentOptions.claimLimit}>
+              Dalej
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );

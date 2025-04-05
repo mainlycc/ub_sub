@@ -2,26 +2,20 @@
 
 import React from 'react';
 import { User, Mail, CreditCard } from 'lucide-react';
+import { PersonalData } from '@/types/insurance';
 
 interface PersonalFormProps {
   data: PersonalData;
   onChange: (data: PersonalData) => void;
-  errors?: { [key: string]: string };
-}
-
-interface PersonalData {
-  type: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  identificationNumber: string;
-  address: {
-    addressLine1: string;
-    street: string;
-    city: string;
-    postCode: string;
-    countryCode: string;
+  errors?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    identificationNumber?: string;
+    street?: string;
+    city?: string;
+    postCode?: string;
   };
 }
 

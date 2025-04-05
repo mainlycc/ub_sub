@@ -85,8 +85,20 @@ const InsuranceCalculator = () => {
     // Walidacja przed wysłaniem
     const errors: ValidationErrors = {};
     
+    console.log('Dane formularza przed walidacją:', {
+      carPrice: calculatorData.carPrice,
+      carPriceType: typeof calculatorData.carPrice,
+      year: calculatorData.year,
+      yearType: typeof calculatorData.year,
+      months: calculatorData.months,
+      monthsType: typeof calculatorData.months,
+      type: activeInsuranceType
+    });
+    
     if (!calculatorData.carPrice || calculatorData.carPrice <= 0) {
       errors.carPrice = 'Proszę podać cenę samochodu';
+    } else if (calculatorData.carPrice > 1000000) {
+      errors.carPrice = 'Maksymalna wartość pojazdu to 1 000 000 zł';
     }
     
     if (!calculatorData.year) {
@@ -106,20 +118,53 @@ const InsuranceCalculator = () => {
     setErrors({});
     
     try {
+      // Przygotowanie danych do wysłania
+      const requestData = {
+        price: Number(calculatorData.carPrice),
+        year: Number(calculatorData.year),
+        months: Number(calculatorData.months),
+        type: activeInsuranceType
+      };
+
+      console.log('Dane wysyłane do API:', requestData);
+
       const response = await fetch('/api/calculate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          price: calculatorData.carPrice,
-          year: calculatorData.year,
-          months: calculatorData.months,
-          type: activeInsuranceType
-        }),
+        body: JSON.stringify(requestData),
       });
       
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('Surowa odpowiedź z API:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Przetworzona odpowiedź z API:', data);
+      } catch (e) {
+        console.error('Błąd parsowania odpowiedzi JSON:', e);
+        throw new Error('Nieprawidłowy format odpowiedzi z API');
+      }
+      
+      if (!response.ok) {
+        console.error('Szczegóły błędu:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+          wysłaneDane: requestData
+        });
+
+        let errorMessage = `Błąd HTTP: ${response.status} ${response.statusText}`;
+        if (data && data.error) {
+          errorMessage += `\nSzczegóły: ${data.error}`;
+          if (data.details) {
+            errorMessage += `\nDodatkowe informacje: ${JSON.stringify(data.details, null, 2)}`;
+          }
+        }
+        throw new Error(errorMessage);
+      }
       
       if (data.success && data.premium !== undefined) {
         const calculationResult = {
@@ -129,19 +174,29 @@ const InsuranceCalculator = () => {
         
         setCalculationResult(calculationResult);
         
-        // Zapisz dane w localStorage do wykorzystania w checkout
         localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
         
-        // Przewijamy do wyników po krótkim opóźnieniu
         setTimeout(() => {
           resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
       } else {
-        alert(`Błąd kalkulacji: ${data.error || 'Nieznany błąd'}`);
+        console.error('Nieprawidłowa odpowiedź:', data);
+        const errorDetails = data.details ? JSON.stringify(data.details, null, 2) : data.error;
+        throw new Error(`Błąd kalkulacji: ${errorDetails || 'Nieznany błąd'}`);
       }
     } catch (error: unknown) {
+      console.error('Błąd podczas kalkulacji:', error);
       const errorMessage = error instanceof Error ? error.message : 'Nieoczekiwany błąd';
-      alert(`Błąd kalkulacji: ${errorMessage}`);
+      
+      // Wyświetlamy błąd w bardziej przyjazny sposób
+      let userMessage = 'Wystąpił błąd podczas kalkulacji składki:\n';
+      if (errorMessage.includes('422')) {
+        userMessage += 'Nieprawidłowe dane wejściowe. Sprawdź poprawność wprowadzonych wartości.';
+      } else {
+        userMessage += errorMessage;
+      }
+      
+      alert(userMessage);
     } finally {
       setIsCalculating(false);
     }

@@ -1,122 +1,125 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
-export async function POST(request: NextRequest) {
+// Helper function to format date as YYYY-MM-DD
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Helper function to format date as ISO string for specific fields
+function formatIsoDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    // Using a fixed time and offset for consistency, similar to example
+    return `${year}-${month}-${day}T00:00:00+02:00`;
+}
+
+// Funkcja do pobrania dostępnych opcji
+async function getAvailableOptions(authToken: string) {
   try {
-    // Pobranie tokenu JWT
-    console.log('Rozpoczynam proces autoryzacji...');
-    const authToken = await getAuthToken();
+    console.log('Pobieranie dostępnych opcji produktów...');
+    const portfoliosResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/portfolios/', {
+      headers: {
+        'X-NODE-JWT-AUTH-TOKEN': authToken,
+        'Accept': 'application/json'
+      }
+    });
     
-    if (!authToken) {
-      console.error('Błąd autoryzacji: brak tokenu JWT');
-      return NextResponse.json(
-        { error: 'Błąd autoryzacji - brak tokenu JWT' },
-        { status: 401 }
-      );
+    if (!portfoliosResponse.ok) {
+      console.error('Błąd pobierania opcji:', portfoliosResponse.status, portfoliosResponse.statusText);
+      return null;
     }
     
-    console.log('Autoryzacja zakończona sukcesem - token JWT otrzymany');
-    
-    // Parsowanie danych z zapytania
-    const reqData = await request.json();
-    const { price, year, months, type } = reqData;
-    
-    // Format daty YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Odpowiednie kody produktów zgodne z dokumentacją
-    // 5_DCGAP_F25_GEN dla fakturowego, 5_DCGAP_MG25_GEN dla MAX
-    const productCode = type === 'fakturowy' ? "5_DCGAP_F25_GEN" : "5_DCGAP_MG25_GEN";
-    
-    // Pełny format daty rejestracji (wraz z godziną)
-    // Używamy pierwszego dnia roku z podanego roku i dodajemy godzinę 
-    const registrationDate = `${year}-01-01T00:00:00+02:00`;
-    
-    // Przygotuj dane do kalkulacji zgodnie z przykładowym JSON
-    const calculationData = {
-      sellerNodeCode: "PL_TEST_GAP_25",
-      productCode: productCode,
-      saleInitiatedOn: today,
-      
-      vehicleSnapshot: {
-        purchasedOn: today,
-        modelCode: "342",
-        categoryCode: "PC",
-        usageCode: "STANDARD",
-        mileage: 1000,
-        firstRegisteredOn: registrationDate,
-        evaluationDate: today,
-        purchasePrice: Math.round(price * 100), // Konwersja 1000 zł -> 100000
-        purchasePriceNet: Math.round(price * 100),
-        purchasePriceVatReclaimableCode: "NO",
-        usageTypeCode: "INDIVIDUAL",
-        purchasePriceInputType: "VAT_INAPPLICABLE"
+    const portfoliosData = await portfoliosResponse.json();
+    console.log('Dostępne opcje produktów:', JSON.stringify(portfoliosData, null, 2));
+    return portfoliosData;
+  } catch (error) {
+    console.error('Błąd podczas pobierania opcji:', error);
+    return null;
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    console.log('==> /api/calculate: Otrzymano body żądania:', body);
+
+    const token = await getAuthToken();
+    if (!token) {
+      console.error('==> /api/calculate: Błąd - Brak tokenu autoryzacji');
+      return NextResponse.json({ success: false, error: 'Brak autoryzacji' }, { status: 401 });
+    }
+
+    const apiUrl = 'https://test.v2.idefend.eu/api/premium-calculator/calculate';
+
+    const requestPayload = {
+      sellerNodeCode: 'PL_TEST_GAP_25',
+      productCode: body.productCode,
+      price: {
+        amount: body.price ? body.price * 100 : 0,
+        currency: 'PLN'
       },
-      
+      vehicleSnapshot: {
+        categoryCode: body.categoryCode,
+        modelCode: body.modelCode,
+        firstRegisteredOn: body.firstRegisteredOn,
+        purchasedOn: body.purchasedOn,
+        usageCode: body.usageCode,
+      },
       options: {
-        TERM: `T_${months}`,
-        CLAIM_LIMIT: "CL_100000",
-        PAYMENT_TERM: "PT_LS",
-        PAYMENT_METHOD: "PM_BT"
+        TERM: body.term || 'T_36',
+        CLAIM_LIMIT: body.claimLimit || 'CL_50000'
       }
     };
-    
-    console.log('Przygotowane dane do wysłania:', JSON.stringify(calculationData, null, 2));
-    
-    // Wywołanie API z poprawnym nagłówkiem autoryzacyjnym
-    const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
+
+    console.log('==> /api/calculate: Wysyłanie do iDefend payload:', JSON.stringify(requestPayload, null, 2));
+
+    const apiResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-NODE-JWT-AUTH-TOKEN': authToken
+        'X-NODE-JWT-AUTH-TOKEN': token,
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(calculationData)
+      body: JSON.stringify(requestPayload)
     });
-    
-    // Analiza odpowiedzi
-    if (!apiResponse.ok) {
-      const errorData = await apiResponse.json().catch(() => ({}));
-      console.error('Odpowiedź API z błędem:', {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        data: errorData
-      });
-      
-      return NextResponse.json(
-        { error: `Błąd API: ${apiResponse.status}`, details: errorData },
-        { status: apiResponse.status }
-      );
+
+    const responseText = await apiResponse.text();
+    console.log(`==> /api/calculate: Odpowiedź z iDefend - Status: ${apiResponse.status}`);
+    console.log('==> /api/calculate: Odpowiedź z iDefend - Raw Body:', responseText);
+
+    let responseData: any;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      console.error('==> /api/calculate: Nie udało się sparsować odpowiedzi iDefend jako JSON.');
+      if (!apiResponse.ok) {
+        return NextResponse.json({ success: false, error: 'Błąd API iDefend: Nieprawidłowa odpowiedź', rawResponse: responseText }, { status: apiResponse.status });
+      }
+      responseData = { premium: null };
     }
-    
-    // Przetworzenie danych odpowiedzi
-    const data = await apiResponse.json();
-    console.log('Otrzymana odpowiedź z API:', JSON.stringify(data, null, 2));
-    
-    // Konwersja ceny z wartości w groszach (np. 235000 -> 2350.00)
-    const premiumAmount = data.premiumSuggested 
-      ? Math.round((data.premiumSuggested / 100) * 100) / 100 
-      : 0;
-    
-    console.log('Przeliczona wartość składki:', premiumAmount, 'zł');
-    
-    // Przygotowanie odpowiedzi w oczekiwanym formacie
+
+    if (!apiResponse.ok) {
+      console.error('==> /api/calculate: Błąd API iDefend (po sparsowaniu):', responseData);
+      const errorMessage = responseData?.detail || responseData?.message || 'Błąd obliczania składki w iDefend';
+      return NextResponse.json({ success: false, error: errorMessage, details: responseData }, { status: apiResponse.status });
+    }
+
+    const calculatedPremium = responseData.premium ? responseData.premium / 100 : null;
+    console.log('==> /api/calculate: Zwracanie sukcesu z premium (PLN):', calculatedPremium);
+
     return NextResponse.json({
       success: true,
-      premium: premiumAmount,
-      details: {
-        productName: data.productName || (type === 'fakturowy' ? 'Ubezpieczenie GAP Fakturowy' : 'Ubezpieczenie GAP MAX'),
-        coveragePeriod: `${months} miesięcy`,
-        vehicleValue: price,
-        maxCoverage: "100 000 PLN" // Zmieniono zgodnie z wybraną opcją CL_100000
-      }
-    });
-    
-  } catch (error: unknown) {
-    console.error('Błąd podczas kalkulacji:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
-    return NextResponse.json(
-      { error: errorMessage || 'Wystąpił błąd podczas kalkulacji' },
-      { status: 500 }
-    );
+      premium: calculatedPremium,
+      details: responseData
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error('==> /api/calculate: Błąd wewnętrzny serwera:', error);
+    return NextResponse.json({ success: false, error: 'Błąd wewnętrzny serwera' }, { status: 500 });
   }
 } 
