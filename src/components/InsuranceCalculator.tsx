@@ -62,7 +62,7 @@ const tooltips = {
   gapFakturowy: "Ubezpieczenie, które pokrywa różnicę między wartością fakturową a wartością rynkową pojazdu w momencie szkody.",
   gapCasco: "Ubezpieczenie, które pokrywa różnicę między wartością początkową pojazdu a wypłatą z AC/OC w przypadku szkody całkowitej.",
   carPrice: "Podaj aktualną wartość rynkową lub cenę zakupu pojazdu.",
-  year: "Wybierz rok produkcji pojazdu.",
+  year: "Wybierz rok produkcji pojazdu. Pojazd musi być zarejestrowany co najmniej 181 dni temu, ale nie więcej niż 10 lat temu.",
   months: "Określ na jak długi okres chcesz wykupić ubezpieczenie."
 };
 
@@ -103,6 +103,17 @@ const InsuranceCalculator = () => {
     
     if (!calculatorData.year) {
       errors.year = 'Proszę wybrać rok produkcji';
+    } else {
+      // Sprawdzamy czy rok jest w odpowiednim zakresie
+      const today = new Date();
+      const firstRegDate = new Date(calculatorData.year, 0, 1);
+      const daysSinceRegistration = Math.floor((today.getTime() - firstRegDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysSinceRegistration < 181) {
+        errors.year = 'Pojazd musi być zarejestrowany co najmniej 181 dni temu';
+      } else if (daysSinceRegistration > 10 * 365) {
+        errors.year = 'Pojazd nie może być starszy niż 10 lat';
+      }
     }
     
     if (!calculatorData.months) {
@@ -190,8 +201,18 @@ const InsuranceCalculator = () => {
       
       // Wyświetlamy błąd w bardziej przyjazny sposób
       let userMessage = 'Wystąpił błąd podczas kalkulacji składki:\n';
-      if (errorMessage.includes('422')) {
-        userMessage += 'Nieprawidłowe dane wejściowe. Sprawdź poprawność wprowadzonych wartości.';
+      
+      // Sprawdzamy rodzaj błędu i dostosowujemy komunikat
+      if (errorMessage.includes('Late solicitation is not in range')) {
+        userMessage = 'Data pierwszej rejestracji pojazdu musi być minimum 181 dni, ale maksimum 10 lat przed datą zakupu. Wybierz inny rok produkcji.';
+      } else if (errorMessage.includes('422')) {
+        userMessage = 'Nieprawidłowe dane wejściowe. Sprawdź poprawność wprowadzonych wartości.';
+      } else if (errorMessage.includes('options:')) {
+        userMessage = 'Wystąpił problem z wyborem opcji. Skontaktuj się z działem obsługi.';
+      } else if (errorMessage.includes('401')) {
+        userMessage = 'Sesja wygasła. Odśwież stronę i spróbuj ponownie.';
+      } else if (errorMessage.includes('500')) {
+        userMessage = 'Wystąpił wewnętrzny błąd systemu. Prosimy spróbować później.';
       } else {
         userMessage += errorMessage;
       }

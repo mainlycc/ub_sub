@@ -25,10 +25,10 @@ export const CalculationForm: React.FC<CalculationFormProps> = ({
 }) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState({
-    TERM: 'T_36'
+    TERM: 'T_36',
+    CLAIM_LIMIT: 'CL_150000'
   });
   const [error, setError] = useState<string | null>(null);
-  const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
 
   const handleCalculate = async () => {
     setIsCalculating(true);
@@ -42,65 +42,70 @@ export const CalculationForm: React.FC<CalculationFormProps> = ({
       if (!selectedOptions.TERM) {
         throw new Error('Proszę wybrać okres ubezpieczenia');
       }
+      if (!selectedOptions.CLAIM_LIMIT) {
+        throw new Error('Proszę wybrać limit odszkodowania');
+      }
+      if (!vehicleData.firstRegisteredOn || !vehicleData.purchasedOn) {
+        throw new Error('Brak wymaganych dat pojazdu (pierwsza rejestracja, data zakupu)');
+      }
 
-      const months = parseInt(selectedOptions.TERM.replace('T_', ''));
-
-      console.log('Wysyłam dane do kalkulacji:', {
+      const requestBody = {
+        productCode: '5_DCGAP_MG25_GEN',
         price: vehicleData.purchasePrice,
-        year: vehicleData.productionYear || new Date().getFullYear(),
-        months: months,
-        type: 'max' // Zawsze używamy typu MAX
-      });
+        term: selectedOptions.TERM,
+        claimLimit: selectedOptions.CLAIM_LIMIT,
+        modelCode: vehicleData.modelCode,
+        categoryCode: vehicleData.categoryCode,
+        usageCode: vehicleData.usageCode,
+        firstRegisteredOn: vehicleData.firstRegisteredOn,
+        purchasedOn: vehicleData.purchasedOn,
+        mileage: vehicleData.mileage,
+      };
 
-      // Wywołanie API kalkulacji
+      console.log('Wysyłam dane do kalkulacji API:', requestBody);
+
       const response = await fetch('/api/calculate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          price: vehicleData.purchasePrice,
-          year: vehicleData.productionYear || new Date().getFullYear(),
-          months: months,
-          type: 'max'
-        })
+        body: JSON.stringify(requestBody)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Błąd podczas kalkulacji składki');
-      }
-
       const data = await response.json();
-      console.log('Otrzymana odpowiedź:', data);
 
-      if (!data.success || !data.premium) {
-        throw new Error('Nie udało się obliczyć składki');
+      if (!response.ok) {
+        console.error('Błąd API:', data);
+        throw new Error(data.error || `Błąd podczas kalkulacji składki (status: ${response.status})`);
       }
 
-      const calculationResult = {
+      console.log('Otrzymana odpowiedź API:', data);
+
+      if (!data.success || data.premium === undefined || data.premium === null) {
+        console.error('Nieprawidłowa odpowiedź API - brak sukcesu lub składki:', data);
+        throw new Error(data.error || 'Nie udało się obliczyć składki lub odpowiedź jest niekompletna');
+      }
+
+      const calculationResult: CalculationResult = {
         premium: data.premium,
-        details: {
-          baseAmount: data.details.baseAmount || data.premium,
-          tax: data.details.tax || Math.round(data.premium * 0.23),
-          totalAmount: data.details.totalAmount || Math.round(data.premium * 1.23)
-        }
+        details: data.details
       };
 
-      console.log('Wynik kalkulacji:', calculationResult);
+      console.log('Wynik kalkulacji przygotowany do przekazania:', calculationResult);
 
-      // Aktualizacja danych płatności
-      const paymentData = {
+      const paymentData: PaymentData = {
         term: selectedOptions.TERM,
-        claimLimit: "CL_50000", // Stały limit odszkodowania
+        claimLimit: selectedOptions.CLAIM_LIMIT,
         premium: calculationResult.premium,
-        paymentTerm: "PT_LS",
-        paymentMethod: "PM_PAYU"
+        paymentTerm: data.details?.options?.PAYMENT_TERM || "PT_LS",
+        paymentMethod: data.details?.options?.PAYMENT_METHOD || "PM_PAYU"
       };
+
+      console.log('Dane płatności przygotowane do przekazania:', paymentData);
 
       onNext(calculationResult, paymentData);
     } catch (error: any) {
-      console.error('Błąd podczas kalkulacji:', error);
+      console.error('Błąd podczas kalkulacji (catch):', error);
       setError(error.message || 'Wystąpił błąd podczas kalkulacji');
     } finally {
       setIsCalculating(false);
@@ -119,10 +124,21 @@ export const CalculationForm: React.FC<CalculationFormProps> = ({
       <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
           <Car className="mr-2 text-blue-600" size={20} />
-          Dane pojazdu do kalkulacji
+          Wybierz opcje ubezpieczenia
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="purchasePrice">Cena zakupu pojazdu (PLN)</Label>
+            <Input
+              id="purchasePrice"
+              type="number"
+              value={vehicleData.purchasePrice}
+              disabled
+              className="bg-gray-100"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="term">Okres ubezpieczenia</Label>
             <Select
@@ -130,7 +146,7 @@ export const CalculationForm: React.FC<CalculationFormProps> = ({
               onValueChange={(value: string) => setSelectedOptions(prev => ({ ...prev, TERM: value }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Wybierz okres ubezpieczenia" />
+                <SelectValue placeholder="Wybierz okres" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="T_12">12 miesięcy</SelectItem>
@@ -143,24 +159,23 @@ export const CalculationForm: React.FC<CalculationFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="purchasePrice">Cena zakupu pojazdu</Label>
-            <Input
-              id="purchasePrice"
-              type="number"
-              value={vehicleData.purchasePrice}
-              disabled
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="claimLimit">Suma ubezpieczenia</Label>
-            <Input
-              id="claimLimit"
-              type="text"
-              value="50 000 PLN"
-              disabled
-              className="bg-gray-100"
-            />
+            <Label htmlFor="claimLimit">Limit odszkodowania (Suma ubezpieczenia)</Label>
+            <Select
+              value={selectedOptions.CLAIM_LIMIT}
+              onValueChange={(value: string) => setSelectedOptions(prev => ({ ...prev, CLAIM_LIMIT: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Wybierz limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CL_50000">50 000 zł</SelectItem>
+                <SelectItem value="CL_100000">100 000 zł</SelectItem>
+                <SelectItem value="CL_150000">150 000 zł</SelectItem>
+                <SelectItem value="CL_200000">200 000 zł</SelectItem>
+                <SelectItem value="CL_250000">250 000 zł</SelectItem>
+                <SelectItem value="CL_300000">300 000 zł</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
