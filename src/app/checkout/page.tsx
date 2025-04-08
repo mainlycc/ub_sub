@@ -10,69 +10,19 @@ import { CalculationForm } from '@/components/checkout/CalculationForm';
 import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
+import { InsuranceOptionsForm } from '@/components/checkout/InsuranceOptionsForm';
+import {
+  InsuranceVariant,
+  VehicleData,
+  PersonalData,
+  InsuranceOptions,
+  CalculationResult,
+  SummaryData
+} from '@/types/checkout';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
 /* eslint-enable @typescript-eslint/no-unused-vars */
-
-// Zaktualizowane interfejsy 
-interface InsuranceVariant {
-  productCode: string;
-  sellerNodeCode: string;
-  signatureTypeCode: string;
-}
-
-interface VehicleData {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: string;
-  usageCode: string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: string;
-  vin: string;
-  vrm: string;
-  make?: string;
-  model?: string;
-}
-
-interface PersonalData {
-  type: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  identificationNumber: string;
-  address: {
-    addressLine1: string;
-    street: string;
-    city: string;
-    postCode: string;
-    countryCode: string;
-  };
-}
-
-interface PaymentData {
-  term: string;
-  claimLimit: string;
-  paymentTerm: string;
-  paymentMethod: string;
-}
-
-interface CalculationResult {
-  premium: number;
-  details: {
-    productName: string;
-    coveragePeriod: string;
-    vehicleValue: number;
-    maxCoverage: string;
-  };
-}
 
 // CheckoutContent component
 const CheckoutContent = () => {
@@ -96,22 +46,23 @@ const CheckoutContent = () => {
   
   // Stany dla pozostałych formularzy
   const [vehicleData, setVehicleData] = useState<VehicleData>({
-    purchasedOn: new Date().toISOString().split('T')[0],
-    modelCode: "",
-    categoryCode: "PC",
-    usageCode: "STANDARD",
+    category: "PC",
+    usage: "STANDARD",
+    vin: "",
+    vrm: "",
+    model: "",
     mileage: 1000,
     firstRegisteredOn: "",
-    evaluationDate: new Date().toISOString().split('T')[0],
+    purchasedOn: new Date().toISOString().split('T')[0],
     purchasePrice: 0,
     purchasePriceNet: 0,
     purchasePriceVatReclaimableCode: "NO",
     usageTypeCode: "INDIVIDUAL",
     purchasePriceInputType: "VAT_INAPPLICABLE",
-    vin: "",
-    vrm: "",
-    make: "",
-    model: ""
+    modelCode: "",
+    categoryCode: "PC",
+    usageCode: "STANDARD",
+    evaluationDate: new Date().toISOString().split('T')[0]
   });
   
   const [personalData, setPersonalData] = useState<PersonalData>({
@@ -130,11 +81,11 @@ const CheckoutContent = () => {
     }
   });
   
-  const [paymentData, setPaymentData] = useState<PaymentData>({
-    term: "T_36",
-    claimLimit: "CL_150000",
-    paymentTerm: "PT_LS",
-    paymentMethod: "PM_PBC"
+  const [paymentData, setPaymentData] = useState<InsuranceOptions>({
+    TERM: "T_36",
+    CLAIM_LIMIT: "CL_150000",
+    PAYMENT_TERM: "PT_LS",
+    PAYMENT_METHOD: "PM_PBC"
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
@@ -149,29 +100,52 @@ const CheckoutContent = () => {
     payment?: { [key: string]: string };
   }>({});
   
+  // Nowy stan dla ścieżek inputów
+  const [inputPaths, setInputPaths] = useState<{
+    vehicle: Array<{
+      field: string;
+      requiredForCalculation: boolean;
+      requiredForConfirmation: boolean;
+      step: string;
+    }>;
+    contact: Array<{
+      field: string;
+      requiredForCalculation: boolean;
+      requiredForConfirmation: boolean;
+      step: string;
+    }>;
+  } | null>(null);
+  
   // Handle variant change
-  const handleVariantChange = (newVariant: InsuranceVariant) => {
-    setInsuranceVariant(newVariant);
+  const handleVariantChange = (data: InsuranceVariant) => {
+    setInsuranceVariant(data);
   };
   
   // Handle vehicle change
-  const handleVehicleChange = (newData: VehicleData) => {
-    setVehicleData(newData);
+  const handleVehicleChange = (data: VehicleData) => {
+    setVehicleData(data);
   };
   
   // Handle personal data change
-  const handlePersonalDataChange = (newData: PersonalData) => {
-    setPersonalData(newData);
+  const handlePersonalDataChange = (data: PersonalData) => {
+    setPersonalData(data);
   };
   
   // Handle payment data change
-  const handlePaymentDataChange = (newData: PaymentData) => {
-    setPaymentData(newData);
+  const handlePaymentDataChange = (data: InsuranceOptions) => {
+    setPaymentData(data);
   };
   
   // Handle calculation
   const handleCalculation = (result: CalculationResult) => {
     setCalculationResult(result);
+  };
+  
+  // Funkcja do obsługi zmiany ścieżek inputów
+  const handleInputPathsChange = (paths: typeof inputPaths) => {
+    setInputPaths(paths);
+    // Możemy tutaj dodać dodatkową logikę, np. resetowanie niektórych pól formularza
+    // w zależności od wybranego produktu
   };
   
   // Validation functions
@@ -314,35 +288,80 @@ const CheckoutContent = () => {
     setIsSubmitting(true);
     
     try {
-      // Przygotowanie danych w odpowiednim formacie
-      const policyData = {
-        extApiNo: null,
-        extReferenceNo: null,
-        extTenderNo: null,
+      console.log('Rozpoczynam proces zakupu polisy...');
+      
+      // Funkcja pomocnicza do sprawdzania i konwersji kwot
+      const toCents = (amount: number) => {
+        // Jeśli kwota > 10000000 (100 000 zł), zakładamy że już jest w groszach
+        if (amount > 10000000) return amount;
+        return Math.round(amount * 100); // Konwersja na grosze
+      };
+      
+      // 1. Kalkulacja składki (Premium calculation)
+      console.log('Krok 1: Kalkulacja składki');
+      const calculationData = {
         sellerNodeCode: insuranceVariant.sellerNodeCode,
         productCode: insuranceVariant.productCode,
-        saleInitiatedOn: new Date().toISOString().split('T')[0],
         signatureTypeCode: insuranceVariant.signatureTypeCode,
-        confirmedByDefault: null,
+        saleInitiatedOn: new Date().toISOString().split('T')[0], // Aktualna data
         
         vehicleSnapshot: {
           purchasedOn: vehicleData.purchasedOn,
-          modelCode: vehicleData.modelCode,
+          modelCode: vehicleData.modelCode || "342",
           categoryCode: vehicleData.categoryCode,
           usageCode: vehicleData.usageCode,
           mileage: vehicleData.mileage,
-          firstRegisteredOn: new Date(vehicleData.firstRegisteredOn).toISOString(),
-          evaluationDate: vehicleData.evaluationDate,
-          purchasePrice: Math.round(vehicleData.purchasePrice * 100),
-          purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
+          firstRegisteredOn: vehicleData.firstRegisteredOn,
+          evaluationDate: vehicleData.evaluationDate || vehicleData.purchasedOn,
+          purchasePrice: toCents(vehicleData.purchasePrice), // Bezpieczna konwersja
+          purchasePriceNet: toCents(vehicleData.purchasePriceNet),
           purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
           usageTypeCode: vehicleData.usageTypeCode,
           purchasePriceInputType: vehicleData.purchasePriceInputType,
           vin: vehicleData.vin,
-          vrm: vehicleData.vrm,
-          owners: [{contact: {inheritFrom: "policyHolder"}}]
+          vrm: vehicleData.vrm
         },
         
+        options: {
+          TERM: paymentData.TERM,
+          CLAIM_LIMIT: paymentData.CLAIM_LIMIT,
+          PAYMENT_TERM: paymentData.PAYMENT_TERM,
+          PAYMENT_METHOD: paymentData.PAYMENT_METHOD
+        }
+      };
+
+      console.log('Dane do kalkulacji:', JSON.stringify(calculationData, null, 2));
+      
+      // Wywołanie kalkulacji
+      const calculationResponse = await fetch('/api/calculate-premium', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(calculationData),
+      });
+
+      if (!calculationResponse.ok) {
+        const errorData = await calculationResponse.json();
+        console.error('Błąd podczas kalkulacji składki:', {
+          status: calculationResponse.status,
+          errorData
+        });
+        throw new Error(`Błąd podczas kalkulacji składki: ${errorData.error || calculationResponse.statusText}`);
+      }
+
+      const calculationResult = await calculationResponse.json();
+      console.log('Wynik kalkulacji:', calculationResult);
+      
+      // Jeśli nie mamy jeszcze rezultatu kalkulacji, zapisujemy go
+      if (!calculationResult) {
+        handleCalculation(calculationResult);
+      }
+      
+      // 2. Blokowanie polisy (Lock)
+      console.log('Krok 2: Blokowanie polisy');
+      const lockData = {
+        ...calculationData,
         client: {
           policyHolder: {
             type: personalData.type,
@@ -366,20 +385,75 @@ const CheckoutContent = () => {
             inheritFrom: "policyHolder"
           }
         },
-        
-        options: {
-          TERM: paymentData.term,
-          CLAIM_LIMIT: paymentData.claimLimit,
-          PAYMENT_TERM: paymentData.paymentTerm,
-          PAYMENT_METHOD: paymentData.paymentMethod
+        vehicleSnapshot: {
+          ...calculationData.vehicleSnapshot,
+          owners: [{
+            contact: {
+              inheritFrom: "policyHolder"
+            }
+          }]
         },
-        
-        premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
+        premium: calculationResult ? toCents(calculationResult.premium) : 0 // Bezpieczna konwersja
       };
+
+      console.log('Dane do blokowania polisy:', JSON.stringify(lockData, null, 2));
       
-      console.log('Wysyłanie danych formularza...');
+      // Wywołanie blokowania polisy
+      const lockResponse = await fetch('/api/lock-policy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(lockData),
+      });
+
+      if (!lockResponse.ok) {
+        const errorData = await lockResponse.json();
+        console.error('Błąd podczas blokowania polisy:', {
+          status: lockResponse.status,
+          errorData
+        });
+        throw new Error(`Błąd podczas blokowania polisy: ${errorData.error || lockResponse.statusText}`);
+      }
+
+      const lockResult = await lockResponse.json();
+      console.log('Wynik blokowania polisy:', lockResult);
       
-      // Wysyłanie maila z potwierdzeniem
+      // Pobranie id zablokowanej polisy
+      const policyId = lockResult.policyId || lockResult.policyDetails?.policyId;
+      if (!policyId) {
+        throw new Error('Nie otrzymano identyfikatora polisy');
+      }
+      
+      // 3. Podpis polisy (Signature)
+      console.log('Krok 3: Podpis polisy');
+      if (insuranceVariant.signatureTypeCode === "AUTHORIZED_BY_SMS") {
+        const signatureResponse = await fetch('/api/sign-policy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            policyId: policyId,
+            signatureType: "AUTHORIZED_BY_SMS"
+          }),
+        });
+
+        if (!signatureResponse.ok) {
+          const errorData = await signatureResponse.json();
+          console.error('Błąd podczas podpisywania polisy:', {
+            status: signatureResponse.status,
+            errorData
+          });
+          throw new Error(`Błąd podczas podpisywania polisy: ${errorData.error || signatureResponse.statusText}`);
+        }
+        
+        const signatureResult = await signatureResponse.json();
+        console.log('Wynik podpisywania polisy:', signatureResult);
+      }
+
+      // 4. Wysyłanie maila z potwierdzeniem
+      console.log('Krok 4: Wysyłanie maila z potwierdzeniem');
       const emailResponse = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -390,20 +464,26 @@ const CheckoutContent = () => {
           vehicleData,
           paymentData,
           calculationResult,
-          policyData // dodajemy pełne dane polisy
+          policyId: policyId
         }),
       });
 
       if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        throw new Error(errorData.details || 'Błąd podczas wysyłania maila');
+        // Logujemy błąd, ale nie przerywamy procesu
+        console.error('Błąd podczas wysyłania maila:', {
+          status: emailResponse.status,
+          errorData: await emailResponse.json()
+        });
+      } else {
+        console.log('Email wysłany pomyślnie');
       }
       
-      // Sukces
+      // Sukces - oznaczamy proces jako zakończony
+      console.log('Proces zakupu polisy zakończony sukcesem');
       setIsCompleted(true);
     } catch (error) {
       console.error('Błąd podczas przetwarzania zamówienia:', error);
-      alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
+      alert(`Wystąpił błąd podczas przetwarzania zamówienia: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -422,7 +502,7 @@ const CheckoutContent = () => {
             </div>
             <h2 className="text-2xl font-bold mb-2">Formularz został wysłany!</h2>
             <p className="text-gray-600 mb-4">
-              {paymentData.paymentMethod === 'PM_BLIK' ? (
+              {paymentData.PAYMENT_METHOD === 'PM_BLIK' ? (
                 "Za chwilę zostaniesz przekierowany do płatności BLIK. Sprawdź powiadomienie w aplikacji swojego banku."
               ) : (
                 "Za chwilę otrzymasz e-mail z danymi do przelewu. Sprawdź swoją skrzynkę odbiorczą."
@@ -434,7 +514,7 @@ const CheckoutContent = () => {
             <Button 
               className="bg-[#300FE6] hover:bg-[#2208B0] text-white w-full mb-3"
               onClick={() => {
-                if (paymentData.paymentMethod === 'PM_BLIK') {
+                if (paymentData.PAYMENT_METHOD === 'PM_BLIK') {
                   // Tutaj można dodać przekierowanie do płatności BLIK
                   window.location.href = '/payment/blik';
                 } else {
@@ -442,9 +522,9 @@ const CheckoutContent = () => {
                 }
               }}
             >
-              {paymentData.paymentMethod === 'PM_BLIK' ? 'Przejdź do płatności' : 'Powrót do strony głównej'}
+              {paymentData.PAYMENT_METHOD === 'PM_BLIK' ? 'Przejdź do płatności' : 'Powrót do strony głównej'}
             </Button>
-            {paymentData.paymentMethod === 'PM_PBC' && (
+            {paymentData.PAYMENT_METHOD === 'PM_PBC' && (
               <p className="text-xs text-gray-400">
                 Pamiętaj, aby w tytule przelewu podać numer zamówienia, który otrzymasz w e-mailu.
               </p>
@@ -513,7 +593,8 @@ const CheckoutContent = () => {
               {currentStep === 1 && (
                 <InsuranceVariantForm 
                   data={insuranceVariant} 
-                  onChange={handleVariantChange} 
+                  onChange={handleVariantChange}
+                  onInputPathsChange={handleInputPathsChange}
                   errors={errors.variant} 
                 />
               )}
@@ -528,6 +609,7 @@ const CheckoutContent = () => {
                   onPaymentChange={handlePaymentDataChange}
                   calculationResult={calculationResult}
                   errors={errors.calculation}
+                  inputPaths={inputPaths?.vehicle}
                 />
               )}
 
@@ -535,29 +617,66 @@ const CheckoutContent = () => {
                 <VehicleForm 
                   data={vehicleData} 
                   onChange={handleVehicleChange} 
-                  errors={errors.vehicle} 
+                  errors={errors.vehicle}
+                  productCode={insuranceVariant.productCode}
+                  inputPaths={inputPaths?.vehicle}
                 />
               )}
 
               {currentStep === 4 && (
-                <PersonalForm 
-                  data={personalData} 
-                  onChange={handlePersonalDataChange} 
-                  errors={errors.personal} 
-                />
+                <div className="space-y-8">
+                  <PersonalForm 
+                    data={personalData} 
+                    onChange={handlePersonalDataChange} 
+                    errors={errors.personal}
+                    inputPaths={inputPaths?.contact}
+                  />
+                  <InsuranceOptionsForm
+                    data={paymentData}
+                    onChange={handlePaymentDataChange}
+                    errors={errors.payment}
+                    productCode={insuranceVariant.productCode}
+                  />
+                </div>
               )}
 
               {currentStep === 5 && (
                 <Summary 
-                  vehicleData={vehicleData}
-                  personalData={personalData}
-                  paymentData={paymentData}
-                  calculationResult={calculationResult}
+                  data={{
+                    variant: {
+                      productCode: insuranceVariant.productCode,
+                      name: "GAP" // TODO: dodać nazwę wariantu
+                    },
+                    vehicle: {
+                      category: vehicleData.category,
+                      model: vehicleData.model,
+                      vin: vehicleData.vin,
+                      vrm: vehicleData.vrm,
+                      purchasedOn: vehicleData.purchasedOn,
+                      firstRegisteredOn: vehicleData.firstRegisteredOn,
+                      mileage: vehicleData.mileage,
+                      purchasePrice: vehicleData.purchasePrice
+                    },
+                    personal: {
+                      type: personalData.type,
+                      firstName: personalData.firstName,
+                      lastName: personalData.lastName,
+                      email: personalData.email,
+                      phoneNumber: personalData.phoneNumber,
+                      identificationNumber: personalData.identificationNumber,
+                      address: {
+                        street: personalData.address.street,
+                        city: personalData.address.city,
+                        postCode: personalData.address.postCode
+                      }
+                    },
+                    options: paymentData,
+                    premium: calculationResult?.premium || 0,
+                    signatureTypeCode: insuranceVariant.signatureTypeCode,
+                    policyId: calculationResult?.policyId
+                  }}
                   onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                  termsAgreed={termsAgreed}
-                  onTermsChange={setTermsAgreed}
-                  onPaymentChange={handlePaymentDataChange}
+                  isLoading={isSubmitting}
                 />
               )}
             </div>

@@ -27,7 +27,7 @@ type CalculatorData = {
   months: number;
 };
 
-type InsuranceType = 'fakturowy' | 'casco';
+type InsuranceType = 'fakturowy' | 'max';
 
 interface ValidationErrors {
   carPrice?: string;
@@ -59,11 +59,11 @@ const parsePrice = (input: string): number => {
 
 // Definicje tooltipów
 const tooltips = {
-  gapFakturowy: "Ubezpieczenie, które pokrywa różnicę między wartością fakturową a wartością rynkową pojazdu w momencie szkody.",
-  gapCasco: "Ubezpieczenie, które pokrywa różnicę między wartością początkową pojazdu a wypłatą z AC/OC w przypadku szkody całkowitej.",
-  carPrice: "Podaj aktualną wartość rynkową lub cenę zakupu pojazdu.",
-  year: "Wybierz rok produkcji pojazdu.",
-  months: "Określ na jak długi okres chcesz wykupić ubezpieczenie."
+  gapFakturowy: "Ubezpieczenie, które pokrywa różnicę między wartością fakturową a wartością rynkową pojazdu w momencie szkody całkowitej lub kradzieży.",
+  gapMax: "Ubezpieczenie działające jak GAP Fakturowy, ale przeznaczone również dla pojazdów finansowanych w formie leasingu lub kredytu, z możliwością rozszerzenia ochrony.",
+  carPrice: "Podaj cenę zakupu pojazdu brutto widoczną na fakturze.",
+  year: "Wybierz rok pierwszej rejestracji pojazdu (z dowodu rejestracyjnego).",
+  months: "Określ na jak długi okres (w miesiącach) chcesz wykupić ubezpieczenie GAP."
 };
 
 const InsuranceCalculator = () => {
@@ -201,18 +201,18 @@ const InsuranceCalculator = () => {
                       {renderTooltip(tooltips.gapFakturowy)}
                     </TabsTrigger>
                     <TabsTrigger 
-                      value="casco" 
+                      value="max" 
                       className="py-3 text-base rounded-tr-md rounded-br-md data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white"
                     >
-                      GAP Casco
-                      {renderTooltip(tooltips.gapCasco)}
+                      GAP MAX
+                      {renderTooltip(tooltips.gapMax)}
                     </TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="fakturowy" className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cena pojazdu
+                        Cena pojazdu (brutto)
                         {renderTooltip(tooltips.carPrice)}
                       </label>
                       <div className="relative">
@@ -235,7 +235,7 @@ const InsuranceCalculator = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Rok produkcji pojazdu
+                        Rok pierwszej rejestracji
                         {renderTooltip(tooltips.year)}
                       </label>
                       <select
@@ -297,10 +297,10 @@ const InsuranceCalculator = () => {
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="casco" className="space-y-6">
+                  <TabsContent value="max" className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cena pojazdu
+                        Cena pojazdu (brutto)
                         {renderTooltip(tooltips.carPrice)}
                       </label>
                       <div className="relative">
@@ -323,7 +323,7 @@ const InsuranceCalculator = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Rok produkcji pojazdu
+                        Rok pierwszej rejestracji
                         {renderTooltip(tooltips.year)}
                       </label>
                       <select

@@ -1,0 +1,2690 @@
+[
+  {
+    "id": 68476,
+    "productCode": "5_DCGAP_FG25_GEN",
+    "productGroupCode": "3_DCGAP",
+    "productGroupAlias": "DEFEND Gap",
+    "productDerivativeAlias": "FLEX GO",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "PC",
+        "name": "Osobowy (kat. M1)"
+      },
+      {
+        "code": "LCV",
+        "name": "Ciężarowy - LCV (DMC do 3500 kg)  kat. N1"
+      },
+      {
+        "code": "BK",
+        "name": "Motocykle i inne pojazdy (kat. L)"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 90,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  },
+  {
+    "id": 68475,
+    "productCode": "5_DCGAP_F25_GEN",
+    "productGroupCode": "3_DCGAP",
+    "productGroupAlias": "DEFEND Gap",
+    "productDerivativeAlias": "FLEX",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "PC",
+        "name": "Osobowy (kat. M1)"
+      },
+      {
+        "code": "LCV",
+        "name": "Ciężarowy - LCV (DMC do 3500 kg)  kat. N1"
+      },
+      {
+        "code": "BK",
+        "name": "Motocykle i inne pojazdy (kat. L)"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 80,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  },
+  {
+    "id": 68473,
+    "productCode": "5_DCGAP_MG25_GEN",
+    "productGroupCode": "3_DCGAP",
+    "productGroupAlias": "DEFEND Gap",
+    "productDerivativeAlias": "MAX AC",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_50000",
+            "name": "50 000 zł",
+            "sort": 120
+          },
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          },
+          {
+            "code": "CL_150000",
+            "name": "150 000 zł",
+            "sort": 140
+          },
+          {
+            "code": "CL_200000",
+            "name": "200 000 zł",
+            "sort": 150
+          },
+          {
+            "code": "CL_250000",
+            "name": "250 000 zł",
+            "sort": 160
+          },
+          {
+            "code": "CL_300000",
+            "name": "300 000 zł",
+            "sort": 170
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "PC",
+        "name": "Osobowy (kat. M1)"
+      },
+      {
+        "code": "LCV",
+        "name": "Ciężarowy - LCV (DMC do 3500 kg)  kat. N1"
+      },
+      {
+        "code": "BK",
+        "name": "Motocykle i inne pojazdy (kat. L)"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 70,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  },
+  {
+    "id": 68474,
+    "productCode": "4_DTGAP_MG25_GEN",
+    "productGroupCode": "3_DTGAP",
+    "productGroupAlias": "DEFEND Truck Gap",
+    "productDerivativeAlias": "T-MAX AC",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_50000",
+            "name": "50 000 zł",
+            "sort": 120
+          },
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          },
+          {
+            "code": "CL_150000",
+            "name": "150 000 zł",
+            "sort": 140
+          },
+          {
+            "code": "CL_200000",
+            "name": "200 000 zł",
+            "sort": 150
+          },
+          {
+            "code": "CL_250000",
+            "name": "250 000 zł",
+            "sort": 160
+          },
+          {
+            "code": "CL_300000",
+            "name": "300 000 zł",
+            "sort": 170
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "BUS",
+        "name": "Autobus"
+      },
+      {
+        "code": "TR",
+        "name": "Ciężarowy (DMC powyżej 3500 kg)"
+      },
+      {
+        "code": "AT",
+        "name": "Traktor rolniczy"
+      },
+      {
+        "code": "TRA",
+        "name": "Przyczepa / Naczepa"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 70,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  },
+  {
+    "id": 68471,
+    "productCode": "5_DCGAP_M25_GEN",
+    "productGroupCode": "3_DCGAP",
+    "productGroupAlias": "DEFEND Gap",
+    "productDerivativeAlias": "MAX",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_50000",
+            "name": "50 000 zł",
+            "sort": 120
+          },
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          },
+          {
+            "code": "CL_150000",
+            "name": "150 000 zł",
+            "sort": 140
+          },
+          {
+            "code": "CL_200000",
+            "name": "200 000 zł",
+            "sort": 150
+          },
+          {
+            "code": "CL_250000",
+            "name": "250 000 zł",
+            "sort": 160
+          },
+          {
+            "code": "CL_300000",
+            "name": "300 000 zł",
+            "sort": 170
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "PC",
+        "name": "Osobowy (kat. M1)"
+      },
+      {
+        "code": "LCV",
+        "name": "Ciężarowy - LCV (DMC do 3500 kg)  kat. N1"
+      },
+      {
+        "code": "BK",
+        "name": "Motocykle i inne pojazdy (kat. L)"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 60,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  },
+  {
+    "id": 68472,
+    "productCode": "5_DTGAP_M25_GEN",
+    "productGroupCode": "3_DTGAP",
+    "productGroupAlias": "DEFEND Truck Gap",
+    "productDerivativeAlias": "T-MAX",
+    "tooltip": null,
+    "inputSchemeItems": [
+      {
+        "field": "vehicleSnapshot.category",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vin",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.vrm",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "inceptionDate",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.model",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.pricing",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.firstRegisteredOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "contactWithoutBeneficiary",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "signatureType",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.purchasedOn",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "evaluationAfterDays": 181,
+        "repairedOnEnabled": false,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "note",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": false,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      },
+      {
+        "field": "vehicleSnapshot.usage",
+        "requiredForCalculation": true,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": [
+          {
+            "code": "STANDARD",
+            "onlyForCategories": null
+          },
+          {
+            "code": "TAXI",
+            "onlyForCategories": [
+              "PC",
+              "LCV"
+            ]
+          },
+          {
+            "code": "TOWING",
+            "onlyForCategories": [
+              "LCV",
+              "TR"
+            ]
+          },
+          {
+            "code": "RENTAL_LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          },
+          {
+            "code": "LEISURE",
+            "onlyForCategories": [
+              "LCV",
+              "TR",
+              "TRA"
+            ]
+          }
+        ],
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.mileage",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "vehicle"
+      },
+      {
+        "field": "vehicleSnapshot.owners",
+        "requiredForCalculation": false,
+        "requiredForConfirmation": true,
+        "minDate": null,
+        "maxDate": null,
+        "limitations": null,
+        "step": "contact"
+      }
+    ],
+    "optionTypes": [
+      {
+        "code": "CLAIM_LIMIT",
+        "name": "Limit odszkodowania",
+        "options": [
+          {
+            "code": "CL_50000",
+            "name": "50 000 zł",
+            "sort": 120
+          },
+          {
+            "code": "CL_100000",
+            "name": "100 000 zł",
+            "sort": 130
+          },
+          {
+            "code": "CL_150000",
+            "name": "150 000 zł",
+            "sort": 140
+          },
+          {
+            "code": "CL_200000",
+            "name": "200 000 zł",
+            "sort": 150
+          },
+          {
+            "code": "CL_250000",
+            "name": "250 000 zł",
+            "sort": 160
+          },
+          {
+            "code": "CL_300000",
+            "name": "300 000 zł",
+            "sort": 170
+          }
+        ]
+      },
+      {
+        "code": "TERM",
+        "name": "Okres ubezpieczenia",
+        "options": [
+          {
+            "code": "T_12",
+            "name": "Okres ubezpieczenia 1 rok",
+            "sort": 230
+          },
+          {
+            "code": "T_24",
+            "name": "Okres ubezpieczenia 2 lata",
+            "sort": 240
+          },
+          {
+            "code": "T_36",
+            "name": "Okres ubezpieczenia 3 lata",
+            "sort": 250
+          },
+          {
+            "code": "T_48",
+            "name": "Okres ubezpieczenia 4 lata",
+            "sort": 260
+          },
+          {
+            "code": "T_60",
+            "name": "Okres ubezpieczenia 5 lat",
+            "sort": 270
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_TERM",
+        "name": "Rodzaj płatności",
+        "options": [
+          {
+            "code": "PT_LS",
+            "name": "Płatność jednorazowa",
+            "sort": 500
+          },
+          {
+            "code": "PT_A",
+            "name": "Płatność roczna",
+            "sort": 510
+          }
+        ]
+      },
+      {
+        "code": "PAYMENT_METHOD",
+        "name": "Forma płatności",
+        "options": [
+          {
+            "code": "PM_PBC",
+            "name": "Płatne przez klienta (BLIK, karta, szybki przelew)",
+            "sort": 590
+          },
+          {
+            "code": "PM_BT",
+            "name": "Przelew tradycyjny",
+            "sort": 600
+          },
+          {
+            "code": "PM_PAYU_M",
+            "name": "Raty miesięczne PayU",
+            "sort": 630
+          },
+          {
+            "code": "PM_BY_DLR",
+            "name": "Płatne przez dealera",
+            "sort": 650
+          }
+        ]
+      }
+    ],
+    "extras": [],
+    "disabledOptionCombinations": [
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_BY_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_LS",
+          "PM_FST_DLR"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU_M"
+        ]
+      },
+      {
+        "optionCodes": [
+          "T_12",
+          "PT_A"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_PAYU"
+        ]
+      },
+      {
+        "optionCodes": [
+          "PT_A",
+          "PM_ONLINE"
+        ]
+      }
+    ],
+    "signatureTypes": [
+      {
+        "code": "AUTHORIZED_BY_SMS",
+        "name": "Zatwierdzone przez kod SMS"
+      },
+      {
+        "code": "AUTHORIZED_BY_PAYMENT",
+        "name": "Zatwierdzone poprzez płatność"
+      },
+      {
+        "code": "AUTHORIZED_IN_EXTERNAL_SYSTEM",
+        "name": "Zatwierdzony w systemie zewnętrznym"
+      }
+    ],
+    "vehicleCategories": [
+      {
+        "code": "BUS",
+        "name": "Autobus"
+      },
+      {
+        "code": "TR",
+        "name": "Ciężarowy (DMC powyżej 3500 kg)"
+      },
+      {
+        "code": "AT",
+        "name": "Traktor rolniczy"
+      },
+      {
+        "code": "TRA",
+        "name": "Przyczepa / Naczepa"
+      }
+    ],
+    "instalmentSplittingSchemes": [
+      {
+        "code": "ALL_REGULAR",
+        "name": "Regular 12 Months ISS",
+        "paymentCount": 12
+      },
+      {
+        "code": "24_REGULAR",
+        "name": "Regular 24 Months ISS",
+        "paymentCount": 24
+      },
+      {
+        "code": "36_REGULAR",
+        "name": "Regular 36Months ISS",
+        "paymentCount": 36
+      }
+    ],
+    "sort": 60,
+    "premiumBankAccount": {
+      "inputType": "default",
+      "countryCode": "PL",
+      "name": "PL FORTEGRA Premium",
+      "iban": "PL361240133011110010",
+      "bic": null,
+      "bankCode": null,
+      "accountNumber": "36124013301111001091978478",
+      "sortCode": null
+    },
+    "endorsementTypeCode": "NEW_BUSINESS",
+    "previousEndorsementTypeCode": null,
+    "previousEndorsementProductDerivativeCodes": [],
+    "previousEndorsementPortfolio": null,
+    "defaultOptionValues": [],
+    "masterPolicy": false,
+    "policyHolder": null,
+    "sodanEnabled": true,
+    "currency": {
+      "divider": 100,
+      "id": 11,
+      "code": "PLN",
+      "name": "Polish Zloty",
+      "description": null
+    },
+    "localizationSetting": {
+      "id": 6,
+      "code": "PL_pl",
+      "name": "Polska",
+      "country": {
+        "bankAccountInputType": "default",
+        "companyIdentificationNumberMode": "optional",
+        "taxIdentificationNumberMode": "required",
+        "vatIdentificationNumberMode": "off",
+        "id": 3,
+        "code": "PL",
+        "name": "Poland",
+        "description": ""
+      },
+      "currencyFormatFractionDigits": 2,
+      "currencyFormatLocaleCode": "pl",
+      "currencyFormatRoundingMethod": "round",
+      "formatDate": "d.m.Y",
+      "formatDateTime": "d.m.Y H:i",
+      "formatDateTimeSeconds": "d.m.Y H:i:s",
+      "formatNumberDecimalSeparator": ",",
+      "formatNumberThousandSeparator": ".",
+      "formatTime": "H:i:s",
+      "roundingPrecision": 2,
+      "taxRates": [
+        {
+          "rate": 0.23,
+          "type": {
+            "id": 3,
+            "code": "VAT_VEHICLE",
+            "name": "Vehicle VAT",
+            "description": null
+          },
+          "effectiveFrom": null,
+          "effectiveTo": null
+        }
+      ],
+      "taxReclaimables": [
+        {
+          "id": 1,
+          "code": "YES",
+          "name": "Yes",
+          "description": null
+        },
+        {
+          "id": 2,
+          "code": "NO",
+          "name": "No",
+          "description": null
+        },
+        {
+          "id": 3,
+          "code": "HALF",
+          "name": "50%",
+          "description": null
+        }
+      ],
+      "timezone": "Europe/Warsaw",
+      "userInterfaceLocaleCode": "pl"
+    },
+    "insuredSumDisplayed": true
+  }
+]
