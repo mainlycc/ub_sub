@@ -28,7 +28,7 @@ interface VehicleData {
   purchasePriceNet: number;
   purchasePriceVatReclaimableCode: string;
   usageTypeCode: string;
-  purchasePriceInputType: string;
+  purchasePriceInputType: 'BRUTTO' | 'NETTO' | 'NETTO_VAT';
   vin: string;
   vrm: string;
   make?: string;

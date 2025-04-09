@@ -10,6 +10,7 @@ import { CalculationForm } from '@/components/checkout/CalculationForm';
 import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
+import { VehicleData } from '@/types/vehicle';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
@@ -20,25 +21,13 @@ interface InsuranceVariant {
   productCode: string;
   sellerNodeCode: string;
   signatureTypeCode: string;
-}
-
-interface VehicleData {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: string;
-  usageCode: string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: string;
-  vin: string;
-  vrm: string;
-  make?: string;
-  model?: string;
+  options: Array<{
+    code: string;
+    value: string | number;
+  }>;
+  vehicleMake: string | null;
+  vehicleTypes?: string[];
+  vehicleModel: string | null;
 }
 
 interface PersonalData {
@@ -91,27 +80,29 @@ const CheckoutContent = () => {
   const [insuranceVariant, setInsuranceVariant] = useState<InsuranceVariant>({
     productCode: "5_DCGAP_MG25_GEN",
     sellerNodeCode: "PL_TEST_GAP_25",
-    signatureTypeCode: "AUTHORIZED_BY_SMS"
+    signatureTypeCode: "AUTHORIZED_BY_SMS",
+    options: [],
+    vehicleMake: null,
+    vehicleModel: null
   });
   
   // Stany dla pozostałych formularzy
   const [vehicleData, setVehicleData] = useState<VehicleData>({
-    purchasedOn: new Date().toISOString().split('T')[0],
-    modelCode: "",
-    categoryCode: "PC",
-    usageCode: "STANDARD",
-    mileage: 1000,
-    firstRegisteredOn: "",
-    evaluationDate: new Date().toISOString().split('T')[0],
+    vin: '',
+    vrm: '',
+    categoryCode: '',
+    usageCode: '',
+    firstRegisteredOn: '',
+    purchasedOn: '',
     purchasePrice: 0,
+    purchasePriceInputType: 'BRUTTO',
+    purchasePriceVatReclaimableCode: '',
+    usageTypeCode: '',
+    mileage: 0,
+    evaluationDate: new Date().toISOString().split('T')[0],
     purchasePriceNet: 0,
-    purchasePriceVatReclaimableCode: "NO",
-    usageTypeCode: "INDIVIDUAL",
-    purchasePriceInputType: "VAT_INAPPLICABLE",
-    vin: "",
-    vrm: "",
-    make: "",
-    model: ""
+    modelCode: '',
+    make: ''
   });
   
   const [personalData, setPersonalData] = useState<PersonalData>({
@@ -178,12 +169,24 @@ const CheckoutContent = () => {
   const validateVariant = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     
+    console.log('Walidacja wariantu:', insuranceVariant);
+    
     if (!insuranceVariant.productCode) {
       newErrors.productCode = "Wybór wariantu ubezpieczenia jest wymagany";
     }
     
+    if (!insuranceVariant.vehicleMake) {
+      newErrors.vehicleMake = "Wybór marki pojazdu jest wymagany";
+    }
+
+    if (!insuranceVariant.vehicleModel) {
+      newErrors.vehicleModel = "Wybór modelu pojazdu jest wymagany";
+    }
+    
     setErrors(prev => ({ ...prev, variant: newErrors }));
-    return Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(newErrors).length === 0;
+    console.log('Wynik walidacji:', isValid, 'Błędy:', newErrors);
+    return isValid;
   };
   
   const validateCalculation = (): boolean => {
@@ -265,15 +268,19 @@ const CheckoutContent = () => {
   
   // Navigation functions
   const goToNextStep = () => {
-    if (currentStep === 1 && !validateVariant()) {
+    console.log('Próba przejścia do następnego kroku. Obecny krok:', currentStep);
+    
+    if (currentStep === 1) {
+      const isValid = validateVariant();
+      console.log('Walidacja kroku 1:', isValid);
+      if (!isValid) return;
+    }
+    
+    if (currentStep === 2 && !validateVehicleData()) {
       return;
     }
     
-    if (currentStep === 2 && !validateCalculation()) {
-      return;
-    }
-    
-    if (currentStep === 3 && !validateVehicleData()) {
+    if (currentStep === 3 && !validateCalculation()) {
       return;
     }
     
@@ -282,8 +289,8 @@ const CheckoutContent = () => {
     }
     
     if (currentStep < 5) {
+      console.log('Przechodzę do kroku:', currentStep + 1);
       setCurrentStep(currentStep + 1);
-      // Update URL without page reload
       router.push(`/checkout?step=${currentStep + 1}`);
     }
   };
@@ -484,11 +491,11 @@ const CheckoutContent = () => {
               />
 
               {[
-                { number: 1, title: "Określenie wariantu" },
-                { number: 2, title: "Poznaj cenę" },
-                { number: 3, title: "Dane pojazdu" },
-                { number: 4, title: "Twoje dane" },
-                { number: 5, title: "Podsumowanie" }
+                { number: 1, title: "ANALIZA POTRZEB KLIENTA" },
+                { number: 2, title: "POJAZD" },
+                { number: 3, title: "PRODUKT" },
+                { number: 4, title: "KLIENT" },
+                { number: 5, title: "PODSUMOWANIE" }
               ].map((step, index) => (
                 <div key={index} className="flex flex-col items-center relative z-10">
                   <div 
@@ -514,11 +521,20 @@ const CheckoutContent = () => {
                 <InsuranceVariantForm 
                   data={insuranceVariant} 
                   onChange={handleVariantChange} 
-                  errors={errors.variant} 
+                  errors={errors.variant}
+                  showOnlyVariantSelection={true} 
                 />
               )}
 
               {currentStep === 2 && (
+                <VehicleForm 
+                  data={vehicleData} 
+                  onChange={handleVehicleChange} 
+                  errors={errors.vehicle} 
+                />
+              )}
+
+              {currentStep === 3 && (
                 <CalculationForm 
                   vehicleData={vehicleData}
                   insuranceVariant={insuranceVariant}
@@ -528,14 +544,6 @@ const CheckoutContent = () => {
                   onPaymentChange={handlePaymentDataChange}
                   calculationResult={calculationResult}
                   errors={errors.calculation}
-                />
-              )}
-
-              {currentStep === 3 && (
-                <VehicleForm 
-                  data={vehicleData} 
-                  onChange={handleVehicleChange} 
-                  errors={errors.vehicle} 
                 />
               )}
 
