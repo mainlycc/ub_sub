@@ -90,16 +90,16 @@ const CheckoutContent = () => {
   const [vehicleData, setVehicleData] = useState<VehicleData>({
     vin: '',
     vrm: '',
-    categoryCode: '',
-    usageCode: '',
+    categoryCode: 'PC',
+    usageCode: 'STANDARD',
     firstRegisteredOn: '',
     purchasedOn: '',
     purchasePrice: 0,
-    purchasePriceInputType: 'BRUTTO',
-    purchasePriceVatReclaimableCode: '',
-    usageTypeCode: '',
+    purchasePriceInputType: 'WITH_VAT',
+    purchasePriceVatReclaimableCode: 'NO',
+    usageTypeCode: 'INDIVIDUAL',
     mileage: 0,
-    evaluationDate: new Date().toISOString().split('T')[0],
+    evaluationDate: '',
     purchasePriceNet: 0,
     modelCode: '',
     make: ''
@@ -260,6 +260,14 @@ const CheckoutContent = () => {
     
     if (!vehicleData.purchasePrice || vehicleData.purchasePrice <= 0) {
       newErrors.purchasePrice = "Cena zakupu pojazdu jest wymagana";
+    }
+
+    if (vehicleData.mileage < 0) {
+      newErrors.mileage = "Przebieg nie może być ujemny";
+    }
+    
+    if (typeof vehicleData.mileage !== 'number' || isNaN(vehicleData.mileage)) {
+      newErrors.mileage = "Przebieg pojazdu jest wymagany";
     }
     
     setErrors(prev => ({ ...prev, vehicle: newErrors }));

@@ -1,6 +1,8 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface VehicleData {
   purchasedOn: string;
@@ -28,6 +30,7 @@ interface PersonalData {
   lastName: string;
   email: string;
   identificationNumber: string;
+  companyName?: string;
   address: {
     addressLine1: string;
     street: string;
@@ -67,6 +70,14 @@ interface SummaryProps {
 }
 
 export const Summary = (props: SummaryProps): React.ReactElement => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [policyId, setPolicyId] = useState<string | null>(null);
+  const [confirmationCode, setConfirmationCode] = useState<string>('');
+  const [showSmsConfirmation, setShowSmsConfirmation] = useState(false);
+  const [isConfirmingSms, setIsConfirmingSms] = useState(false);
+  const [smsError, setSmsError] = useState<string | null>(null);
+
   if (!props.calculationResult) {
     return (
       <div className="p-6 text-center">
@@ -74,6 +85,156 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       </div>
     );
   }
+
+  const getValidSaleInitiatedDate = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
+  const registerPolicy = async () => {
+    if (!props.calculationResult) return;
+    
+    setIsRegistering(true);
+    setRegistrationError(null);
+
+    try {
+      console.log('Dane osobowe przed wysłaniem:', {
+        type: props.personalData.type,
+        phoneNumber: props.personalData.phoneNumber,
+        email: props.personalData.email,
+        firstName: props.personalData.firstName,
+        lastName: props.personalData.lastName,
+        address: props.personalData.address
+      });
+
+      const policyData = {
+        sellerNodeCode: "PL_TEST_GAP_25",
+        productCode: "5_DCGAP_MG25_GEN",
+        saleInitiatedOn: getValidSaleInitiatedDate(),
+        signatureTypeCode: "AUTHORIZED_BY_SMS",
+        vehicleSnapshot: {
+          purchasedOn: props.vehicleData.purchasedOn,
+          modelCode: props.vehicleData.modelCode,
+          categoryCode: "PC",
+          usageCode: "STANDARD",
+          mileage: props.vehicleData.mileage,
+          firstRegisteredOn: props.vehicleData.firstRegisteredOn + "T07:38:46+02:00",
+          evaluationDate: getValidSaleInitiatedDate(),
+          purchasePrice: Math.round(props.vehicleData.purchasePrice * 100),
+          purchasePriceNet: Math.round(props.vehicleData.purchasePriceNet * 100),
+          purchasePriceVatReclaimableCode: "NO",
+          usageTypeCode: "INDIVIDUAL",
+          purchasePriceInputType: "VAT_INAPPLICABLE",
+          vin: props.vehicleData.vin,
+          vrm: props.vehicleData.vrm,
+          owners: [{ contact: { inheritFrom: "policyHolder" } }]
+        },
+        client: {
+          policyHolder: {
+            type: "person",
+            email: props.personalData.email,
+            phoneNumber: props.personalData.phoneNumber.startsWith('+') ? props.personalData.phoneNumber : `+48${props.personalData.phoneNumber.replace(/\D/g, '')}`,
+            firstName: props.personalData.firstName,
+            lastName: props.personalData.lastName,
+            identificationNumber: props.personalData.identificationNumber,
+            address: {
+              addressLine1: `${props.personalData.firstName?.trim() ?? ''} ${props.personalData.lastName?.trim() ?? ''}`.trim(),
+              street: props.personalData.address?.street?.trim() ?? '',
+              city: props.personalData.address?.city?.trim() ?? '',
+              postCode: props.personalData.address?.postCode?.trim() ?? '',
+              countryCode: 'PL'
+            }
+          },
+          insured: {
+            inheritFrom: "policyHolder"
+          },
+          beneficiary: {
+            inheritFrom: "policyHolder"
+          }
+        },
+        options: {
+          TERM: props.paymentData.term,
+          CLAIM_LIMIT: props.paymentData.claimLimit,
+          PAYMENT_TERM: props.paymentData.paymentTerm,
+          PAYMENT_METHOD: props.paymentData.paymentMethod
+        },
+        premium: Math.round(props.calculationResult.premium * 100)
+      };
+
+      console.log('Wysyłane dane:', JSON.stringify(policyData, null, 2));
+
+      const response = await fetch('/api/policies/creation/lock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(policyData),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error('Błąd odpowiedzi:', responseData);
+        if (responseData.details) {
+          console.error('Szczegóły błędu API:', responseData.details);
+        }
+        throw new Error(responseData.error || 'Błąd podczas rejestracji polisy');
+      }
+
+      setPolicyId(responseData.id);
+      setShowSmsConfirmation(true);
+      
+    } catch (error) {
+      console.error('Błąd podczas rejestracji polisy:', error);
+      setRegistrationError(
+        error instanceof Error 
+          ? error.message 
+          : 'Wystąpił nieoczekiwany błąd podczas rejestracji polisy'
+      );
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const confirmSmsSignature = async () => {
+    if (!policyId || !confirmationCode) return;
+    
+    setIsConfirmingSms(true);
+    setSmsError(null);
+
+    try {
+      const response = await fetch(`/api/policies/${policyId}/confirm-signature`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          confirmationCode: confirmationCode
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Błąd podczas potwierdzania podpisu');
+      }
+
+      // Po udanym potwierdzeniu podpisu system automatycznie wygeneruje dokumenty
+      setShowSmsConfirmation(false);
+      
+    } catch (error) {
+      console.error('Błąd podczas potwierdzania podpisu:', error);
+      setSmsError(
+        error instanceof Error 
+          ? error.message 
+          : 'Wystąpił nieoczekiwany błąd podczas potwierdzania podpisu'
+      );
+    } finally {
+      setIsConfirmingSms(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -123,30 +284,13 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           <div className="space-y-4">
             <p><span className="font-medium">Składka:</span> <span className="text-xl font-bold text-[#300FE6]">{props.calculationResult.premium.toLocaleString()} zł</span></p>
             <p><span className="font-medium">Sposób płatności:</span> {props.paymentData.paymentTerm === 'PT_LS' ? 'Jednorazowo' : 'Miesięcznie'}</p>
-            
-            <div className="mt-4">
-              <p className="font-medium mb-2">Wybierz metodę płatności:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  className={`border rounded-lg p-4 cursor-pointer transition-all
-                    ${props.paymentData.paymentMethod === 'PM_BLIK' 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5' 
-                      : 'border-gray-200 hover:border-gray-300'}`}
-                  onClick={() => props.onPaymentChange({ ...props.paymentData, paymentMethod: 'PM_BLIK' })}
-                >
-                  BLIK
-                </div>
-                <div
-                  className={`border rounded-lg p-4 cursor-pointer transition-all
-                    ${props.paymentData.paymentMethod === 'PM_PBC' 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5' 
-                      : 'border-gray-200 hover:border-gray-300'}`}
-                  onClick={() => props.onPaymentChange({ ...props.paymentData, paymentMethod: 'PM_PBC' })}
-                >
-                  Przelew bankowy
-                </div>
-              </div>
-            </div>
+            <p><span className="font-medium">Forma płatności:</span> {
+              props.paymentData.paymentMethod === 'PM_PBC' ? 'BLIK, karta, szybki przelew' :
+              props.paymentData.paymentMethod === 'PM_BT' ? 'Przelew tradycyjny' :
+              props.paymentData.paymentMethod === 'PM_PAYU_M' ? 'Raty miesięczne PayU' :
+              props.paymentData.paymentMethod === 'PM_BY_DLR' ? 'Płatne przez dealera' :
+              'Nieznany'
+            }</p>
           </div>
         </div>
       </div>
@@ -165,6 +309,57 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           </span>
         </label>
       </div>
+
+      {/* Wyświetlanie błędów */}
+      {registrationError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Błąd! </strong>
+          <span className="block sm:inline">{registrationError}</span>
+        </div>
+      )}
+
+      {smsError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Błąd potwierdzenia SMS! </strong>
+          <span className="block sm:inline">{smsError}</span>
+        </div>
+      )}
+
+      {/* Potwierdzenie SMS */}
+      {showSmsConfirmation ? (
+        <div className="mt-6 space-y-4">
+          <p className="text-gray-700">
+            Na podany numer telefonu został wysłany kod SMS. 
+            Wprowadź go poniżej, aby potwierdzić zawarcie umowy.
+          </p>
+          <div className="flex space-x-4">
+            <Input
+              type="text"
+              value={confirmationCode}
+              onChange={(e) => setConfirmationCode(e.target.value)}
+              placeholder="Wprowadź kod z SMS"
+              className="max-w-xs"
+            />
+            <Button
+              onClick={confirmSmsSignature}
+              disabled={isConfirmingSms || !confirmationCode}
+              className="bg-[#300FE6] hover:bg-[#2507b3] text-white"
+            >
+              {isConfirmingSms ? 'Potwierdzanie...' : 'Potwierdź kod SMS'}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-end mt-6">
+          <Button
+            onClick={registerPolicy}
+            disabled={isRegistering || !props.termsAgreed}
+            className="bg-[#300FE6] hover:bg-[#2507b3] text-white px-8 py-3"
+          >
+            {isRegistering ? 'Rejestrowanie polisy...' : 'Zarejestruj polisę'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

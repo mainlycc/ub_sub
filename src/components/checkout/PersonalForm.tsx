@@ -51,6 +51,12 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         [name]: value
       });
     }
+
+    console.log('Aktualne dane osobowe:', {
+      name,
+      value,
+      data
+    });
   };
 
   const isAddressField = (field: string): field is AddressField => {

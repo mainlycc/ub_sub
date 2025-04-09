@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { metadata } from './metadata';
+import { ClientLayout } from '@/components/ClientLayout';
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Ubezpieczenia GAP",
-  description: "Kalkulator ubezpieczeń GAP",
-};
+export { metadata };
 
 export default function RootLayout({
   children,
@@ -19,13 +16,9 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className={inter.className}>
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

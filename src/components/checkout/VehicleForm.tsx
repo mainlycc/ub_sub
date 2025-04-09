@@ -79,23 +79,50 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
   };
 
   const handleInputChange = (field: keyof VehicleData, value: string | number) => {
-    onChange({
-      ...data,
-      [field]: value
-    });
+    const updatedData = { ...data, [field]: value };
+    
+    // Jeśli zmieniamy purchasePrice, aktualizujemy też purchasePriceNet
+    if (field === 'purchasePrice') {
+      const price = typeof value === 'number' ? value : parseFloat(value) || 0;
+      if (data.purchasePriceInputType === 'WITHOUT_VAT') {
+        updatedData.purchasePriceNet = price;
+      } else if (data.purchasePriceInputType === 'WITH_VAT') {
+        // Dla WITH_VAT, obliczamy wartość netto (23% VAT)
+        updatedData.purchasePriceNet = Math.round(price / 1.23);
+      } else {
+        // Dla VAT_INAPPLICABLE, wartość netto = brutto
+        updatedData.purchasePriceNet = price;
+      }
+    }
+
+    // Ustawiamy domyślne wartości dla pustych pól
+    if (!updatedData.usageTypeCode) {
+      updatedData.usageTypeCode = 'INDIVIDUAL';
+    }
+    if (!updatedData.purchasePriceVatReclaimableCode) {
+      updatedData.purchasePriceVatReclaimableCode = 'NO';
+    }
+    if (!updatedData.usageCode) {
+      updatedData.usageCode = 'STANDARD';
+    }
+    if (!updatedData.categoryCode) {
+      updatedData.categoryCode = 'PC';
+    }
+
+    onChange(updatedData);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-            <span className="text-[#FF8E3D] font-bold">1</span>
-          </div>
-          Dane pojazdu
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+          <span className="text-[#FF8E3D] font-bold">1</span>
+        </div>
+        Dane pojazdu
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="vin">VIN</Label>
             <Input
@@ -119,8 +146,8 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             />
             {errors?.vrm && (
               <p className="text-sm text-red-500">{errors.vrm}</p>
-            )}
-          </div>
+          )}
+        </div>
 
           <div className="space-y-2">
             <Label htmlFor="categoryCode">Kategoria pojazdu</Label>
@@ -129,11 +156,11 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               value={data.categoryCode}
               onChange={(e) => handleInputChange('categoryCode', e.target.value)}
               className={errors?.categoryCode ? 'border-red-500' : ''}
-            >
-              <option value="">Wybierz kategorię</option>
-              {categories.map(cat => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
-              ))}
+          >
+            <option value="">Wybierz kategorię</option>
+            {categories.map(cat => (
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
+            ))}
             </Select>
             {errors?.categoryCode && (
               <p className="text-sm text-red-500">{errors.categoryCode}</p>
@@ -169,13 +196,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             />
             {errors?.firstRegisteredOn && (
               <p className="text-sm text-red-500">{errors.firstRegisteredOn}</p>
-            )}
-          </div>
+          )}
+        </div>
 
           <div className="space-y-2">
             <Label htmlFor="purchasedOn">Data nabycia</Label>
             <Input
-              type="date"
+            type="date"
               id="purchasedOn"
               value={data.purchasedOn}
               onChange={(e) => handleInputChange('purchasedOn', e.target.value)}
@@ -197,46 +224,42 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             />
             {errors?.purchasePrice && (
               <p className="text-sm text-red-500">{errors.purchasePrice}</p>
+          )}
+        </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mileage">Przebieg pojazdu (km)</Label>
+            <Input
+              type="number"
+              id="mileage"
+              min="0"
+              step="1"
+              value={data.mileage || ''}
+              onChange={(e) => handleInputChange('mileage', parseInt(e.target.value) || 0)}
+              className={errors?.mileage ? 'border-red-500' : ''}
+              placeholder="Wprowadź przebieg w kilometrach"
+            />
+            {errors?.mileage && (
+              <p className="text-sm text-red-500">{errors.mileage}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="purchasePriceInputType">Podana wartość jest</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleInputChange('purchasePriceInputType', 'BRUTTO')}
-                className={`p-2 text-center rounded ${
-                  data.purchasePriceInputType === 'BRUTTO'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100'
-                }`}
-              >
-                Brutto
-              </button>
-              <button
-                type="button"
-                onClick={() => handleInputChange('purchasePriceInputType', 'NETTO')}
-                className={`p-2 text-center rounded ${
-                  data.purchasePriceInputType === 'NETTO'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100'
-                }`}
-              >
-                Netto
-              </button>
-              <button
-                type="button"
-                onClick={() => handleInputChange('purchasePriceInputType', 'NETTO_VAT')}
-                className={`p-2 text-center rounded ${
-                  data.purchasePriceInputType === 'NETTO_VAT'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100'
-                }`}
-              >
-                Netto + 50% VAT
-              </button>
-            </div>
+            <Select
+              id="purchasePriceInputType"
+              value={data.purchasePriceInputType}
+              onChange={(e) => handleInputChange('purchasePriceInputType', e.target.value)}
+              className={errors?.purchasePriceInputType ? 'border-red-500' : ''}
+            >
+              <option value="">Wybierz typ wartości</option>
+              <option value="WITH_VAT">Brutto (z VAT)</option>
+              <option value="WITHOUT_VAT">Netto (bez VAT)</option>
+              <option value="VAT_INAPPLICABLE">VAT nie ma zastosowania</option>
+            </Select>
+            {errors?.purchasePriceInputType && (
+              <p className="text-sm text-red-500">{errors.purchasePriceInputType}</p>
+            )}
           </div>
         </div>
 

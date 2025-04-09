@@ -238,13 +238,13 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-            <span className="text-[#FF8E3D] font-bold">1</span>
-          </div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
+          <span className="text-[#FF8E3D] font-bold">1</span>
+        </div>
           Wybierz wariant ubezpieczenia
         </h2>
-
+        
         <div className="grid grid-cols-1 gap-4">
           {variantOptions.map((variant) => {
             const Icon = variant.icon;

@@ -39,7 +39,7 @@ export async function getAuthToken(): Promise<string | null> {
       console.error('Brak tokenu w odpowiedzi:', response.data);
       throw new Error('Brak tokenu w odpowiedzi');
     }
-
+    
     // Zapisz token w cache
     cachedToken = response.data.token;
     tokenExpiration = Date.now() + 14 * 60 * 1000; // 14 minut

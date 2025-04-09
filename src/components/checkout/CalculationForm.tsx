@@ -2,8 +2,11 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { Car, Calendar, DollarSign } from 'lucide-react';
+import { Car, Calendar, DollarSign, Calculator, CreditCard, Clock, Wallet } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Label } from "../ui/label";
+import { Select } from "../ui/select";
+import { VehicleData } from '@/types/vehicle';
 
 interface CalculationFormProps {
   vehicleData: VehicleData;
@@ -14,25 +17,6 @@ interface CalculationFormProps {
   onPaymentChange: (data: PaymentData) => void;
   calculationResult: CalculationResult | null;
   errors?: { [key: string]: string };
-}
-
-interface VehicleData {
-  purchasedOn: string;
-  modelCode: string;
-  categoryCode: string;
-  usageCode: string;
-  mileage: number;
-  firstRegisteredOn: string;
-  evaluationDate: string;
-  purchasePrice: number;
-  purchasePriceNet: number;
-  purchasePriceVatReclaimableCode: string;
-  usageTypeCode: string;
-  purchasePriceInputType: 'BRUTTO' | 'NETTO' | 'NETTO_VAT';
-  vin: string;
-  vrm: string;
-  make?: string;
-  model?: string;
 }
 
 interface InsuranceVariant {
@@ -91,6 +75,7 @@ export const CalculationForm = ({
 }: CalculationFormProps): React.ReactElement => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(vehicleData.purchasePrice || 0);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
   
   // Handler do zmiany ceny pojazdu
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,170 +89,244 @@ export const CalculationForm = ({
   };
   
   // Handler do zmiany opcji płatności
-  const handleOptionChange = (name: string, value: string) => {
+  const handlePaymentChange = (field: string, value: string) => {
     onPaymentChange({
       ...paymentData,
-      [name]: value
+      [field]: value
     });
   };
   
   // Wykonanie kalkulacji
-  const calculatePremium = () => {
+  const calculatePremium = async () => {
     setIsCalculating(true);
+    setCalculationError(null);
     
-    // Symulacja kalkulacji - w rzeczywistej aplikacji byłoby to zapytanie do API
-    setTimeout(() => {
-      // Przykładowy algorytm obliczania składki
-      const baseRate = 0.03; // 3% ceny pojazdu
-      const termMultiplier = {
-        T_12: 0.6,
-        T_24: 0.8,
-        T_36: 1.0,
-        T_48: 1.2,
-        T_60: 1.4
-      }[paymentData.term] || 1.0;
+    try {
+      const purchaseDate = new Date(vehicleData.purchasedOn);
+      const today = new Date();
+      const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      const limitMultiplier = paymentData.claimLimit === "CL_150000" ? 1.2 : 1.0;
+      // Sprawdzamy czy data zakupu nie jest starsza niż 10 lat
+      const tenYearsAgo = new Date();
+      tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
+      tenYearsAgo.setMonth(11, 31); // 31 grudnia danego roku
       
-      // Obliczanie składki
-      const premium = Math.round(vehicleValue * baseRate * termMultiplier * limitMultiplier);
+      if (purchaseDate < tenYearsAgo) {
+        setCalculationError('Data zakupu pojazdu nie może być starsza niż 10 lat (do 31 grudnia)');
+        setIsCalculating(false);
+        return;
+      }
+
+      // Sprawdzamy czy pojazd kwalifikuje się do późnej wyceny
+      if (daysSincePurchase <= 180) {
+        setCalculationError('Dla tego pojazdu nie można wykonać kalkulacji - minimalny okres od zakupu to 181 dni');
+        setIsCalculating(false);
+        return;
+      }
+
+      // Przygotowujemy dane pojazdu bez evaluationDate
+      const { evaluationDate, ...vehicleDataWithoutEvaluation } = vehicleData;
       
-      // Mapowanie okresu do tekstu
-      const coveragePeriodMap = {
-        T_12: "12 miesięcy",
-        T_24: "24 miesiące",
-        T_36: "36 miesięcy",
-        T_48: "48 miesięcy",
-        T_60: "60 miesięcy"
+      const requestData = {
+        sellerNodeCode: insuranceVariant.sellerNodeCode,
+        productCode: insuranceVariant.productCode,
+        saleInitiatedOn: new Date().toISOString().split('T')[0],
+        vehicleSnapshot: {
+          ...vehicleDataWithoutEvaluation,
+          purchasePrice: Math.round(vehicleData.purchasePrice * 100), // Konwertujemy na grosze
+          purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100), // Konwertujemy na grosze
+          evaluationDate: today.toISOString().split('T')[0]
+        },
+        options: {
+          TERM: paymentData.term,
+          CLAIM_LIMIT: paymentData.claimLimit,
+          PAYMENT_TERM: paymentData.paymentTerm,
+          PAYMENT_METHOD: paymentData.paymentMethod
+        }
       };
-      
-      // Ustalenie nazwy produktu
-      const productName = insuranceVariant.productCode.includes("MG25") 
-        ? "GAP Fakturowy" 
-        : "GAP Wartości Pojazdu";
-      
-      // Wynik kalkulacji
+
+      // Sprawdzamy czy marka i model są dostępne
+      if (!vehicleData.make || !vehicleData.modelCode) {
+        setCalculationError('Wybierz markę i model pojazdu');
+        setIsCalculating(false);
+        return;
+      }
+
+      console.log('Wysyłane dane:', JSON.stringify(requestData, null, 2));
+
+      const response = await fetch('/api/policies/creation/calculate-offer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Błąd podczas kalkulacji oferty');
+      }
+
+      // Sprawdzamy dokładniej strukturę odpowiedzi
+      console.log('Odpowiedź z serwera:', JSON.stringify(responseData, null, 2));
+
+      // Sprawdzamy czy mamy dostępną sugerowaną składkę
+      const premiumAmount = responseData.premiumSuggested || responseData.premiumMax || responseData.premium;
+      if (premiumAmount === null || premiumAmount === undefined) {
+        throw new Error('Nieprawidłowa odpowiedź z serwera - brak danych o składce');
+      }
+
+      // Zakładając, że API zwraca dane w odpowiednim formacie
       const result: CalculationResult = {
-        premium: premium,
+        premium: Math.round(premiumAmount / 100), // Konwertujemy z groszy na złote
         details: {
-          productName: productName,
-          coveragePeriod: coveragePeriodMap[paymentData.term as keyof typeof coveragePeriodMap] || "36 miesięcy",
-          vehicleValue: vehicleValue,
-          maxCoverage: paymentData.claimLimit === "CL_150000" ? "150 000 PLN" : "100 000 PLN"
+          productName: responseData.productName || 'Ubezpieczenie GAP',
+          coveragePeriod: responseData.coveragePeriod || `${paymentData.term.replace('T_', '')} miesięcy`,
+          vehicleValue: Math.round(responseData.insuredSum / 100) || vehicleData.purchasePrice, // Używamy insuredSum zamiast vehicleValue
+          maxCoverage: responseData.maxCoverage || paymentData.claimLimit.replace('CL_', '') + ' PLN'
         }
       };
       
       onCalculate(result);
+    } catch (error) {
+      console.error('Błąd podczas kalkulacji:', error);
+      setCalculationError(
+        error instanceof Error 
+          ? error.message 
+          : 'Wystąpił nieoczekiwany błąd podczas kalkulacji'
+      );
+    } finally {
       setIsCalculating(false);
-    }, 800);
+    }
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
         <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-          <span className="text-[#FF8E3D] font-bold">2</span>
+          <span className="text-[#FF8E3D] font-bold">3</span>
         </div>
-        Poznaj cenę ubezpieczenia
+        Wybierz wariant ubezpieczenia
       </h2>
-      
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Car className="mr-2 text-blue-600" size={20} />
-          Dane pojazdu do kalkulacji
-        </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wartość pojazdu (PLN) *
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                className="w-full p-2 pr-10 border border-gray-300 rounded-md"
-                value={vehicleValue || ""}
-                onChange={handlePriceChange}
-                placeholder="np. 50000"
-              />
-              <DollarSign className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            </div>
-          </div>
+        {/* Limit odszkodowania */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Calculator className="w-4 h-4" />
+            Limit odszkodowania
+          </Label>
+          <Select
+            value={paymentData.claimLimit}
+            onChange={(e) => handlePaymentChange('claimLimit', e.target.value)}
+            className={errors?.claimLimit ? 'border-red-500' : ''}
+          >
+            <option value="">Wybierz limit</option>
+            <option value="CL_50000">50 000 zł</option>
+            <option value="CL_100000">100 000 zł</option>
+            <option value="CL_150000">150 000 zł</option>
+            <option value="CL_200000">200 000 zł</option>
+            <option value="CL_250000">250 000 zł</option>
+            <option value="CL_300000">300 000 zł</option>
+          </Select>
+          {errors?.claimLimit && (
+            <p className="text-sm text-red-500">{errors.claimLimit}</p>
+          )}
         </div>
+
+        {/* Okres ubezpieczenia */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Okres ubezpieczenia
+          </Label>
+          <Select
+            value={paymentData.term}
+            onChange={(e) => handlePaymentChange('term', e.target.value)}
+            className={errors?.term ? 'border-red-500' : ''}
+          >
+            <option value="">Wybierz okres</option>
+            <option value="T_12">1 rok</option>
+            <option value="T_24">2 lata</option>
+            <option value="T_36">3 lata</option>
+            <option value="T_48">4 lata</option>
+            <option value="T_60">5 lat</option>
+          </Select>
+          {errors?.term && (
+            <p className="text-sm text-red-500">{errors.term}</p>
+          )}
       </div>
       
-      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Calendar className="mr-2 text-blue-600" size={20} />
-          Opcje ubezpieczenia
-        </h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Okres ubezpieczenia
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {termOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-2 text-center cursor-pointer transition-all
-                    ${paymentData.term === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('term', option.value)}
-                >
-                  {option.label}
-                </div>
-              ))}
+        {/* Rodzaj płatności */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            Rodzaj płatności
+          </Label>
+          <Select
+            value={paymentData.paymentTerm}
+            onChange={(e) => handlePaymentChange('paymentTerm', e.target.value)}
+            className={errors?.paymentTerm ? 'border-red-500' : ''}
+          >
+            <option value="">Wybierz rodzaj płatności</option>
+            <option value="PT_LS">Płatność jednorazowa</option>
+            <option value="PT_A">Płatność roczna</option>
+          </Select>
+          {errors?.paymentTerm && (
+            <p className="text-sm text-red-500">{errors.paymentTerm}</p>
+          )}
+          </div>
+          
+        {/* Forma płatności */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Wallet className="w-4 h-4" />
+            Forma płatności
+          </Label>
+          <Select
+            value={paymentData.paymentMethod}
+            onChange={(e) => handlePaymentChange('paymentMethod', e.target.value)}
+            className={errors?.paymentMethod ? 'border-red-500' : ''}
+          >
+            <option value="">Wybierz formę płatności</option>
+            <option value="PM_PBC">Płatne przez klienta (BLIK, karta, szybki przelew)</option>
+            <option value="PM_BT">Przelew tradycyjny</option>
+            <option value="PM_PAYU_M">Raty miesięczne PayU</option>
+            <option value="PM_BY_DLR">Płatne przez dealera</option>
+          </Select>
+          {errors?.paymentMethod && (
+            <p className="text-sm text-red-500">{errors.paymentMethod}</p>
+          )}
             </div>
           </div>
           
+      {/* Podsumowanie wartości pojazdu */}
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="flex justify-between items-center">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Maksymalny limit odszkodowania
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {claimLimitOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-3 text-center cursor-pointer transition-all
-                    ${paymentData.claimLimit === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('claimLimit', option.value)}
-                >
-                  {option.label}
+            <p className="text-sm text-gray-600">Wartość pojazdu</p>
+            <p className="text-lg font-semibold">{vehicleData.purchasePrice.toLocaleString('pl-PL')} zł</p>
                 </div>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sposób płatności
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {paymentTermOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`border rounded-lg p-3 text-center cursor-pointer transition-all
-                    ${paymentData.paymentTerm === option.value 
-                      ? 'border-[#300FE6] bg-[#300FE6]/5 text-[#300FE6] font-medium' 
-                      : 'border-gray-300 hover:border-gray-400'}`}
-                  onClick={() => handleOptionChange('paymentTerm', option.value)}
-                >
-                  {option.label}
-                </div>
-              ))}
-            </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-600">Typ wartości</p>
+            <p className="text-lg font-semibold">
+              {vehicleData.purchasePriceInputType === 'WITH_VAT' ? 'Brutto' :
+               vehicleData.purchasePriceInputType === 'WITHOUT_VAT' ? 'Netto' : 'Netto + 50% VAT'}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Przycisk do kalkulacji */}
+      {/* Wyświetlanie błędu kalkulacji */}
+      {calculationError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+          <strong className="font-bold">Błąd! </strong>
+          <span className="block sm:inline">{calculationError}</span>
+        </div>
+      )}
+
+      {/* Przycisk kalkulacji */}
       <div className="flex justify-end mt-6">
         <Button
           onClick={calculatePremium}
@@ -284,11 +343,6 @@ export const CalculationForm = ({
           )}
         </Button>
       </div>
-
-      {/* Wyświetlanie błędów */}
-      {errors?.vehicleValue && (
-        <p className="text-red-500 text-sm mt-2">{errors.vehicleValue}</p>
-      )}
 
       {/* Wyświetlanie wyniku kalkulacji */}
       {calculationResult && (

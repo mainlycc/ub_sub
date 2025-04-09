@@ -6,7 +6,7 @@ export interface VehicleData {
   firstRegisteredOn: string;
   purchasedOn: string;
   purchasePrice: number;
-  purchasePriceInputType: 'BRUTTO' | 'NETTO' | 'NETTO_VAT';
+  purchasePriceInputType: 'WITH_VAT' | 'WITHOUT_VAT' | 'VAT_INAPPLICABLE';
   purchasePriceVatReclaimableCode: string;
   usageTypeCode: string;
   mileage: number;
