@@ -3,12 +3,12 @@ import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
 
 export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
     const data = await request.json();
-    const { id } = context.params;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').slice(-2, -1)[0];
     
     console.log('Potwierdzanie SMS dla polisy ID:', id);
     console.log('Dane żądania:', JSON.stringify(data));
