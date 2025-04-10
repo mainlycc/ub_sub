@@ -1,0 +1,241 @@
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#general-settings)    General settings
+
+There are several steps needed to process policy signature and payment.
+
+For signature types, there are several available options. At least one of them was agreed as a part of partner contract between partner and Defend.
+
+Signature types:
+
+- signed proposal
+
+- authorized by SMS
+
+- authorized by payment
+
+- authorization not required
+
+- authorized by external system
+
+
+As a part of the partner contact, there has to be an agreement regarding payment methods. There are two options:
+
+- payment before sign is required
+
+- payment before sign is not required
+
+
+The following steps depend on the combination of signature type and payment method, that was set during policy creation. The signature type can be obtained by calling `/api/policies/{id}` call with id = ID of created policy.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#if-signature-type-authorized-by-external-system)    If signature type = authorized by external system
+
+For partners, the usual settings is **signature type = authorized in external systems**.
+
+If payment before sign is required:
+
+- the system generates payment information
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+- before further steps, the policy needs to be in status "paid".
+
+
+If payment before sign is not required:
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+Then, the policy signature has to be confirmed by partner by using API call:
+
+- `/api/policies/{id}/confirm-signature`
+
+
+
+- where id = ID of a policy to which partner wishes to confirm signature, and
+
+- where confirmationCode is the code that partner previously obtained from the system when performing policy lock
+
+
+After this:
+
+- the policy is confirmed,
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy contract, OR
+
+- the system generates policy contract and sends to e-mail
+
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#if-signature-type-authorized-by-sms)    If signature type = authorized by SMS
+
+If payment before sign **is required**:
+
+- the system generates payment information
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+- before further steps, the policy needs to be in status "paid".
+
+
+If payment before sign **is not required**:
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+Then, the system sends SMS and the policy signature has to be confirmed by partner by using API call:
+
+- `/api/policies/{id}/confirm-signature`
+
+
+
+- where id = ID of a policy to which partner wishes to confirm signature, and
+
+- where confirmationCode is the code that partner previously obtained from the system when performing policy lock
+
+
+After this:
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy contract, OR
+
+- the system generates policy contract and sends to e-mail
+
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#if-signature-type-authorization-not-required)    If signature type = authorization not required
+
+In such case, the authorization is not required, so only configuration of payments before sign taken into account.
+
+If payment before sign is required:
+
+- the system generates payment information
+
+- before further steps, the policy needs to be in status "paid".
+
+
+If payment before sign is not required:
+
+- no action is done.
+
+
+After this:
+
+- the policy is confirmed by default,
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy contract, OR
+
+- the system generates policy contract and sends to e-mail
+
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#if-signature-type-signed-proposal)    If signature type = signed proposal
+
+If payment before sign is required:
+
+- the system generates payment information
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+- before further steps, the policy needs to be in status "paid".
+
+
+If payment before sign is not required:
+
+- the system generates policy precontract
+
+
+Then, the policy signature has to be confirmed by partner.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments\#if-signature-type-authorized-by-payment)    If signature type = authorized by payment
+
+In this case, it does not matter, what is the configuration of required payment before sign. The payment information is generated always.
+
+The steps are:
+
+- the system generates payment information
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy precontract, OR
+
+- the system generates policy precontract and sends to e-mail
+
+
+After this:
+
+- the policy is confirmed by default,
+
+- based on the node contract configuration,
+
+
+
+- the system does nothing, OR
+
+- the system generates policy contract, OR
+
+- the system generates policy contract and sends to e-mail
+
+
+[PreviousLock](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/lock) [NextApprovals, documents upload](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/approvals-documents-upload)
+
+Last updated 2 years ago

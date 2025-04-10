@@ -1,0 +1,24 @@
+After policy is signed and (optionally) paid, the policy is awaiting approval from the system.
+
+After approval is given, the next step is to upload required documents. Firstly, partner checks the list of missing files needed for upload:
+
+- `/api/policies/{id}/missing-upload-types`
+
+
+
+- where id = ID of the policy that we are currently working with
+
+
+Then a list of missing documents is returned.
+
+Upload of necessary documents is done through:
+
+- `/api/policies/{id}/uploads`
+
+
+
+- where id = ID of the policy that we are currently working with
+
+
+[PreviousSignatures, payments](https://defend-insurance-holding.gitbook.io/api-documentation/steps-for-creating-policy/signatures-payments) [NextOther helpful API calls](https://defend-insurance-holding.gitbook.io/api-documentation/other-helpful-api-calls)
+

@@ -102,7 +102,10 @@ const CheckoutContent = () => {
     evaluationDate: '',
     purchasePriceNet: 0,
     modelCode: '',
-    make: ''
+    make: '',
+    makeId: '',
+    modelId: '',
+    model: ''
   });
   
   const [personalData, setPersonalData] = useState<PersonalData>({

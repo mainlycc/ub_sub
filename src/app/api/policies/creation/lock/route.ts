@@ -26,16 +26,16 @@ interface PolicyData {
     policyHolder: {
       type: string;
       email: string;
-      phone: string;
+      phoneNumber: string;
       firstName: string;
       lastName: string;
-      pesel: string;
+      identificationNumber: string;
       address: {
         street: string;
-        houseNumber: string;
+        addressLine1: string;
         city: string;
-        postalCode: string;
-        country: string;
+        postCode: string;
+        countryCode: string;
       };
     };
     insured: {
@@ -88,10 +88,10 @@ function validatePolicyData(data: any): { isValid: boolean; errors: string[] } {
   } else {
     if (!client.type) errors.push('Brak typu klienta');
     if (!client.email) errors.push('Brak email klienta');
-    if (!client.phone) errors.push('Brak telefonu klienta');
+    if (!client.phoneNumber) errors.push('Brak telefonu klienta');
     if (!client.firstName) errors.push('Brak imienia klienta');
     if (!client.lastName) errors.push('Brak nazwiska klienta');
-    if (!client.pesel) errors.push('Brak PESEL klienta');
+    if (!client.identificationNumber) errors.push('Brak PESEL klienta');
 
     // Sprawdzanie adresu
     const address = client.address;
@@ -99,10 +99,10 @@ function validatePolicyData(data: any): { isValid: boolean; errors: string[] } {
       errors.push('Brak adresu klienta');
     } else {
       if (!address.street) errors.push('Brak ulicy');
-      if (!address.houseNumber) errors.push('Brak numeru domu');
+      if (!address.addressLine1) errors.push('Brak numeru domu');
       if (!address.city) errors.push('Brak miasta');
-      if (!address.postalCode) errors.push('Brak kodu pocztowego');
-      if (!address.country) errors.push('Brak kraju');
+      if (!address.postCode) errors.push('Brak kodu pocztowego');
+      if (!address.countryCode) errors.push('Brak kraju');
     }
   }
 

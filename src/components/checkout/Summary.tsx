@@ -21,6 +21,8 @@ interface VehicleData {
   vrm: string;
   make?: string;
   model?: string;
+  makeId?: string;
+  modelId?: string;
 }
 
 interface PersonalData {
@@ -100,23 +102,81 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     setRegistrationError(null);
 
     try {
-      console.log('Dane osobowe przed wysłaniem:', {
-        type: props.personalData.type,
-        phoneNumber: props.personalData.phoneNumber,
-        email: props.personalData.email,
-        firstName: props.personalData.firstName,
-        lastName: props.personalData.lastName,
-        address: props.personalData.address
-      });
+      // Sprawdzanie kompletności danych przed wysłaniem
+      const validateData = () => {
+        const errors = [];
+        
+        // Sprawdzanie danych pojazdu
+        if (!props.vehicleData.makeId) errors.push('Brak makeId pojazdu');
+        if (!props.vehicleData.modelId) errors.push('Brak modelId pojazdu');
+        if (!props.vehicleData.vin) errors.push('Brak numeru VIN');
+        if (!props.vehicleData.vrm) errors.push('Brak numeru rejestracyjnego');
+        
+        // Sprawdzanie danych osobowych
+        if (!props.personalData.phoneNumber) errors.push('Brak numeru telefonu');
+        if (!props.personalData.identificationNumber) errors.push('Brak numeru PESEL');
+        if (!props.personalData.address.street) errors.push('Brak ulicy');
+        if (!props.personalData.address.postCode) errors.push('Brak kodu pocztowego');
+        if (!props.personalData.address.city) errors.push('Brak miasta');
+        
+        // Upewnijmy się, że mamy addressLine1 (numer domu)
+        if (!props.personalData.address.addressLine1) errors.push('Brak numeru domu');
+        
+        return errors;
+      };
+
+      const validationErrors = validateData();
+      if (validationErrors.length > 0) {
+        console.error('Błędy walidacji:', validationErrors);
+        throw new Error(`Nieprawidłowe dane: ${validationErrors.join(', ')}`);
+      }
+
+      // Przygotuj numer telefonu w odpowiednim formacie
+      let phoneNumber = props.personalData.phoneNumber;
+      if (!phoneNumber || phoneNumber.trim() === '') {
+        throw new Error('Numer telefonu jest wymagany');
+      }
+      
+      if (!phoneNumber.startsWith('+')) {
+        // Usuń wszystkie nie-cyfry
+        const cleanedNumber = phoneNumber.replace(/\D/g, '');
+        // Dodaj prefiks kraju, jeśli go nie ma
+        phoneNumber = cleanedNumber.startsWith('48') ? `+${cleanedNumber}` : `+48${cleanedNumber}`;
+      }
+
+      // Upewnij się, że mamy wypełnione addressLine1
+      let addressLine1 = props.personalData.address.addressLine1;
+      if (!addressLine1 || addressLine1.trim() === '') {
+        addressLine1 = props.personalData.address.street.match(/\d+$/)?.[0] || `${props.personalData.firstName} ${props.personalData.lastName}`;
+      }
+      
+      // Upewnij się, że kod pocztowy ma poprawny format
+      let postCode = props.personalData.address.postCode;
+      if (!postCode || !postCode.match(/^\d{2}-\d{3}$/)) {
+        if (postCode && postCode.replace(/\D/g, '').length === 5) {
+          postCode = postCode.replace(/\D/g, '').replace(/^(\d{2})(\d{3})$/, '$1-$2');
+        } else {
+          throw new Error('Kod pocztowy musi mieć format XX-XXX');
+        }
+      }
+      
+      // Upewnij się, że mamy kod kraju
+      const countryCode = props.personalData.address.countryCode || 'PL';
 
       const policyData = {
+        extApiNo: null,
+        extReferenceNo: null,
+        extTenderNo: null,
         sellerNodeCode: "PL_TEST_GAP_25",
         productCode: "5_DCGAP_MG25_GEN",
         saleInitiatedOn: getValidSaleInitiatedDate(),
         signatureTypeCode: "AUTHORIZED_BY_SMS",
+        confirmedByDefault: null,
         vehicleSnapshot: {
           purchasedOn: props.vehicleData.purchasedOn,
           modelCode: props.vehicleData.modelCode,
+          makeId: props.vehicleData.makeId || '',
+          modelId: props.vehicleData.modelId || '',
           categoryCode: "PC",
           usageCode: "STANDARD",
           mileage: props.vehicleData.mileage,
@@ -134,17 +194,17 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         client: {
           policyHolder: {
             type: "person",
-            email: props.personalData.email,
-            phoneNumber: props.personalData.phoneNumber.startsWith('+') ? props.personalData.phoneNumber : `+48${props.personalData.phoneNumber.replace(/\D/g, '')}`,
+            phoneNumber: phoneNumber,
             firstName: props.personalData.firstName,
             lastName: props.personalData.lastName,
+            email: props.personalData.email,
             identificationNumber: props.personalData.identificationNumber,
             address: {
-              addressLine1: `${props.personalData.firstName?.trim() ?? ''} ${props.personalData.lastName?.trim() ?? ''}`.trim(),
-              street: props.personalData.address?.street?.trim() ?? '',
-              city: props.personalData.address?.city?.trim() ?? '',
-              postCode: props.personalData.address?.postCode?.trim() ?? '',
-              countryCode: 'PL'
+              addressLine1: addressLine1,
+              street: props.personalData.address.street,
+              city: props.personalData.address.city,
+              postCode: postCode,
+              countryCode: countryCode
             }
           },
           insured: {
@@ -179,6 +239,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         console.error('Błąd odpowiedzi:', responseData);
         if (responseData.details) {
           console.error('Szczegóły błędu API:', responseData.details);
+          throw new Error(`Błąd API: ${JSON.stringify(responseData.details)}`);
         }
         throw new Error(responseData.error || 'Błąd podczas rejestracji polisy');
       }
@@ -198,6 +259,32 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     }
   };
 
+  const handleMissingDocuments = async (policyId: string) => {
+    try {
+      // Sprawdzenie wymaganych dokumentów
+      const missingTypesResponse = await fetch(`/api/policies/${policyId}/missing-upload-types`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!missingTypesResponse.ok) {
+        throw new Error('Błąd podczas sprawdzania wymaganych dokumentów');
+      }
+
+      const missingTypes = await missingTypesResponse.json();
+      
+      // Tutaj możesz dodać logikę obsługi wymaganych dokumentów
+      console.log('Wymagane dokumenty:', missingTypes);
+      
+      return missingTypes;
+    } catch (error) {
+      console.error('Błąd podczas sprawdzania dokumentów:', error);
+      throw error;
+    }
+  };
+
   const confirmSmsSignature = async () => {
     if (!policyId || !confirmationCode) return;
     
@@ -205,6 +292,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     setSmsError(null);
 
     try {
+      // Potwierdzenie podpisu SMS
       const response = await fetch(`/api/policies/${policyId}/confirm-signature`, {
         method: 'POST',
         headers: {
@@ -221,8 +309,14 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         throw new Error(data.error || 'Błąd podczas potwierdzania podpisu');
       }
 
-      // Po udanym potwierdzeniu podpisu system automatycznie wygeneruje dokumenty
+      // Po udanym potwierdzeniu sprawdzamy wymagane dokumenty
+      const missingDocs = await handleMissingDocuments(policyId);
+      
+      // Ukrywamy formularz SMS
       setShowSmsConfirmation(false);
+      
+      // Tutaj możesz dodać logikę wyświetlania informacji o sukcesie
+      // i ewentualnie przekierować użytkownika do kolejnego kroku (np. upload dokumentów)
       
     } catch (error) {
       console.error('Błąd podczas potwierdzania podpisu:', error);

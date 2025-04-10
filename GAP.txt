@@ -1,0 +1,52 @@
+API - Links
+-	LIVE system: https://v2.idefend.eu (do not use LIVE environment for the test purposes please)
+-	TEST system: https://test.v2.idefend.eu
+
+API - Credentials/Token (both LIVE and TEST)
+-	Login/Username:	GAP_2025_PL
+-	Password:		LEaBY4TXgWa4QJX
+-	Seller Node Code:	PL_TEST_GAP_25 (needed for both calculation and policy registration process)
+ 
+API – Key Endpoints
+-	CALCULATE OFFER => https://test.v2.idefend.eu/api/policies/creation/calculate-offer (TEST environment link)
+o	In case all inputs are as expected and in proper format, we provide you with a price. Policy is not created
+o	An example file with json structure is attached (we require just minimum set of data)
+-	LOCK (POLICY REGISTRATION) => https://test.v2.idefend.eu/api/policies/creation/lock (TEST environment link)
+o	In case all inputs are as expected and in a proper format, the policy is created (locked)
+o	An example file with json structure is attached (we require the full data set; e.g., also the client data)
+
+API - Description in General
+-	All API Endpoints (and try-outs even without generating any active token): https://v2.idefend.eu/api
+-	API Playground (active token needed): https://apiplayground.test.v2.idefend.eu/
+-	API Documentation: https://defend-insurance-holding.gitbook.io/api-documentation/
+-	You always need to use an existing Seller Node Code – we allow to create new Seller via our API if needed
+-	See this example of how to use the amounts: use 180300 for 1.803 zł (two zeros are always added to the end of the value)
+ 
+API - Explanation of some key Attributes/Fields needed specifically for GAP (all names and values are case sensitive)
+-	You can list all the products and options by using:
+o	https://test.v2.idefend.eu/api/policies/creation/portfolios/
+o	Remember – you always have to use a valid JWT token (its validity is limited to 15 minutes)
+-	We always provide you with an intuitive response if the data format for the data set does not fit our expectations
+-	"saleInitiatedOn" => Current date
+-	"productCode" => E.g., one of the most popular GAP coverages is MAX with code "5_DCGAP_M25_GEN". There are also three other coverages and their specific codes: 5_DCGAP_MG25_GEN, 5_DCGAP_F25_GEN, 5_DCGAP_FG25_GEN
+-	“evaluationDate” => Mandatory field only for MAX AC and FLEX GO (for vehicles purchased more than 180 days ago. This field informs us about when the vehicle’s value evaluation document (e.g. invoice) was created
+-	"PAYMENT_TERM" => This is to set the premium payment frequency and is also important from the pricing perspective
+o	"PT_LS" for Onetime payment (could be divided into 12 instalments – see PAYMENT METHOD "PM_PAYU_M")
+o	"PT_A" for annual payments (the price is usually a bit higher)
+-	"PAYMENT_METHOD" => This is how the premium will be paid. Available options:
+o	"PM_PAYU” for Card payment using PayU payment gateway (BLIK included)
+o	"PM_BT" for Bank transfer
+o	"PM_BY_DLR" for Paid by dealer
+o	"PM_PBC" for Payment by client – We provide a payment gateway link, where the client decides about the way how to pay (two options: PayU gateway BLIK incl. or Bank transfer)
+o	"PM_PAYU_M" for 12 monthly instalments through PayU payment gateway (card instalments)
+-	"modelcode" => we expect one of our existing Model codes. You can list all the makes and related models by using https://test.v2.idefend.eu/api/vehicles/makes?pagination=false
+-	"inceptionDate" => Determines from what date the policy is valid; all dates should be up to date to avoid errors
+
+What is flexible and depends on your specific requirements
+-	We can send the client an email with the pre-contract document (all the Terms and Conditions + a draft of a contract) right after the policy is created and we can send another email with the real policy contract document right after the policy was signed, OR we can just provide you with both documents, so it is you who sends the documents to the client
+-	We provide various policy signature methods. We recommend “signed by payment” method, but we also can process signature with code from SMS (One Time Password)
+
+What might also be useful
+-	We recommend to use price visible in the attribute "premiumSuggested" from our response
+-	For faster understanding of our API you can also use our front-end web application iDEFEND where you can see our own process flow (take it just as one example of many ways, how our product could be registered with us):
+o	URL: https://test.v2.idefend.eu/, e-mail testapidefend@gmail.com, pass diG2021!, select role Test GAP 25

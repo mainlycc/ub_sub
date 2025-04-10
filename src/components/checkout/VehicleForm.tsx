@@ -61,6 +61,33 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
     if (!selectedModel) {
       newErrors.model = 'Wybierz model pojazdu';
     }
+    if (!data.vin) {
+      newErrors.vin = 'Brak numeru VIN';
+    }
+    if (!data.vrm) {
+      newErrors.vrm = 'Brak numeru rejestracyjnego';
+    }
+    if (!data.categoryCode) {
+      newErrors.categoryCode = 'Brak kategorii pojazdu';
+    }
+    if (!data.usageCode) {
+      newErrors.usageCode = 'Brak sposobu wykorzystania';
+    }
+    if (!data.firstRegisteredOn) {
+      newErrors.firstRegisteredOn = 'Brak daty pierwszej rejestracji';
+    }
+    if (!data.purchasedOn) {
+      newErrors.purchasedOn = 'Brak daty nabycia';
+    }
+    if (!data.purchasePrice) {
+      newErrors.purchasePrice = 'Brak wartości pojazdu';
+    }
+    if (!data.mileage) {
+      newErrors.mileage = 'Brak przebiegu pojazdu';
+    }
+    if (!data.purchasePriceInputType) {
+      newErrors.purchasePriceInputType = 'Brak typu wartości';
+    }
     
     setLocalErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -74,27 +101,36 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
         ...data,
         modelCode: selectedModel || '',
         make: selectedMakeId || '',
+        makeId: selectedMakeId || '',
+        modelId: selectedModel || '',
       });
     }
+  };
+
+  const handleMakeSelect = (makeId: string | null) => {
+    setSelectedMakeId(makeId);
+    setSelectedModel(null);
+    onChange({
+      ...data,
+      make: makeId || '',
+      makeId: makeId || '',
+      modelCode: '',
+      modelId: ''
+    });
+  };
+
+  const handleModelSelect = (modelId: string | null) => {
+    setSelectedModel(modelId);
+    onChange({
+      ...data,
+      modelCode: modelId || '',
+      modelId: modelId || ''
+    });
   };
 
   const handleInputChange = (field: keyof VehicleData, value: string | number) => {
     const updatedData = { ...data, [field]: value };
     
-    // Jeśli zmieniamy purchasePrice, aktualizujemy też purchasePriceNet
-    if (field === 'purchasePrice') {
-      const price = typeof value === 'number' ? value : parseFloat(value) || 0;
-      if (data.purchasePriceInputType === 'WITHOUT_VAT') {
-        updatedData.purchasePriceNet = price;
-      } else if (data.purchasePriceInputType === 'WITH_VAT') {
-        // Dla WITH_VAT, obliczamy wartość netto (23% VAT)
-        updatedData.purchasePriceNet = Math.round(price / 1.23);
-      } else {
-        // Dla VAT_INAPPLICABLE, wartość netto = brutto
-        updatedData.purchasePriceNet = price;
-      }
-    }
-
     // Ustawiamy domyślne wartości dla pustych pól
     if (!updatedData.usageTypeCode) {
       updatedData.usageTypeCode = 'INDIVIDUAL';
@@ -107,6 +143,50 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
     }
     if (!updatedData.categoryCode) {
       updatedData.categoryCode = 'PC';
+    }
+    if (!updatedData.purchasePriceInputType) {
+      updatedData.purchasePriceInputType = 'VAT_INAPPLICABLE';
+    }
+
+    // Jeśli zmieniamy purchasePrice, aktualizujemy też purchasePriceNet
+    if (field === 'purchasePrice') {
+      const price = typeof value === 'number' ? value : parseFloat(value) || 0;
+      updatedData.purchasePriceNet = price; // Dla VAT_INAPPLICABLE, wartość netto = brutto
+    }
+
+    // Dodajemy brakujące pola wymagane przez API
+    if (!updatedData.evaluationDate) {
+      updatedData.evaluationDate = new Date().toISOString().split('T')[0];
+    }
+
+    // Jeśli zmieniamy markę lub model, aktualizujemy też makeId i modelId
+    if (field === 'make') {
+      updatedData.makeId = String(value);
+    }
+    if (field === 'modelCode') {
+      updatedData.modelId = String(value);
+    }
+    
+    // Upewnijmy się, że makeId i modelId są zawsze ustawione
+    if (selectedMakeId && !updatedData.makeId) {
+      updatedData.makeId = selectedMakeId;
+      updatedData.make = selectedMakeId;
+    }
+    
+    if (selectedModel && !updatedData.modelId) {
+      updatedData.modelId = selectedModel;
+      updatedData.modelCode = selectedModel;
+    }
+    
+    // Sprawdź VIN
+    if (field === 'vin') {
+      // Upewnij się, że VIN ma prawidłowy format (usuń wszystkie spacje i znaki specjalne)
+      updatedData.vin = String(value).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    }
+    
+    // Upewnij się, że numer rejestracyjny jest w odpowiednim formacie
+    if (field === 'vrm') {
+      updatedData.vrm = String(value).replace(/\s+/g, '').toUpperCase();
     }
 
     onChange(updatedData);
@@ -266,20 +346,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <VehicleMakeSelect
             selectedMakeId={selectedMakeId}
-            onMakeSelect={(makeId) => {
-              setSelectedMakeId(makeId);
-              setSelectedModel(null);
-              handleInputChange('make', makeId || '');
-            }}
+            onMakeSelect={handleMakeSelect}
             error={localErrors.make}
           />
           <VehicleModelSelect
             selectedModelId={selectedModel}
             makeId={selectedMakeId}
-            onModelSelect={(modelId) => {
-              setSelectedModel(modelId);
-              handleInputChange('modelCode', modelId);
-            }}
+            onModelSelect={handleModelSelect}
             error={localErrors.model}
           />
         </div>

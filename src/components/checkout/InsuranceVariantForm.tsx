@@ -180,12 +180,12 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
   const handleVariantSelect = (portfolio: Portfolio) => {
     const selectedVariant: InsuranceVariant = {
       productCode: portfolio.productCode,
-      sellerNodeCode: "PL_TEST_GAP_25",
+      sellerNodeCode: portfolio.sellerNodeCode,
       signatureTypeCode: "AUTHORIZED_BY_SMS",
-      options: [],
+      options: portfolio.optionTypes.map(option => ({ code: option.code, value: '' })),
       vehicleTypes: portfolio.vehicleTypes,
-      vehicleMake: null,
-      vehicleModel: null
+      vehicleMake: data.vehicleMake,
+      vehicleModel: data.vehicleModel
     };
 
     onChange(selectedVariant);

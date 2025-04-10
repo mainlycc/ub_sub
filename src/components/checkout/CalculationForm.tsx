@@ -124,18 +124,26 @@ export const CalculationForm = ({
         return;
       }
 
-      // Przygotowujemy dane pojazdu bez evaluationDate
-      const { evaluationDate, ...vehicleDataWithoutEvaluation } = vehicleData;
-      
       const requestData = {
-        sellerNodeCode: insuranceVariant.sellerNodeCode,
-        productCode: insuranceVariant.productCode,
-        saleInitiatedOn: new Date().toISOString().split('T')[0],
+        sellerNodeCode: "PL_TEST_GAP_25",
+        productCode: "5_DCGAP_MG25_GEN",
+        saleInitiatedOn: today.toISOString().split('T')[0],
         vehicleSnapshot: {
-          ...vehicleDataWithoutEvaluation,
-          purchasePrice: Math.round(vehicleData.purchasePrice * 100), // Konwertujemy na grosze
-          purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100), // Konwertujemy na grosze
-          evaluationDate: today.toISOString().split('T')[0]
+          purchasedOn: vehicleData.purchasedOn,
+          modelCode: vehicleData.modelCode,
+          categoryCode: "PC",
+          usageCode: "STANDARD",
+          mileage: vehicleData.mileage,
+          firstRegisteredOn: vehicleData.firstRegisteredOn + "T07:38:46+02:00",
+          evaluationDate: today.toISOString().split('T')[0],
+          purchasePrice: Math.round(vehicleData.purchasePrice * 100),
+          purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
+          purchasePriceVatReclaimableCode: "NO",
+          usageTypeCode: "INDIVIDUAL",
+          purchasePriceInputType: "VAT_INAPPLICABLE",
+          vin: vehicleData.vin,
+          vrm: vehicleData.vrm,
+          owners: [{ contact: { inheritFrom: "policyHolder" } }]
         },
         options: {
           TERM: paymentData.term,
@@ -144,13 +152,6 @@ export const CalculationForm = ({
           PAYMENT_METHOD: paymentData.paymentMethod
         }
       };
-
-      // Sprawdzamy czy marka i model są dostępne
-      if (!vehicleData.make || !vehicleData.modelCode) {
-        setCalculationError('Wybierz markę i model pojazdu');
-        setIsCalculating(false);
-        return;
-      }
 
       console.log('Wysyłane dane:', JSON.stringify(requestData, null, 2));
 
@@ -168,23 +169,18 @@ export const CalculationForm = ({
         throw new Error(responseData.error || 'Błąd podczas kalkulacji oferty');
       }
 
-      // Sprawdzamy dokładniej strukturę odpowiedzi
-      console.log('Odpowiedź z serwera:', JSON.stringify(responseData, null, 2));
-
-      // Sprawdzamy czy mamy dostępną sugerowaną składkę
       const premiumAmount = responseData.premiumSuggested || responseData.premiumMax || responseData.premium;
       if (premiumAmount === null || premiumAmount === undefined) {
         throw new Error('Nieprawidłowa odpowiedź z serwera - brak danych o składce');
       }
 
-      // Zakładając, że API zwraca dane w odpowiednim formacie
       const result: CalculationResult = {
-        premium: Math.round(premiumAmount / 100), // Konwertujemy z groszy na złote
+        premium: Math.round(premiumAmount / 100),
         details: {
-          productName: responseData.productName || 'Ubezpieczenie GAP',
-          coveragePeriod: responseData.coveragePeriod || `${paymentData.term.replace('T_', '')} miesięcy`,
-          vehicleValue: Math.round(responseData.insuredSum / 100) || vehicleData.purchasePrice, // Używamy insuredSum zamiast vehicleValue
-          maxCoverage: responseData.maxCoverage || paymentData.claimLimit.replace('CL_', '') + ' PLN'
+          productName: 'Ubezpieczenie GAP MAX',
+          coveragePeriod: `${paymentData.term.replace('T_', '')} miesięcy`,
+          vehicleValue: Math.round(vehicleData.purchasePrice),
+          maxCoverage: paymentData.claimLimit.replace('CL_', '') + ' PLN'
         }
       };
       

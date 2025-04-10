@@ -1,0 +1,115 @@
+## [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#vehicles-and-vehicle-snapshots)    Vehicles and vehicle snapshots
+
+![](https://defend-insurance-holding.gitbook.io/~gitbook/image?url=https%3A%2F%2F1396451652-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252Ff7iPxrRuUVYUlG0hrB4d%252Fuploads%252Fwf1QUEM6eyn2ptqYsTuB%252Fvehicle_hierarchy.png%3Falt%3Dmedia%26token%3D578f785e-9276-4dcb-bae3-f08fb1ea3d01&width=768&dpr=4&quality=100&sign=b6911a20&sv=2)
+
+**Vehicle snapshot** is an entity that includes information about a vehicle at a certain point in time. E.g. mileage, market value.
+
+**Vehicles** are entities that describe characteristics of the vehicle that do not change over time, e.g. color, engine type and size, transmission.
+
+## [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#api-calls)    API calls
+
+API offers several calls to get information about vehicles. All of them are HTTP GET requests.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#general)    General
+
+URL: `GET /api/vehicles`
+
+Returns a collection of all vehicles.
+
+URL: `GET /api/vehicles/{id}`
+
+Returns details of a specific vehicle with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#categories)    Categories
+
+URL: `GET /api/vehicles/categories`
+
+Returns a collection of all vehicle categories.
+
+URL: `GET /api/vehicles/categories/{id}`
+
+Returns details of a specific category with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#drive-types)    Drive types
+
+URL: `GET /api/vehicles/drive-types`
+
+Returns a collection of all vehicle drive types.
+
+URL: `GET /api/vehicles/drive-types/{id}`
+
+Returns details of a specific drive type with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#engine-types)    Engine types
+
+URL: `GET /api/vehicles/engine-types`
+
+Returns a collection of all vehicle engine types.
+
+URL: `GET /api/vehicles/engine-types/{id}`
+
+Returns details of a specific engine type with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#makes)    Makes
+
+URL: `GET /api/vehicles/makes`
+
+Returns a collection of all vehicle manufacturers.
+
+URL: `GET /api/vehicles/makes/{id}`
+
+Returns details of a specific manufacturer with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#models)    Models
+
+URL: `GET /api/vehicles/models`
+
+Returns a collection of all vehicle models.
+
+URL: `GET /api/vehicles/models/{id}`
+
+Returns details of a specific car model with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#purchase-types)    Purchase types
+
+URL: `GET /api/vehicles/purchase-types`
+
+Returns a collection of all vehicle purchase types.
+
+URL: `GET /api/vehicles/purchase-types/{id}`
+
+Returns details of a specific type of purchase with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#sale-types)    Sale types
+
+URL: `GET /api/vehicles/sale-types`
+
+Returns a collection of all vehicle sale types.
+
+URL: `GET /api/vehicles/sale-types/{id}`
+
+Returns details of a specific type of sale with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#transmission-types)    Transmission types
+
+URL: `GET /api/vehicles/transmission-types`
+
+Returns a collection of all vehicle transmission types.
+
+URL: `GET /api/vehicles/transmission-types/{id}`
+
+Returns details of a specific type of transmission with ID submitted in the request.
+
+### [Direct link to heading](https://defend-insurance-holding.gitbook.io/api-documentation/vehicles\#usage-types)    Usage types
+
+URL: `GET /api/vehicles/usage-types`
+
+Returns a collection of all vehicle usage types.
+
+URL: `GET /api/vehicles/usage-types/{id}`
+
+Returns details of a specific type of usage with ID submitted in the request.
+
+[PreviousCountries, currencies](https://defend-insurance-holding.gitbook.io/api-documentation/countries-currencies) [NextVehicle snapshots](https://defend-insurance-holding.gitbook.io/api-documentation/vehicle-snapshots)
+
+Last updated 8 months ago

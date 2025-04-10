@@ -14,4 +14,7 @@ export interface VehicleData {
   purchasePriceNet: number;
   modelCode: string;
   make: string;
+  model?: string;
+  makeId: string;
+  modelId: string;
 } 

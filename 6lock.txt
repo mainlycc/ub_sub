@@ -1,0 +1,12 @@
+Lock
+After all steps are performed, the policy has to be locked and is in the status of waiting for confirmation from client's side.
+
+API calls
+API offers several calls to get information about products. All of them are HTTP GET requests.
+
+Lock policy
+URL: POST /api/policies/creation/lock
+
+Returns details of created policy from the system based on the seller, vehicle, client and premium data from the POST request. All information about the insured, insurer and other necessary contact information should be included in this API call.
+
+The call returns payment URL and other data regarding the policy

@@ -1,0 +1,29 @@
+{
+	"sellerNodeCode": "PL_TEST_GAP_25",
+	"productCode": "5_DCGAP_MG25_GEN",
+	"saleInitiatedOn": "2025-02-24",	
+	
+		"vehicleSnapshot":
+	{
+		"purchasedOn": "2025-02-24",
+		"modelCode": "342",
+		"categoryCode": "PC",
+		"usageCode":"STANDARD", 
+		"mileage": 1000,
+		"firstRegisteredOn": "2021-05-01T07:38:46+02:00",
+		"evaluationDate": "2025-02-24",
+		"purchasePrice": 15000000,
+		"purchasePriceNet": 15000000,
+		"purchasePriceVatReclaimableCode": "NO",
+		"usageTypeCode": "INDIVIDUAL",
+		"purchasePriceInputType": "VAT_INAPPLICABLE"
+		},
+	
+	"options":
+	{				
+		"TERM": "T_36",
+		"CLAIM_LIMIT": "CL_150000",
+		"PAYMENT_TERM": "PT_LS",
+		"PAYMENT_METHOD": "PM_PAYU"
+	}
+}
