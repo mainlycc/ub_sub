@@ -10,7 +10,12 @@ interface PolicyResponse {
   status: string;
   productCode: string;
   premium: number;
-  [key: string]: any; // Dla pozostałych pól, które mogą się pojawiać
+  sellerNodeCode?: string;
+  saleInitiatedOn?: string;
+  client?: Record<string, unknown>;
+  vehicleSnapshot?: Record<string, unknown>;
+  options?: Record<string, string>;
+  [key: string]: unknown;
 }
 
 interface PolicyRegistrationProps {
