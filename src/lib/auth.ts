@@ -9,6 +9,11 @@ const AUTH_CREDENTIALS = {
   password: "LEaBY4TXgWa4QJX"
 };
 
+interface AuthResponse {
+  token: string;
+  expiresIn?: number;
+}
+
 // Funkcja do autoryzacji i uzyskania tokenu JWT
 export async function getAuthToken(): Promise<string | null> {
   try {
@@ -20,46 +25,64 @@ export async function getAuthToken(): Promise<string | null> {
 
     console.log('Pobieranie nowego tokenu...');
     
-    const response = await axios.post<{token: string; expiresIn?: number}>(
+    const response = await axios.post<AuthResponse>(
       'https://test.v2.idefend.eu/api/jwt-token',
       AUTH_CREDENTIALS,
       {
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000 // 10 sekund timeout
       }
     );
 
-    console.log('Odpowiedź z serwera:', {
+    console.log('Odpowiedź z serwera autoryzacji:', {
       status: response.status,
-      hasToken: !!response.data?.token
+      hasToken: !!response.data?.token,
+      expiresIn: response.data?.expiresIn
     });
 
     if (!response.data?.token) {
       console.error('Brak tokenu w odpowiedzi:', response.data);
-      throw new Error('Brak tokenu w odpowiedzi');
+      throw new Error('Brak tokenu w odpowiedzi z serwera autoryzacji');
     }
     
     // Zapisz token w cache
     cachedToken = response.data.token;
-    tokenExpiration = Date.now() + 14 * 60 * 1000; // 14 minut
-    console.log('Nowy token zapisany');
+    // Jeśli serwer zwraca expiresIn, użyj tej wartości, w przeciwnym razie użyj 14 minut
+    const expirationTime = response.data.expiresIn 
+      ? response.data.expiresIn * 1000  // konwersja na milisekundy
+      : 14 * 60 * 1000; // 14 minut
+    
+    tokenExpiration = Date.now() + expirationTime;
+    console.log('Nowy token zapisany, wygasa za:', Math.floor(expirationTime / 1000 / 60), 'minut');
 
     return cachedToken;
 
-  } catch (error: unknown) {
-    const apiError = error as AxiosError;
-    console.error('Błąd autoryzacji:', {
-      message: apiError.message,
-      response: (apiError.response as AxiosResponse)?.data,
-      status: (apiError.response as AxiosResponse)?.status
-    });
-    
+  } catch (error) {
     // Resetuj cache w przypadku błędu
     cachedToken = null;
     tokenExpiration = null;
     
-    throw new Error('Błąd autoryzacji');
+    if (axios.isAxiosError(error)) {
+      const apiError = error as AxiosError<any>;
+      console.error('Błąd autoryzacji:', {
+        message: apiError.message,
+        response: apiError.response?.data,
+        status: apiError.response?.status,
+        code: apiError.code
+      });
+      
+      if (apiError.response?.status === 401) {
+        throw new Error('Nieprawidłowe dane uwierzytelniające');
+      } else if (apiError.code === 'ECONNABORTED') {
+        throw new Error('Timeout podczas próby autoryzacji');
+      } else if (!apiError.response) {
+        throw new Error('Brak połączenia z serwerem autoryzacji');
+      }
+    }
+    
+    throw new Error('Nieoczekiwany błąd podczas autoryzacji');
   }
 }
 
