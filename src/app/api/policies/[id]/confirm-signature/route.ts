@@ -74,7 +74,7 @@ export async function POST(
           { error: errorData.error || 'Nieprawidłowy kod SMS' },
           { status: 400 }
         );
-      } catch (e) {
+      } catch {
         // Jeśli nie jest to prawidłowy JSON, zwracamy tekst odpowiedzi
         return NextResponse.json(
           { error: 'Nieprawidłowy kod SMS', details: textResponse },

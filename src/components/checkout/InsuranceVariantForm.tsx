@@ -71,7 +71,7 @@ interface PortfolioApiResponse {
 }
 
 // Funkcja pomocnicza do pobierania ścieżek wejściowych dla produktu
-const getInputPathsForProduct = (_productCode: string): { vehicle: InputPath[]; contact: InputPath[]; } => {
+const getInputPathsForProduct = (/* productCode */): { vehicle: InputPath[]; contact: InputPath[]; } => {
   const paths = {
     vehicle: [
       { field: 'make', requiredForCalculation: true, requiredForConfirmation: true, step: 'vehicle' },
@@ -104,7 +104,7 @@ const variantOptions: VariantOption[] = [
   }
 ];
 
-export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors, showOnlyVariantSelection: _showOnlyVariantSelection }: InsuranceVariantFormProps): React.ReactElement => {
+export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors /* showOnlyVariantSelection */ }: InsuranceVariantFormProps): React.ReactElement => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -177,7 +177,8 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
 
     onChange(selectedVariant);
 
-    const inputPaths = getInputPathsForProduct(portfolio.productCode);
+    // Pobranie ścieżek wejściowych
+    const inputPaths = getInputPathsForProduct();
     if (onInputPathsChange) {
       onInputPathsChange(inputPaths);
     }

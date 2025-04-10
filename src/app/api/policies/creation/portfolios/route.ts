@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
-export async function GET(_request: Request) {
+export async function GET() {
   console.log('[policies/portfolios] Otrzymano zapytanie GET');
   try {
     console.log('[policies/portfolios] Próba pobrania tokena...');

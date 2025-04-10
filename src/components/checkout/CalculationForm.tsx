@@ -44,16 +44,15 @@ interface CalculationResult {
 
 export const CalculationForm = ({ 
   vehicleData, 
-  insuranceVariant: _insuranceVariant, 
+  /* insuranceVariant nie jest używany */ 
   paymentData, 
   onCalculate, 
-  onVehicleChange, 
+  /* onVehicleChange nie jest używany */ 
   onPaymentChange, 
   calculationResult, 
   errors 
 }: CalculationFormProps): React.ReactElement => {
   const [isCalculating, setIsCalculating] = useState(false);
-  const [vehicleValue, setVehicleValue] = useState(vehicleData.purchasePrice || 0);
   const [calculationError, setCalculationError] = useState<string | null>(null);
   
   const handlePaymentChange = (field: string, value: string) => {
@@ -290,7 +289,7 @@ export const CalculationForm = ({
       <div className="flex justify-end mt-6">
         <Button
           onClick={calculatePremium}
-          disabled={isCalculating || !vehicleValue || vehicleValue <= 0}
+          disabled={isCalculating || !vehicleData.purchasePrice || vehicleData.purchasePrice <= 0}
           className="bg-[#300FE6] hover:bg-[#2208B0] text-white px-8 py-3 rounded-md transition-all"
         >
           {isCalculating ? (
