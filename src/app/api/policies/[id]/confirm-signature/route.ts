@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { NextRequest } from 'next/server';
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
