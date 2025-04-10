@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
+// Dodajemy interfejs dla violation
+interface ValidationViolation {
+  propertyPath: string;
+  message: string;
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
@@ -45,7 +51,7 @@ export async function POST(request: Request) {
         
         // Jeśli mamy błędy walidacji (422), formatujemy je w czytelny sposób
         if (apiResponse.status === 422 && responseData.violations) {
-          const errors = responseData.violations.map((v: any) => 
+          const errors = responseData.violations.map((v: ValidationViolation) => 
             `${v.propertyPath}: ${v.message}`
           ).join('\n');
           
@@ -64,8 +70,8 @@ export async function POST(request: Request) {
       // Przekazujemy odpowiedź z API
       return NextResponse.json(responseData);
 
-    } catch (parseError) {
-      console.error('Nie udało się sparsować odpowiedzi:', responseText);
+    } catch (error) {
+      console.error('Nie udało się sparsować odpowiedzi:', responseText, 'Błąd:', error);
       return NextResponse.json(
         { error: 'Otrzymano nieprawidłową odpowiedź z API' },
         { status: 500 }

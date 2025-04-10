@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, CreditCard, Clock, TrendingDown, Car, Truck } from 'lucide-react';
+import { ShieldCheck, Truck } from 'lucide-react';
 import { VehicleMakeSelect } from './VehicleMakeSelect';
 import { VehicleModelSelect } from './VehicleModelSelect';
 
@@ -59,8 +59,19 @@ interface VariantOption {
   vehicleTypes: string[];
 }
 
+// Definicja typu dla danych portfolio z API
+interface PortfolioApiResponse {
+  productCode: string;
+  productGroupAlias?: string;
+  productDerivativeAlias?: string;
+  optionTypes?: Array<{
+    code: string;
+    name: string;
+  }>;
+}
+
 // Funkcja pomocnicza do pobierania ścieżek wejściowych dla produktu
-const getInputPathsForProduct = (productCode: string): { vehicle: InputPath[]; contact: InputPath[]; } => {
+const getInputPathsForProduct = (_productCode: string): { vehicle: InputPath[]; contact: InputPath[]; } => {
   const paths = {
     vehicle: [
       { field: 'make', requiredForCalculation: true, requiredForConfirmation: true, step: 'vehicle' },
@@ -93,31 +104,9 @@ const variantOptions: VariantOption[] = [
   }
 ];
 
-export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors, showOnlyVariantSelection }: InsuranceVariantFormProps): React.ReactElement => {
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors, showOnlyVariantSelection: _showOnlyVariantSelection }: InsuranceVariantFormProps): React.ReactElement => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  const getDefaultName = (productCode: string, productGroupAlias?: string, productDerivativeAlias?: string): string => {
-    if (productGroupAlias && productDerivativeAlias) {
-      return `${productGroupAlias} ${productDerivativeAlias}`;
-    }
-    return 'Ubezpieczenie GAP';
-  };
-
-  const getDefaultDescription = (productCode: string, productGroupAlias?: string): string => {
-    if (productCode.includes('DTGAP')) {
-      return 'Ubezpieczenie GAP dla samochodów ciężarowych';
-    }
-    return 'Ubezpieczenie GAP dla samochodów osobowych';
-  };
-
-  const getVariantIcon = (productCode: string): React.ElementType => {
-    if (productCode.includes('DTGAP')) {
-      return Truck;
-    }
-    return ShieldCheck;
-  };
 
   useEffect(() => {
     const fetchPortfolios = async () => {
@@ -134,12 +123,12 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         const data = await response.json();
         console.log('Dane z API:', data);
 
-        // Filtrujemy i mapujemy produkty
-        const mappedPortfolios: Portfolio[] = data
-          .filter((item: any) => 
+        // Filtrujemy i mapujemy produkty - usunięto niepotrzebne przypisanie do zmiennej portfolios
+        data
+          .filter((item: PortfolioApiResponse) => 
             !['5_DCGAP_F25_GEN', '5_DCGAP_FG25_GEN'].includes(item.productCode)
           )
-          .map((portfolio: any) => ({
+          .map((portfolio: PortfolioApiResponse) => ({
             productCode: portfolio.productCode,
             sellerNodeCode: "PL_TEST_GAP_25",
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
@@ -153,8 +142,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
             productGroupAlias: portfolio.productGroupAlias
           }));
 
-        console.log('Zmapowane portfolio:', mappedPortfolios);
-        setPortfolios(mappedPortfolios);
       } catch (error) {
         console.error('Błąd podczas pobierania produktów:', error);
         setLoadError(error instanceof Error ? error.message : 'Nie udało się pobrać listy produktów');
@@ -167,9 +154,9 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
   }, []);
 
   // Funkcja pomocnicza do generowania opisów produktów
-  const getProductDescription = (portfolio: any): string => {
+  const getProductDescription = (portfolio: PortfolioApiResponse): string => {
     const isCommercial = portfolio.productCode.includes('DTGAP');
-    const hasAC = portfolio.productDerivativeAlias.includes('AC');
+    const hasAC = portfolio.productDerivativeAlias?.includes('AC') || false;
     
     if (isCommercial) {
       return `Ubezpieczenie dla pojazdów ciężarowych${hasAC ? ' z AC' : ''}`;

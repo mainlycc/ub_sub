@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { Car, Calendar, DollarSign, Calculator, CreditCard, Clock, Wallet } from 'lucide-react';
+import { Calculator, Clock, Wallet } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { Select } from "../ui/select";
@@ -42,30 +42,9 @@ interface CalculationResult {
   };
 }
 
-const termOptions = [
-  { value: "T_12", label: "12 miesięcy" },
-  { value: "T_24", label: "24 miesiące" },
-  { value: "T_36", label: "36 miesięcy" },
-  { value: "T_48", label: "48 miesięcy" },
-  { value: "T_60", label: "60 miesięcy" }
-];
-const claimLimitOptions = [
-  { value: "CL_50000", label: "50 000 PLN" },
-  { value: "CL_100000", label: "100 000 PLN" },
-  { value: "CL_150000", label: "150 000 PLN" },
-  { value: "CL_200000", label: "200 000 PLN" },
-  { value: "CL_250000", label: "250 000 PLN" },
-  { value: "CL_300000", label: "300 000 PLN" }
-];
-
-const paymentTermOptions = [
-  { value: "PT_LS", label: "Płatność jednorazowa" },
-  { value: "PT_M", label: "Płatność miesięczna" }
-];
-
 export const CalculationForm = ({ 
   vehicleData, 
-  insuranceVariant, 
+  insuranceVariant: _insuranceVariant, 
   paymentData, 
   onCalculate, 
   onVehicleChange, 
@@ -77,18 +56,6 @@ export const CalculationForm = ({
   const [vehicleValue, setVehicleValue] = useState(vehicleData.purchasePrice || 0);
   const [calculationError, setCalculationError] = useState<string | null>(null);
   
-  // Handler do zmiany ceny pojazdu
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const price = parseFloat(e.target.value);
-    setVehicleValue(price);
-    onVehicleChange({
-      ...vehicleData,
-      purchasePrice: price,
-      purchasePriceNet: price * 0.8, // przykładowa wartość netto (80% wartości brutto)
-    });
-  };
-  
-  // Handler do zmiany opcji płatności
   const handlePaymentChange = (field: string, value: string) => {
     onPaymentChange({
       ...paymentData,
@@ -96,7 +63,6 @@ export const CalculationForm = ({
     });
   };
   
-  // Wykonanie kalkulacji
   const calculatePremium = async () => {
     setIsCalculating(true);
     setCalculationError(null);
@@ -106,10 +72,9 @@ export const CalculationForm = ({
       const today = new Date();
       const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      // Sprawdzamy czy data zakupu nie jest starsza niż 10 lat
       const tenYearsAgo = new Date();
       tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
-      tenYearsAgo.setMonth(11, 31); // 31 grudnia danego roku
+      tenYearsAgo.setMonth(11, 31);
       
       if (purchaseDate < tenYearsAgo) {
         setCalculationError('Data zakupu pojazdu nie może być starsza niż 10 lat (do 31 grudnia)');
@@ -117,7 +82,6 @@ export const CalculationForm = ({
         return;
       }
 
-      // Sprawdzamy czy pojazd kwalifikuje się do późnej wyceny
       if (daysSincePurchase <= 180) {
         setCalculationError('Dla tego pojazdu nie można wykonać kalkulacji - minimalny okres od zakupu to 181 dni');
         setIsCalculating(false);
@@ -252,12 +216,12 @@ export const CalculationForm = ({
           {errors?.term && (
             <p className="text-sm text-red-500">{errors.term}</p>
           )}
-      </div>
-      
+        </div>
+          
         {/* Rodzaj płatności */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4" />
+            <Calculator className="w-4 h-4" />
             Rodzaj płatności
           </Label>
           <Select

@@ -55,7 +55,7 @@ interface PolicyData {
 }
 
 // Funkcja walidująca dane polisy
-function validatePolicyData(data: any): { isValid: boolean; errors: string[] } {
+function validatePolicyData(data: PolicyData): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Sprawdzanie podstawowych pól
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     console.log('Otrzymane dane:', JSON.stringify(data, null, 2));
 
     // Walidacja danych
-    const validation = validatePolicyData(data);
+    const validation = validatePolicyData(data as PolicyData);
     if (!validation.isValid) {
       console.error('Błędy walidacji:', validation.errors);
       return NextResponse.json(

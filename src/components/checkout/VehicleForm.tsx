@@ -6,7 +6,6 @@ import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { VehicleMakeSelect } from './VehicleMakeSelect';
 import { VehicleModelSelect } from './VehicleModelSelect';
-import { ArrowRight } from 'lucide-react';
 import { VehicleData } from '@/types/vehicle';
 
 interface VehicleFormProps {

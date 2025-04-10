@@ -261,6 +261,8 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
   const handleMissingDocuments = async (policyId: string) => {
     try {
+      console.log('Sprawdzanie wymaganych dokumentów dla polisy ID:', policyId);
+      
       // Sprawdzenie wymaganych dokumentów
       const missingTypesResponse = await fetch(`/api/policies/${policyId}/missing-upload-types`, {
         method: 'GET',
@@ -269,14 +271,48 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         }
       });
 
-      if (!missingTypesResponse.ok) {
-        throw new Error('Błąd podczas sprawdzania wymaganych dokumentów');
-      }
-
-      const missingTypes = await missingTypesResponse.json();
+      // Odczytaj odpowiedź jako tekst
+      const textResponse = await missingTypesResponse.text();
+      console.log('Odpowiedź missing-upload-types (tekst):', textResponse);
       
-      // Tutaj możesz dodać logikę obsługi wymaganych dokumentów
+      interface MissingDocument {
+        code: string;
+        name: string;
+        description?: string;
+        error?: string;
+      }
+      
+      let missingTypes: MissingDocument[] = [];
+      
+      // Jeśli mamy niepustą odpowiedź, próbujemy sparsować JSON
+      if (textResponse.trim()) {
+        try {
+          const data = JSON.parse(textResponse);
+          
+          if (Array.isArray(data)) {
+            missingTypes = data;
+          } else if (data.error) {
+            console.error('Błąd API:', data.error);
+            throw new Error(data.error);
+          } else {
+            console.warn('Nieoczekiwany format odpowiedzi:', data);
+          }
+        } catch (parseError) {
+          console.error('Błąd parsowania JSON:', parseError);
+          throw new Error('Otrzymano nieprawidłową odpowiedź z serwera');
+        }
+      }
+      
       console.log('Wymagane dokumenty:', missingTypes);
+      
+      // Jeśli status nie jest OK, sprawdzamy czy mamy błąd
+      if (!missingTypesResponse.ok) {
+        if (missingTypes.length > 0 && 'error' in missingTypes[0]) {
+          throw new Error(missingTypes[0].error || 'Błąd podczas sprawdzania dokumentów');
+        } else {
+          throw new Error('Błąd podczas sprawdzania wymaganych dokumentów');
+        }
+      }
       
       return missingTypes;
     } catch (error) {
@@ -292,9 +328,11 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     setSmsError(null);
 
     try {
-      // Potwierdzenie podpisu SMS
+      console.log('Wysyłanie kodu SMS:', confirmationCode, 'dla polisy ID:', policyId);
+      
+      // Potwierdzenie podpisu SMS - zmiana z POST na PUT
       const response = await fetch(`/api/policies/${policyId}/confirm-signature`, {
-        method: 'POST',
+        method: 'POST', // To nadal POST, bo nasz własny backend API używa POST, ale wewnątrz wysyła PUT
         headers: {
           'Content-Type': 'application/json',
         },
@@ -303,20 +341,73 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Błąd podczas potwierdzania podpisu');
+      // Odczytaj odpowiedź jako JSON
+      let data;
+      try {
+        const textResponse = await response.text();
+        console.log('Odpowiedź serwera (tekst):', textResponse);
+        
+        // Pusta odpowiedź lub nieprawidłowy JSON
+        if (!textResponse.trim()) {
+          if (response.ok) {
+            data = { success: true };
+          } else {
+            throw new Error('Otrzymano pustą odpowiedź z serwera');
+          }
+        } else {
+          // Próba parsowania JSON
+          try {
+            data = JSON.parse(textResponse);
+            console.log('Odpowiedź sparsowana jako JSON:', data);
+          } catch (parseError) {
+            console.error('Błąd parsowania JSON:', parseError);
+            throw new Error('Otrzymano nieprawidłową odpowiedź z serwera (nie JSON)');
+          }
+        }
+      } catch (readError) {
+        console.error('Błąd odczytu odpowiedzi:', readError);
+        throw new Error('Nie udało się odczytać odpowiedzi z serwera');
       }
 
-      // Po udanym potwierdzeniu sprawdzamy wymagane dokumenty
-      const missingDocs = await handleMissingDocuments(policyId);
-      
-      // Ukrywamy formularz SMS
-      setShowSmsConfirmation(false);
-      
-      // Tutaj możesz dodać logikę wyświetlania informacji o sukcesie
-      // i ewentualnie przekierować użytkownika do kolejnego kroku (np. upload dokumentów)
+      // Sprawdź status odpowiedzi
+      if (!response.ok) {
+        console.error('Błąd odpowiedzi:', data);
+        
+        // Obsługujemy różne rodzaje błędów
+        if (data.error) {
+          if (data.error.includes('token') || data.error.includes('autoryzac')) {
+            throw new Error('Błąd autoryzacji. Spróbuj ponownie za chwilę.');
+          } else if (data.error.includes('nieprawidłow') || data.error.includes('invalid')) {
+            throw new Error('Nieprawidłowy kod SMS. Sprawdź kod i spróbuj ponownie.');
+          } else {
+            throw new Error(data.error);
+          }
+        } else {
+          throw new Error('Błąd podczas potwierdzania podpisu');
+        }
+      }
+
+      // Jeśli mamy success: true, kontynuujemy
+      if (data.success || response.ok) {
+        console.log('Podpis SMS potwierdzony pomyślnie');
+        
+        // Po udanym potwierdzeniu sprawdzamy wymagane dokumenty
+        try {
+          await handleMissingDocuments(policyId);
+          console.log('Sprawdzono dokumenty dla polisy');
+        } catch (docsError) {
+          console.error('Błąd podczas pobierania wymaganych dokumentów:', docsError);
+          // Kontynuujemy mimo błędu z dokumentami
+        }
+        
+        // Ukrywamy formularz SMS
+        setShowSmsConfirmation(false);
+        
+        // Wyświetlamy informację o sukcesie
+        props.onSubmit();
+      } else {
+        throw new Error('Nieznany błąd podczas potwierdzania kodu SMS');
+      }
       
     } catch (error) {
       console.error('Błąd podczas potwierdzania podpisu:', error);

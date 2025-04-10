@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   console.log('[vehicles/makes] Otrzymano zapytanie GET');
   
   try {

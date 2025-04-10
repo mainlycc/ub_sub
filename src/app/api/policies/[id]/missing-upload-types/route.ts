@@ -1,25 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
-export async function POST(
+export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const data = await request.json();
     const { id } = params;
     
-    console.log('Potwierdzanie SMS dla polisy ID:', id);
-    console.log('Dane żądania:', JSON.stringify(data));
-    
-    // Sprawdź czy mamy kod potwierdzający
-    if (!data.confirmationCode) {
-      console.error('Brak kodu potwierdzającego w żądaniu');
-      return NextResponse.json(
-        { error: 'Brak kodu potwierdzającego' },
-        { status: 400 }
-      );
-    }
+    console.log('Pobieranie typów dokumentów dla polisy ID:', id);
     
     // Pobierz token autoryzacyjny
     const token = await getAuthToken();
@@ -30,25 +19,17 @@ export async function POST(
         { status: 401 }
       );
     }
-    
+
     console.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
 
-    // Dane do wysłania do API
-    const requestBody = {
-      confirmationCode: data.confirmationCode
-    };
-    
-    console.log('Wysyłanie żądania do API Defend...');
-    
-    // Wysyłamy żądanie do właściwego API - ZMIANA Z POST NA PUT!
-    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/confirm-signature`, {
-      method: 'PUT',
+    // Wysyłamy żądanie do właściwego API
+    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/missing-upload-types`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
         'X-NODE-JWT-AUTH-TOKEN': token
-      },
-      body: JSON.stringify(requestBody),
+      }
     });
     
     console.log('Status odpowiedzi API:', response.status);
@@ -62,28 +43,8 @@ export async function POST(
         { status: 401 }
       );
     }
-    
-    if (response.status === 400) {
-      const textResponse = await response.text();
-      console.error('Błąd w żądaniu (400):', textResponse);
-      
-      // Próbujemy sparsować odpowiedź jako JSON, ale obsługujemy przypadek gdy to nie jest JSON
-      try {
-        const errorData = JSON.parse(textResponse);
-        return NextResponse.json(
-          { error: errorData.error || 'Nieprawidłowy kod SMS' },
-          { status: 400 }
-        );
-      } catch (e) {
-        // Jeśli nie jest to prawidłowy JSON, zwracamy tekst odpowiedzi
-        return NextResponse.json(
-          { error: 'Nieprawidłowy kod SMS', details: textResponse },
-          { status: 400 }
-        );
-      }
-    }
 
-    // Dla wszystkich innych typów odpowiedzi, próbujemy odczytać jako tekst
+    // Dla wszystkich typów odpowiedzi, próbujemy odczytać jako tekst
     const textResponse = await response.text();
     console.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
     
@@ -94,18 +55,15 @@ export async function POST(
         jsonResponse = JSON.parse(textResponse);
         console.log('Odpowiedź sparsowana jako JSON:', jsonResponse);
       } else {
-        console.log('Pusta odpowiedź z API');
-        jsonResponse = { success: true };
+        console.log('Pusta odpowiedź z API - brak wymaganych dokumentów');
+        jsonResponse = [];
       }
     } catch (e) {
       console.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
       
-      // Jeśli status jest OK, ale nie jest to JSON, zwracamy sukces
+      // Jeśli status jest OK, ale nie jest to JSON, zwracamy pustą tablicę
       if (response.ok) {
-        return NextResponse.json(
-          { success: true, message: 'Podpis potwierdzony pomyślnie' },
-          { status: 200 }
-        );
+        return NextResponse.json([], { status: 200 });
       } else {
         return NextResponse.json(
           { 
@@ -125,13 +83,19 @@ export async function POST(
     if (!response.ok) {
       console.error('Błąd odpowiedzi API:', jsonResponse);
       return NextResponse.json(
-        { error: jsonResponse.error || jsonResponse.message || 'Błąd podczas potwierdzania podpisu' },
+        { error: jsonResponse.error || jsonResponse.message || 'Błąd podczas pobierania typów dokumentów' },
         { status: response.status }
       );
     }
 
-    // Wszystko OK, zwracamy odpowiedź
-    return NextResponse.json(jsonResponse || { success: true });
+    // Sprawdzamy czy odpowiedź to tablica
+    if (Array.isArray(jsonResponse)) {
+      return NextResponse.json(jsonResponse);
+    } else {
+      // Jeśli to nie jest tablica, ale mamy poprawną odpowiedź, zwracamy pustą tablicę
+      console.warn('Odpowiedź API nie jest tablicą:', jsonResponse);
+      return NextResponse.json([]);
+    }
     
   } catch (error) {
     console.error('Wyjątek podczas przetwarzania żądania:', error);
