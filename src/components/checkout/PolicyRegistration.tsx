@@ -4,6 +4,15 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { VehicleData } from '@/types/vehicle';
 
+// Definicja typu dla danych polisy zwracanych przez API
+interface PolicyResponse {
+  id: string;
+  status: string;
+  productCode: string;
+  premium: number;
+  [key: string]: any; // Dla pozostałych pól, które mogą się pojawiać
+}
+
 interface PolicyRegistrationProps {
   vehicleData: VehicleData;
   insuranceVariant: {
@@ -41,7 +50,7 @@ interface PolicyRegistrationProps {
       maxCoverage: string;
     };
   };
-  onPolicyRegistered: (policyData: any) => void;
+  onPolicyRegistered: (policyData: PolicyResponse) => void;
 }
 
 export const PolicyRegistration = ({

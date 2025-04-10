@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { metadata } from './metadata';
 import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export { metadata };
+export const metadata = {
+  title: 'Ubezpieczenie GAP',
+  description: 'Platforma ubezpieczeniowa do obsługi ubezpieczeń GAP',
+};
 
 export default function RootLayout({
   children,
