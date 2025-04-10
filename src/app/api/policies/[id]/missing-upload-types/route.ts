@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request
 ) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').slice(-2, -1)[0];
     
     console.log('Pobieranie typów dokumentów dla polisy ID:', id);
     
