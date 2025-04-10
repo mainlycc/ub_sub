@@ -2,19 +2,19 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
 
-interface RouteContext {
+type RouteParams = {
   params: {
     id: string;
   };
-}
+};
 
 export async function POST(
   request: NextRequest,
-  context: RouteContext
+  { params }: RouteParams
 ) {
   try {
     const data = await request.json();
-    const { id } = context.params;
+    const { id } = params;
     
     console.log('Potwierdzanie SMS dla polisy ID:', id);
     console.log('Dane żądania:', JSON.stringify(data));
