@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
+import { NextApiResponse } from 'next';
 
 type Props = {
   params: {
@@ -10,7 +11,7 @@ type Props = {
 
 export async function POST(
   request: NextRequest,
-  context: Props
+  context: { params: { id: string } }
 ) {
   try {
     const data = await request.json();
@@ -48,7 +49,7 @@ export async function POST(
     console.log('Wysyłanie żądania do API Defend...');
     
     // Wysyłamy żądanie do właściwego API - ZMIANA Z POST NA PUT!
-    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/confirm-signature`, {
+    const responseAPI = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/confirm-signature`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -58,11 +59,11 @@ export async function POST(
       body: JSON.stringify(requestBody),
     });
     
-    console.log('Status odpowiedzi API:', response.status);
-    console.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...response.headers.entries()])));
+    console.log('Status odpowiedzi API:', responseAPI.status);
+    console.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...responseAPI.headers.entries()])));
 
     // Sprawdzamy najpierw status odpowiedzi
-    if (response.status === 401 || response.status === 403) {
+    if (responseAPI.status === 401 || responseAPI.status === 403) {
       console.error('Błąd autoryzacji w API Defend');
       return NextResponse.json(
         { error: 'Błąd autoryzacji. Token wygasł lub jest nieprawidłowy.' },
@@ -70,8 +71,8 @@ export async function POST(
       );
     }
     
-    if (response.status === 400) {
-      const textResponse = await response.text();
+    if (responseAPI.status === 400) {
+      const textResponse = await responseAPI.text();
       console.error('Błąd w żądaniu (400):', textResponse);
       
       // Próbujemy sparsować odpowiedź jako JSON, ale obsługujemy przypadek gdy to nie jest JSON
@@ -91,7 +92,7 @@ export async function POST(
     }
 
     // Dla wszystkich innych typów odpowiedzi, próbujemy odczytać jako tekst
-    const textResponse = await response.text();
+    const textResponse = await responseAPI.text();
     console.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
     
     // Sprawdzamy czy to JSON
@@ -108,7 +109,7 @@ export async function POST(
       console.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
       
       // Jeśli status jest OK, ale nie jest to JSON, zwracamy sukces
-      if (response.ok) {
+      if (responseAPI.ok) {
         return NextResponse.json(
           { success: true, message: 'Podpis potwierdzony pomyślnie' },
           { status: 200 }
@@ -118,22 +119,22 @@ export async function POST(
           { 
             error: 'Otrzymano nieprawidłową odpowiedź z API (nie JSON)',
             details: {
-              status: response.status,
-              contentType: response.headers.get('content-type'), 
+              status: responseAPI.status,
+              contentType: responseAPI.headers.get('content-type'), 
               responsePreview: textResponse.substring(0, 100)
             }
           },
-          { status: response.status }
+          { status: responseAPI.status }
         );
       }
     }
 
     // Jeśli odpowiedź nie jest OK, ale mamy JSON
-    if (!response.ok) {
+    if (!responseAPI.ok) {
       console.error('Błąd odpowiedzi API:', jsonResponse);
       return NextResponse.json(
         { error: jsonResponse.error || jsonResponse.message || 'Błąd podczas potwierdzania podpisu' },
-        { status: response.status }
+        { status: responseAPI.status }
       );
     }
 
