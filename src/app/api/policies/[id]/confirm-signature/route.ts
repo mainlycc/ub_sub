@@ -2,13 +2,19 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
 
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: Props
 ) {
   try {
     const data = await request.json();
-    const { id } = params;
+    const { id } = context.params;
     
     console.log('Potwierdzanie SMS dla polisy ID:', id);
     console.log('Dane żądania:', JSON.stringify(data));
