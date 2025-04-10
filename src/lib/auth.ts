@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
 
 let cachedToken: string | null = null;
 let tokenExpiration: number | null = null;
@@ -12,6 +12,13 @@ const AUTH_CREDENTIALS = {
 interface AuthResponse {
   token: string;
   expiresIn?: number;
+}
+
+interface ErrorResponse {
+  error?: string;
+  message?: string;
+  code?: number;
+  status?: number;
 }
 
 // Funkcja do autoryzacji i uzyskania tokenu JWT
@@ -65,7 +72,7 @@ export async function getAuthToken(): Promise<string | null> {
     tokenExpiration = null;
     
     if (axios.isAxiosError(error)) {
-      const apiError = error as AxiosError<any>;
+      const apiError = error as AxiosError<ErrorResponse>;
       console.error('Błąd autoryzacji:', {
         message: apiError.message,
         response: apiError.response?.data,
