@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
-import { NextApiResponse } from 'next';
-
-type Props = {
-  params: {
-    id: string;
-  };
-};
 
 export async function POST(
   request: NextRequest,
