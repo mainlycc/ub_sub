@@ -40,7 +40,10 @@ interface InsuredData {
   personData?: PersonalData;
 }
 
-export const InsuredPersonsForm = ({ data, onChange, errors }: InsuredPersonsFormProps): React.ReactElement => {
+export const InsuredPersonsForm = ({ 
+  data, 
+  onChange 
+}: InsuredPersonsFormProps): React.ReactElement => {
   const [showInsuredSelect, setShowInsuredSelect] = useState(false);
   const [showVehicleOwnerSelect, setShowVehicleOwnerSelect] = useState(false);
 

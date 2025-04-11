@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { User, Mail, CreditCard, Check, Building, ChevronRight } from 'lucide-react';
+import { User, Mail, CreditCard, Building, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PersonalData {
@@ -820,7 +820,7 @@ export const CheckoutFinalForm = ({
                       className="w-full p-2 border border-gray-300 rounded-md"
                       value={data.policyHolder.phoneNumber}
                       onChange={(e) => {
-                        let value = e.target.value;
+                        const value = e.target.value;
                         let formattedPhone = value.replace(/\D/g, '');
                         if (formattedPhone.startsWith('48')) {
                           formattedPhone = formattedPhone.substring(2);
@@ -954,7 +954,7 @@ export const CheckoutFinalForm = ({
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={data.policyHolder.address.postCode}
                         onChange={(e) => {
-                          let value = e.target.value;
+                          const value = e.target.value;
                           let formattedPostCode = value.replace(/[^\d-]/g, '');
                           
                           if (formattedPostCode.length === 2 && !value.includes('-')) {
@@ -1251,7 +1251,7 @@ export const CheckoutFinalForm = ({
                       className="w-full p-2 border border-gray-300 rounded-md"
                       value={data.insured.personData?.phoneNumber || ''}
                       onChange={(e) => {
-                        let value = e.target.value;
+                        const value = e.target.value;
                         let formattedPhone = value.replace(/\D/g, '');
                         if (formattedPhone.startsWith('48')) {
                           formattedPhone = formattedPhone.substring(2);
@@ -1412,7 +1412,7 @@ export const CheckoutFinalForm = ({
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={data.insured.personData?.address.postCode || ''}
                         onChange={(e) => {
-                          let value = e.target.value;
+                          const value = e.target.value;
                           let formattedPostCode = value.replace(/[^\d-]/g, '');
                           
                           if (formattedPostCode.length === 2 && !value.includes('-')) {
@@ -1720,7 +1720,7 @@ export const CheckoutFinalForm = ({
                       className="w-full p-2 border border-gray-300 rounded-md"
                       value={data.vehicleOwner.personData?.phoneNumber || ''}
                       onChange={(e) => {
-                        let value = e.target.value;
+                        const value = e.target.value;
                         let formattedPhone = value.replace(/\D/g, '');
                         if (formattedPhone.startsWith('48')) {
                           formattedPhone = formattedPhone.substring(2);
@@ -1881,7 +1881,7 @@ export const CheckoutFinalForm = ({
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={data.vehicleOwner.personData?.address.postCode || ''}
                         onChange={(e) => {
-                          let value = e.target.value;
+                          const value = e.target.value;
                           let formattedPostCode = value.replace(/[^\d-]/g, '');
                           
                           if (formattedPostCode.length === 2 && !value.includes('-')) {

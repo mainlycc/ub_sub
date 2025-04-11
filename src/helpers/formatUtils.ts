@@ -23,19 +23,50 @@ export function formatPostalCode(postalCode: string): string {
   return digitsOnly;
 }
 
+// Definicje typów
+interface Address {
+  street: string;
+  city: string;
+  postCode: string;
+  countryCode: string;
+  addressLine1: string;
+}
+
+interface PersonalData {
+  firstName: string;
+  lastName: string;
+  identificationNumber: string;
+  type: string;
+  phoneNumber: string;
+  email: string;
+  emailAddress?: string;
+  address: Address;
+  companyName?: string;
+  taxId?: string;
+  isCompany?: boolean;
+  addressLine1?: string;
+  addressLine2?: string;
+  correspondenceAddressLine1?: string;
+  correspondenceAddressLine2?: string;
+  correspondenceCity?: string;
+  correspondenceCountryCode?: string;
+  correspondencePostalCode?: string;
+  countryCode?: string;
+  postalCode?: string;
+}
+
+interface InsuredData {
+  inheritFrom?: string;
+  personData?: PersonalData;
+}
+
 /**
  * Konwertuje dane formularza na format wymagany przez API
  */
 export function convertToApiFormat(data: {
-  policyHolder: any;
-  insured: {
-    inheritFrom?: string;
-    personData?: any;
-  };
-  vehicleOwner: {
-    inheritFrom?: string;
-    personData?: any;
-  };
+  policyHolder: PersonalData;
+  insured: InsuredData;
+  vehicleOwner: InsuredData;
 }) {
   // Przygotowanie danych klienta
   const client = {
@@ -65,24 +96,24 @@ export function convertToApiFormat(data: {
 /**
  * Formatuje dane osobowe na format wymagany przez API
  */
-function formatPersonDataForApi(personData: any) {
+function formatPersonDataForApi(personData: PersonalData) {
   return {
-    addressLine1: personData.addressLine1,
+    addressLine1: personData.addressLine1 || personData.address?.addressLine1,
     addressLine2: personData.addressLine2 || null,
-    city: personData.city,
+    city: personData.address?.city || '',
     companyName: personData.isCompany ? personData.companyName : null,
-    correspondenceAddressLine1: personData.correspondenceAddressLine1 || personData.addressLine1,
+    correspondenceAddressLine1: personData.correspondenceAddressLine1 || personData.addressLine1 || personData.address?.addressLine1,
     correspondenceAddressLine2: personData.correspondenceAddressLine2 || personData.addressLine2 || null,
-    correspondenceCity: personData.correspondenceCity || personData.city,
+    correspondenceCity: personData.correspondenceCity || personData.address?.city || '',
     correspondenceCountryCode: personData.correspondenceCountryCode || 'POL',
-    correspondencePostalCode: personData.correspondencePostalCode ? formatPostalCode(personData.correspondencePostalCode) : formatPostalCode(personData.postalCode),
-    countryCode: personData.countryCode || 'POL',
-    emailAddress: personData.emailAddress,
+    correspondencePostalCode: personData.correspondencePostalCode ? formatPostalCode(personData.correspondencePostalCode) : formatPostalCode(personData.postalCode || personData.address?.postCode || ''),
+    countryCode: personData.countryCode || personData.address?.countryCode || 'POL',
+    emailAddress: personData.emailAddress || personData.email,
     firstName: personData.isCompany ? null : personData.firstName,
     identificationNumber: personData.identificationNumber,
     isCompany: personData.isCompany || false,
     lastName: personData.isCompany ? null : personData.lastName,
     phoneNumber: formatPhoneNumber(personData.phoneNumber),
-    postalCode: formatPostalCode(personData.postalCode)
+    postalCode: formatPostalCode(personData.postalCode || personData.address?.postCode || '')
   };
 } 

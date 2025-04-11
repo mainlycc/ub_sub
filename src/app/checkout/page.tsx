@@ -7,16 +7,11 @@ import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Suspense } from 'react';
 import { InsuranceVariantForm } from '@/components/checkout/InsuranceVariantForm';
 import { CalculationForm } from '@/components/checkout/CalculationForm';
-import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
 import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
 import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
 import { VehicleData } from '@/types/vehicle';
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// import { ShieldCheck, TrendingDown, DollarSign } from "lucide-react";
-/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -187,7 +182,7 @@ const CheckoutContent = () => {
   // Efekt synchronizujący początkowe dane klienta z danymi ubezpieczającego
   useEffect(() => {
     setCustomerData(insuredPersonsData.policyHolder);
-  }, []);
+  }, [insuredPersonsData.policyHolder]);
   
   // Handle variant change
   const handleVariantChange = (newVariant: InsuranceVariant) => {
@@ -197,19 +192,6 @@ const CheckoutContent = () => {
   // Handle vehicle change
   const handleVehicleChange = (newData: VehicleData) => {
     setVehicleData(newData);
-  };
-  
-  // Handle insured persons change
-  const handleInsuredPersonsChange = (newData: InsuredPersonsData) => {
-    setInsuredPersonsData(newData);
-  };
-  
-  // Funkcja do aktualizacji danych ubezpieczającego (personalData)
-  const handlePersonalDataChange = (newPolicyHolder: PersonalData) => {
-    setInsuredPersonsData(prevData => ({
-      ...prevData,
-      policyHolder: newPolicyHolder
-    }));
   };
   
   // Handle payment data change
