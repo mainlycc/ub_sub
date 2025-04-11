@@ -196,10 +196,10 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       if (parent === 'address' && child in updatedInsured.personData.address) {
-        updatedInsured.personData.address[child as keyof AddressData] = value;
+        updatedInsured.personData.address[child as keyof AddressData] = value as string;
       }
     } else {
-      updatedInsured.personData[name as keyof PersonalData] = value;
+      (updatedInsured.personData as any)[name] = value;
     }
     
     onChange({
@@ -234,10 +234,10 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       if (parent === 'address' && child in updatedVehicleOwner.personData.address) {
-        updatedVehicleOwner.personData.address[child as keyof AddressData] = value;
+        updatedVehicleOwner.personData.address[child as keyof AddressData] = value as string;
       }
     } else {
-      updatedVehicleOwner.personData[name as keyof PersonalData] = value;
+      (updatedVehicleOwner.personData as any)[name] = value;
     }
     
     onChange({
@@ -267,8 +267,10 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
   const handlePersonToggle = (role: 'insured' | 'vehicleOwner') => {
     if (role === 'insured') {
       setShowInsuredSelect(!showInsuredSelect);
+      setShowVehicleOwnerSelect(false); // Zamknij drugi dropdown
     } else {
       setShowVehicleOwnerSelect(!showVehicleOwnerSelect);
+      setShowInsuredSelect(false); // Zamknij drugi dropdown
     }
   };
 
@@ -324,7 +326,7 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
     }
   };
 
-  // Przygotuj dane do wyświetlenia w UI (kto jest kim)
+  // Określa, kto jest kim w polisie
   const getDisplayName = (role: 'insured' | 'vehicleOwner') => {
     if (data[role].inheritFrom === 'policyHolder') {
       return 'KLIENT (UBEZPIECZAJĄCY)';
@@ -341,10 +343,10 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
           <span className="text-[#FF8E3D] font-bold">3</span>
         </div>
-        Twoje dane
+        Dane klienta
       </h2>
       
-      {/* Sekcja wyboru osób */}
+      {/* Osoby w polisie - sekcja wyboru ról */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 space-y-4 mb-6">
         <h3 className="text-lg font-semibold mb-4">
           Osoby w polisie

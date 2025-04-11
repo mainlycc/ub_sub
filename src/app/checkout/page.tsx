@@ -174,10 +174,8 @@ const CheckoutContent = () => {
     }
   });
   
-  // Stany określające role klienta
+  // Usuwam zbędne stany zastąpione przez InsuredPersonsForm
   const [, setIsPolicyHolder] = useState(true);
-  const [isInsured, setIsInsured] = useState(true);
-  const [isVehicleOwner, setIsVehicleOwner] = useState(true);
   
   // Efekt synchronizujący początkowe dane klienta z danymi ubezpieczającego
   useEffect(() => {
@@ -361,17 +359,7 @@ const CheckoutContent = () => {
     
     try {
       // Przygotowanie danych w odpowiednim formacie API
-      const apiFormatData = convertToApiFormat({
-        policyHolder: customerData,
-        insured: {
-          inheritFrom: isInsured ? 'policyHolder' : undefined,
-          personData: !isInsured ? insuredPersonsData.insured.personData : undefined
-        },
-        vehicleOwner: {
-          inheritFrom: isVehicleOwner ? 'policyHolder' : undefined,
-          personData: !isVehicleOwner ? insuredPersonsData.vehicleOwner.personData : undefined
-        }
-      });
+      const apiFormatData = convertToApiFormat(insuredPersonsData);
       
       const policyData = {
         extApiNo: null,
@@ -422,7 +410,7 @@ const CheckoutContent = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          personalData: customerData,
+          personalData: insuredPersonsData.policyHolder,
           vehicleData,
           paymentData,
           calculationResult,
@@ -556,11 +544,6 @@ const CheckoutContent = () => {
                 insured: newData.insured,
                 vehicleOwner: newData.vehicleOwner
               });
-
-              // Aktualizuj stany ról klienta
-              setIsPolicyHolder(true); // Domyślnie klient jest ubezpieczającym
-              setIsInsured(newData.insured.inheritFrom === 'customer');
-              setIsVehicleOwner(newData.vehicleOwner.inheritFrom === 'customer');
             }}
             onSaveOffer={handleSaveOffer}
             onContinue={handleContinueToSummary}
