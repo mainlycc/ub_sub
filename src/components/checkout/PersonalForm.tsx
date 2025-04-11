@@ -198,8 +198,12 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
       if (parent === 'address' && child in updatedInsured.personData.address) {
         updatedInsured.personData.address[child as keyof AddressData] = value as string;
       }
-    } else {
-      (updatedInsured.personData as Record<string, string>)[name] = value;
+    } else if (name in updatedInsured.personData) {
+      // Bezpośrednio sprawdzamy, czy pole istnieje w obiekcie personData
+      // i ustawiamy jego wartość typowo
+      if (name === 'firstName' || name === 'lastName' || name === 'email' || name === 'phoneNumber' || name === 'identificationNumber' || name === 'type') {
+        (updatedInsured.personData as PersonalData)[name] = value;
+      }
     }
     
     onChange({
@@ -236,8 +240,12 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
       if (parent === 'address' && child in updatedVehicleOwner.personData.address) {
         updatedVehicleOwner.personData.address[child as keyof AddressData] = value as string;
       }
-    } else {
-      (updatedVehicleOwner.personData as Record<string, string>)[name] = value;
+    } else if (name in updatedVehicleOwner.personData) {
+      // Bezpośrednio sprawdzamy, czy pole istnieje w obiekcie personData
+      // i ustawiamy jego wartość typowo
+      if (name === 'firstName' || name === 'lastName' || name === 'email' || name === 'phoneNumber' || name === 'identificationNumber' || name === 'type') {
+        (updatedVehicleOwner.personData as PersonalData)[name] = value;
+      }
     }
     
     onChange({
