@@ -174,9 +174,6 @@ const CheckoutContent = () => {
     }
   });
   
-  // Usuwam zbędne stany zastąpione przez InsuredPersonsForm
-  const [, setIsPolicyHolder] = useState(true);
-  
   // Efekt synchronizujący początkowe dane klienta z danymi ubezpieczającego
   useEffect(() => {
     setCustomerData(insuredPersonsData.policyHolder);

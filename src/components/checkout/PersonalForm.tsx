@@ -199,7 +199,7 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         updatedInsured.personData.address[child as keyof AddressData] = value as string;
       }
     } else {
-      (updatedInsured.personData as any)[name] = value;
+      (updatedInsured.personData as Record<string, string>)[name] = value;
     }
     
     onChange({
@@ -237,7 +237,7 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         updatedVehicleOwner.personData.address[child as keyof AddressData] = value as string;
       }
     } else {
-      (updatedVehicleOwner.personData as any)[name] = value;
+      (updatedVehicleOwner.personData as Record<string, string>)[name] = value;
     }
     
     onChange({
