@@ -10,6 +10,8 @@ import { CalculationForm } from '@/components/checkout/CalculationForm';
 import { PersonalForm } from '@/components/checkout/PersonalForm';
 import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
+import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
+import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
 import { VehicleData } from '@/types/vehicle';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -25,9 +27,7 @@ interface InsuranceVariant {
     code: string;
     value: string | number;
   }>;
-  vehicleMake: string | null;
   vehicleTypes?: string[];
-  vehicleModel: string | null;
 }
 
 interface PersonalData {
@@ -44,6 +44,17 @@ interface PersonalData {
     postCode: string;
     countryCode: string;
   };
+}
+
+interface InsuredData {
+  inheritFrom?: string;
+  personData?: PersonalData;
+}
+
+interface InsuredPersonsData {
+  policyHolder: PersonalData;
+  insured: InsuredData;
+  vehicleOwner: InsuredData;
 }
 
 interface PaymentData {
@@ -82,8 +93,7 @@ const CheckoutContent = () => {
     sellerNodeCode: "PL_TEST_GAP_25",
     signatureTypeCode: "AUTHORIZED_BY_SMS",
     options: [],
-    vehicleMake: null,
-    vehicleModel: null
+    vehicleTypes: ['PC']
   });
   
   // Stany dla pozostałych formularzy
@@ -108,19 +118,28 @@ const CheckoutContent = () => {
     model: ''
   });
   
-  const [personalData, setPersonalData] = useState<PersonalData>({
-    type: "person",
-    phoneNumber: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    identificationNumber: "",
-    address: {
-      addressLine1: "",
-      street: "",
-      city: "",
-      postCode: "",
-      countryCode: "PL"
+  // Nowy stan dla relacji między osobami w polisie
+  const [insuredPersonsData, setInsuredPersonsData] = useState<InsuredPersonsData>({
+    policyHolder: {
+      type: "person",
+      phoneNumber: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      identificationNumber: "",
+      address: {
+        addressLine1: "",
+        street: "",
+        city: "",
+        postCode: "",
+        countryCode: "PL"
+      }
+    },
+    insured: {
+      inheritFrom: 'policyHolder'
+    },
+    vehicleOwner: {
+      inheritFrom: 'policyHolder'
     }
   });
   
@@ -143,6 +162,33 @@ const CheckoutContent = () => {
     payment?: { [key: string]: string };
   }>({});
   
+  // Nowy stan dla danych klienta
+  const [customerData, setCustomerData] = useState<PersonalData>({
+    type: "person",
+    phoneNumber: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    identificationNumber: "",
+    address: {
+      addressLine1: "",
+      street: "",
+      city: "",
+      postCode: "",
+      countryCode: "PL"
+    }
+  });
+  
+  // Stany określające role klienta
+  const [isPolicyHolder, setIsPolicyHolder] = useState(true);
+  const [isInsured, setIsInsured] = useState(true);
+  const [isVehicleOwner, setIsVehicleOwner] = useState(true);
+  
+  // Efekt synchronizujący początkowe dane klienta z danymi ubezpieczającego
+  useEffect(() => {
+    setCustomerData(insuredPersonsData.policyHolder);
+  }, []);
+  
   // Handle variant change
   const handleVariantChange = (newVariant: InsuranceVariant) => {
     setInsuranceVariant(newVariant);
@@ -153,9 +199,17 @@ const CheckoutContent = () => {
     setVehicleData(newData);
   };
   
-  // Handle personal data change
-  const handlePersonalDataChange = (newData: PersonalData) => {
-    setPersonalData(newData);
+  // Handle insured persons change
+  const handleInsuredPersonsChange = (newData: InsuredPersonsData) => {
+    setInsuredPersonsData(newData);
+  };
+  
+  // Funkcja do aktualizacji danych ubezpieczającego (personalData)
+  const handlePersonalDataChange = (newPolicyHolder: PersonalData) => {
+    setInsuredPersonsData(prevData => ({
+      ...prevData,
+      policyHolder: newPolicyHolder
+    }));
   };
   
   // Handle payment data change
@@ -178,14 +232,6 @@ const CheckoutContent = () => {
       newErrors.productCode = "Wybór wariantu ubezpieczenia jest wymagany";
     }
     
-    if (!insuranceVariant.vehicleMake) {
-      newErrors.vehicleMake = "Wybór marki pojazdu jest wymagany";
-    }
-
-    if (!insuranceVariant.vehicleModel) {
-      newErrors.vehicleModel = "Wybór modelu pojazdu jest wymagany";
-    }
-    
     setErrors(prev => ({ ...prev, variant: newErrors }));
     const isValid = Object.keys(newErrors).length === 0;
     console.log('Wynik walidacji:', isValid, 'Błędy:', newErrors);
@@ -206,35 +252,35 @@ const CheckoutContent = () => {
   const validatePersonalData = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     
-    if (!personalData.firstName) {
+    if (!insuredPersonsData.policyHolder.firstName) {
       newErrors.firstName = "Imię jest wymagane";
     }
     
-    if (!personalData.lastName) {
+    if (!insuredPersonsData.policyHolder.lastName) {
       newErrors.lastName = "Nazwisko jest wymagane";
     }
     
-    if (!personalData.phoneNumber) {
+    if (!insuredPersonsData.policyHolder.phoneNumber) {
       newErrors.phoneNumber = "Numer telefonu jest wymagany";
     }
     
-    if (!personalData.email || !/\S+@\S+\.\S+/.test(personalData.email)) {
+    if (!insuredPersonsData.policyHolder.email || !/\S+@\S+\.\S+/.test(insuredPersonsData.policyHolder.email)) {
       newErrors.email = "Wymagany poprawny adres email";
     }
     
-    if (!personalData.identificationNumber || personalData.identificationNumber.length !== 11) {
+    if (!insuredPersonsData.policyHolder.identificationNumber || insuredPersonsData.policyHolder.identificationNumber.length !== 11) {
       newErrors.identificationNumber = "Wymagany poprawny numer PESEL (11 cyfr)";
     }
     
-    if (!personalData.address.street) {
+    if (!insuredPersonsData.policyHolder.address.street) {
       newErrors.street = "Ulica jest wymagana";
     }
     
-    if (!personalData.address.city) {
+    if (!insuredPersonsData.policyHolder.address.city) {
       newErrors.city = "Miasto jest wymagane";
     }
     
-    if (!personalData.address.postCode || !/^\d{2}-\d{3}$/.test(personalData.address.postCode)) {
+    if (!insuredPersonsData.policyHolder.address.postCode || !/^\d{2}-\d{3}$/.test(insuredPersonsData.policyHolder.address.postCode)) {
       newErrors.postCode = "Wymagany poprawny kod pocztowy (format: XX-XXX)";
     }
     
@@ -299,7 +345,7 @@ const CheckoutContent = () => {
       return;
     }
     
-    if (currentStep < 5) {
+    if (currentStep < 5) {  // Zmieniam maksymalny krok z 6 na 5
       console.log('Przechodzę do kroku:', currentStep + 1);
       setCurrentStep(currentStep + 1);
       router.push(`/checkout?step=${currentStep + 1}`);
@@ -332,7 +378,19 @@ const CheckoutContent = () => {
     setIsSubmitting(true);
     
     try {
-      // Przygotowanie danych w odpowiednim formacie
+      // Przygotowanie danych w odpowiednim formacie API
+      const apiFormatData = convertToApiFormat({
+        policyHolder: customerData,
+        insured: {
+          inheritFrom: isInsured ? 'policyHolder' : undefined,
+          personData: !isInsured ? insuredPersonsData.insured.personData : undefined
+        },
+        vehicleOwner: {
+          inheritFrom: isVehicleOwner ? 'policyHolder' : undefined,
+          personData: !isVehicleOwner ? insuredPersonsData.vehicleOwner.personData : undefined
+        }
+      });
+      
       const policyData = {
         extApiNo: null,
         extReferenceNo: null,
@@ -344,13 +402,14 @@ const CheckoutContent = () => {
         confirmedByDefault: null,
         
         vehicleSnapshot: {
+          ...apiFormatData.vehicleSnapshot,
           purchasedOn: vehicleData.purchasedOn,
           modelCode: vehicleData.modelCode,
           categoryCode: vehicleData.categoryCode,
           usageCode: vehicleData.usageCode,
           mileage: vehicleData.mileage,
           firstRegisteredOn: new Date(vehicleData.firstRegisteredOn).toISOString(),
-          evaluationDate: vehicleData.evaluationDate,
+          evaluationDate: new Date().toISOString().split('T')[0],
           purchasePrice: Math.round(vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
           purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
@@ -358,32 +417,9 @@ const CheckoutContent = () => {
           purchasePriceInputType: vehicleData.purchasePriceInputType,
           vin: vehicleData.vin,
           vrm: vehicleData.vrm,
-          owners: [{contact: {inheritFrom: "policyHolder"}}]
         },
         
-        client: {
-          policyHolder: {
-            type: personalData.type,
-            phoneNumber: personalData.phoneNumber,
-            firstName: personalData.firstName,
-            lastName: personalData.lastName,
-            email: personalData.email,
-            identificationNumber: personalData.identificationNumber,
-            address: {
-              addressLine1: personalData.address.addressLine1 || `${personalData.firstName} ${personalData.lastName}`,
-              street: personalData.address.street,
-              city: personalData.address.city,
-              postCode: personalData.address.postCode,
-              countryCode: personalData.address.countryCode
-            }
-          },
-          insured: {
-            inheritFrom: "policyHolder"
-          },
-          beneficiary: {
-            inheritFrom: "policyHolder"
-          }
-        },
+        client: apiFormatData.client,
         
         options: {
           TERM: paymentData.term,
@@ -395,7 +431,7 @@ const CheckoutContent = () => {
         premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
       };
       
-      console.log('Wysyłanie danych formularza...');
+      console.log('Wysyłanie danych formularza...', policyData);
       
       // Wysyłanie maila z potwierdzeniem
       const emailResponse = await fetch('/api/send-email', {
@@ -404,7 +440,7 @@ const CheckoutContent = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          personalData,
+          personalData: customerData,
           vehicleData,
           paymentData,
           calculationResult,
@@ -473,6 +509,101 @@ const CheckoutContent = () => {
     );
   };
 
+  // Funkcje do obsługi akcji w CheckoutFinalForm
+  const handleSaveOffer = () => {
+    console.log('Zapisywanie oferty...');
+    alert('Oferta została zapisana!');
+  };
+  
+  const handleContinueToSummary = () => {
+    setCurrentStep(5); // Zmieniamy z 6 na 5
+    router.push(`/checkout?step=5`); // Zmieniamy z 6 na 5
+  };
+
+  const renderStepContent = () => {
+    if (isCompleted) {
+      return renderSuccess();
+    }
+    
+    switch (currentStep) {
+      case 1:
+        return (
+          <InsuranceVariantForm
+            data={insuranceVariant}
+            onChange={handleVariantChange}
+            errors={errors.variant}
+          />
+        );
+      case 2:
+        return (
+          <VehicleForm
+            data={vehicleData}
+            onChange={handleVehicleChange}
+            errors={errors.vehicle}
+          />
+        );
+      case 3:
+        return (
+          <CalculationForm
+            vehicleData={vehicleData}
+            insuranceVariant={insuranceVariant}
+            paymentData={paymentData}
+            onCalculate={handleCalculation}
+            onVehicleChange={handleVehicleChange}
+            onPaymentChange={handlePaymentDataChange}
+            calculationResult={calculationResult}
+            errors={errors.calculation}
+          />
+        );
+      case 4:
+        return (
+          <CheckoutFinalForm
+            data={{
+              policyHolder: insuredPersonsData.policyHolder,
+              insured: insuredPersonsData.insured,
+              vehicleOwner: insuredPersonsData.vehicleOwner,
+              customer: customerData
+            }}
+            onChange={(newData) => {
+              // Aktualizuj dane klienta
+              setCustomerData(newData.customer);
+              
+              // Aktualizuj dane osób w polisie
+              setInsuredPersonsData({
+                policyHolder: newData.policyHolder,
+                insured: newData.insured,
+                vehicleOwner: newData.vehicleOwner
+              });
+
+              // Aktualizuj stany ról klienta
+              setIsPolicyHolder(true); // Domyślnie klient jest ubezpieczającym
+              setIsInsured(newData.insured.inheritFrom === 'customer');
+              setIsVehicleOwner(newData.vehicleOwner.inheritFrom === 'customer');
+            }}
+            onSaveOffer={handleSaveOffer}
+            onContinue={handleContinueToSummary}
+            errors={errors.personal}
+          />
+        );
+      case 5: // Zmieniamy z 6 na 5
+        return (
+          <Summary
+            vehicleData={vehicleData}
+            personalData={customerData}
+            paymentData={paymentData}
+            calculationResult={calculationResult}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            termsAgreed={termsAgreed}
+            onTermsChange={setTermsAgreed}
+            onPaymentChange={handlePaymentDataChange}
+          />
+        );
+      default:
+        return <div>Nieznany krok</div>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#E1EDFF]/30">
       {renderSuccess()}
@@ -502,9 +633,9 @@ const CheckoutContent = () => {
               />
 
               {[
-                { number: 1, title: "ANALIZA POTRZEB KLIENTA" },
+                { number: 1, title: "WARIANT" },
                 { number: 2, title: "POJAZD" },
-                { number: 3, title: "PRODUKT" },
+                { number: 3, title: "KALKULACJA" },
                 { number: 4, title: "KLIENT" },
                 { number: 5, title: "PODSUMOWANIE" }
               ].map((step, index) => (
@@ -528,57 +659,7 @@ const CheckoutContent = () => {
 
             {/* Formularz - treść */}
             <div className="bg-gray-50 rounded-xl p-6 mb-8">
-              {currentStep === 1 && (
-                <InsuranceVariantForm 
-                  data={insuranceVariant} 
-                  onChange={handleVariantChange} 
-                  errors={errors.variant}
-                  showOnlyVariantSelection={true} 
-                />
-              )}
-
-              {currentStep === 2 && (
-                <VehicleForm 
-                  data={vehicleData} 
-                  onChange={handleVehicleChange} 
-                  errors={errors.vehicle} 
-                />
-              )}
-
-              {currentStep === 3 && (
-                <CalculationForm 
-                  vehicleData={vehicleData}
-                  insuranceVariant={insuranceVariant}
-                  paymentData={paymentData}
-                  onCalculate={handleCalculation}
-                  onVehicleChange={handleVehicleChange}
-                  onPaymentChange={handlePaymentDataChange}
-                  calculationResult={calculationResult}
-                  errors={errors.calculation}
-                />
-              )}
-
-              {currentStep === 4 && (
-                <PersonalForm 
-                  data={personalData} 
-                  onChange={handlePersonalDataChange} 
-                  errors={errors.personal} 
-                />
-              )}
-
-              {currentStep === 5 && (
-                <Summary 
-                  vehicleData={vehicleData}
-                  personalData={personalData}
-                  paymentData={paymentData}
-                  calculationResult={calculationResult}
-                  onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                  termsAgreed={termsAgreed}
-                  onTermsChange={setTermsAgreed}
-                  onPaymentChange={handlePaymentDataChange}
-                />
-              )}
+              {renderStepContent()}
             </div>
 
             {/* Przyciski nawigacyjne */}
@@ -602,22 +683,21 @@ const CheckoutContent = () => {
                 </Button>
               )}
               
-              {currentStep < 5 ? (
+              {currentStep < 3 ? (
                 <Button
                   className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
                   onClick={goToNextStep}
                 >
                   Dalej <ChevronRight size={16} className="ml-1" />
                 </Button>
-              ) : (
+              ) : currentStep === 3 ? (
                 <Button
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !termsAgreed}
+                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                  onClick={goToNextStep}
                 >
-                  {isSubmitting ? 'Przetwarzanie...' : 'Zamawiam i płacę'}
+                  Dalej <ChevronRight size={16} className="ml-1" />
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

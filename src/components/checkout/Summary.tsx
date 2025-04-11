@@ -33,6 +33,7 @@ interface PersonalData {
   email: string;
   identificationNumber: string;
   companyName?: string;
+  taxId?: string;
   address: {
     addressLine1: string;
     street: string;
@@ -79,6 +80,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
   const [showSmsConfirmation, setShowSmsConfirmation] = useState(false);
   const [isConfirmingSms, setIsConfirmingSms] = useState(false);
   const [smsError, setSmsError] = useState<string | null>(null);
+  const [smsSuccess, setSmsSuccess] = useState<string | null>(null);
 
   if (!props.calculationResult) {
     return (
@@ -100,6 +102,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     
     setIsRegistering(true);
     setRegistrationError(null);
+    setSmsSuccess(null);
 
     try {
       // Sprawdzanie kompletności danych przed wysłaniem
@@ -115,12 +118,17 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         // Sprawdzanie danych osobowych
         if (!props.personalData.phoneNumber) errors.push('Brak numeru telefonu');
         if (!props.personalData.identificationNumber) errors.push('Brak numeru PESEL');
-        if (!props.personalData.address.street) errors.push('Brak ulicy');
-        if (!props.personalData.address.postCode) errors.push('Brak kodu pocztowego');
-        if (!props.personalData.address.city) errors.push('Brak miasta');
+        if (!props.personalData.address?.street) errors.push('Brak ulicy');
+        if (!props.personalData.address?.postCode) errors.push('Brak kodu pocztowego');
+        if (!props.personalData.address?.city) errors.push('Brak miasta');
         
-        // Upewnijmy się, że mamy addressLine1 (numer domu)
-        if (!props.personalData.address.addressLine1) errors.push('Brak numeru domu');
+        // Upewnijmy się, że mamy addressLine1 (numer domu) lub użyjemy ulicy jako zamiennika
+        const addressLine1 = props.personalData.address?.addressLine1 || 
+                            (props.personalData.address?.street ? 
+                            props.personalData.address.street.match(/\d+$/)?.[0] || 
+                            props.personalData.address.street : '');
+        
+        if (!addressLine1) errors.push('Brak numeru domu');
         
         return errors;
       };
@@ -145,14 +153,14 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       }
 
       // Upewnij się, że mamy wypełnione addressLine1
-      let addressLine1 = props.personalData.address.addressLine1;
+      let addressLine1 = props.personalData.address?.addressLine1;
       if (!addressLine1 || addressLine1.trim() === '') {
-        addressLine1 = props.personalData.address.street.match(/\d+$/)?.[0] || `${props.personalData.firstName} ${props.personalData.lastName}`;
+        addressLine1 = props.personalData.address?.street.match(/\d+$/)?.[0] || props.personalData.address?.street || `${props.personalData.firstName} ${props.personalData.lastName}`;
       }
       
       // Upewnij się, że kod pocztowy ma poprawny format
-      let postCode = props.personalData.address.postCode;
-      if (!postCode || !postCode.match(/^\d{2}-\d{3}$/)) {
+      let postCode = props.personalData.address?.postCode || '';
+      if (!postCode.match(/^\d{2}-\d{3}$/)) {
         if (postCode && postCode.replace(/\D/g, '').length === 5) {
           postCode = postCode.replace(/\D/g, '').replace(/^(\d{2})(\d{3})$/, '$1-$2');
         } else {
@@ -161,7 +169,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       }
       
       // Upewnij się, że mamy kod kraju
-      const countryCode = props.personalData.address.countryCode || 'PL';
+      const countryCode = props.personalData.address?.countryCode || 'PL';
 
       const policyData = {
         extApiNo: null,
@@ -201,8 +209,8 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
             identificationNumber: props.personalData.identificationNumber,
             address: {
               addressLine1: addressLine1,
-              street: props.personalData.address.street,
-              city: props.personalData.address.city,
+              street: props.personalData.address?.street || '',
+              city: props.personalData.address?.city || '',
               postCode: postCode,
               countryCode: countryCode
             }
@@ -326,6 +334,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     
     setIsConfirmingSms(true);
     setSmsError(null);
+    setSmsSuccess(null);
 
     try {
       console.log('Wysyłanie kodu SMS:', confirmationCode, 'dla polisy ID:', policyId);
@@ -400,11 +409,15 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           // Kontynuujemy mimo błędu z dokumentami
         }
         
-        // Ukrywamy formularz SMS
-        setShowSmsConfirmation(false);
+        // Ustawiamy komunikat sukcesu
+        setSmsSuccess('Podpis został potwierdzony pomyślnie. Za chwilę nastąpi przekierowanie...');
         
-        // Wyświetlamy informację o sukcesie
-        props.onSubmit();
+        // Ukrywamy formularz SMS po krótkim opóźnieniu
+        setTimeout(() => {
+          setShowSmsConfirmation(false);
+          // Wyświetlamy informację o sukcesie
+          props.onSubmit();
+        }, 2000);
       } else {
         throw new Error('Nieznany błąd podczas potwierdzania kodu SMS');
       }
@@ -416,6 +429,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           ? error.message 
           : 'Wystąpił nieoczekiwany błąd podczas potwierdzania podpisu'
       );
+      setSmsSuccess(null);
     } finally {
       setIsConfirmingSms(false);
     }
@@ -434,19 +448,49 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Dane pojazdu */}
         <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">Dane pojazdu</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+              <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11a1 1 0 001-1v-5h2.05a2.5 2.5 0 014.9 0H19a1 1 0 001-1V7a1 1 0 00-.293-.707l-2-2A1 1 0 0017 4H3z" />
+            </svg>
+            Dane pojazdu
+          </h3>
           <div className="space-y-2">
+            <p><span className="font-medium">Marka i model:</span> {props.vehicleData.make} {props.vehicleData.model}</p>
             <p><span className="font-medium">Data zakupu:</span> {new Date(props.vehicleData.purchasedOn).toLocaleDateString()}</p>
+            <p><span className="font-medium">Data pierwszej rejestracji:</span> {new Date(props.vehicleData.firstRegisteredOn).toLocaleDateString()}</p>
             <p><span className="font-medium">VIN:</span> {props.vehicleData.vin}</p>
             <p><span className="font-medium">Nr rejestracyjny:</span> {props.vehicleData.vrm}</p>
+            <p><span className="font-medium">Przebieg:</span> {props.vehicleData.mileage.toLocaleString()} km</p>
+            <p><span className="font-medium">Wartość pojazdu:</span> {props.vehicleData.purchasePrice.toLocaleString()} zł</p>
+            <p><span className="font-medium">VAT odliczalny:</span> {
+              props.vehicleData.purchasePriceVatReclaimableCode === 'YES' ? 'Tak' :
+              props.vehicleData.purchasePriceVatReclaimableCode === 'PARTIAL' ? 'Częściowo (50%)' :
+              'Nie'
+            }</p>
           </div>
         </div>
 
-        {/* Dane osobowe */}
+        {/* Dane ubezpieczającego */}
         <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">Dane osobowe</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+            </svg>
+            Dane ubezpieczającego
+          </h3>
           <div className="space-y-2">
-            <p><span className="font-medium">Imię i nazwisko:</span> {props.personalData.firstName} {props.personalData.lastName}</p>
+            {props.personalData.type === 'company' ? (
+              <>
+                <p><span className="font-medium">Nazwa firmy:</span> {props.personalData.companyName}</p>
+                <p><span className="font-medium">NIP:</span> {props.personalData.taxId}</p>
+              </>
+            ) : (
+              <>
+                <p><span className="font-medium">Imię i nazwisko:</span> {props.personalData.firstName} {props.personalData.lastName}</p>
+                <p><span className="font-medium">PESEL:</span> {props.personalData.identificationNumber}</p>
+              </>
+            )}
             <p><span className="font-medium">Email:</span> {props.personalData.email}</p>
             <p><span className="font-medium">Telefon:</span> {props.personalData.phoneNumber}</p>
             <p><span className="font-medium">Adres:</span> {props.personalData.address.street}, {props.personalData.address.postCode} {props.personalData.address.city}</p>
@@ -455,21 +499,35 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
         {/* Szczegóły ubezpieczenia */}
         <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">Szczegóły ubezpieczenia</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Szczegóły ubezpieczenia
+          </h3>
           <div className="space-y-2">
             <p><span className="font-medium">Produkt:</span> {props.calculationResult.details.productName}</p>
             <p><span className="font-medium">Okres ochrony:</span> {props.calculationResult.details.coveragePeriod}</p>
+            <p><span className="font-medium">Wartość pojazdu:</span> {props.calculationResult.details.vehicleValue.toLocaleString()} zł</p>
             <p><span className="font-medium">Maksymalna ochrona:</span> {props.calculationResult.details.maxCoverage}</p>
+            <p><span className="font-medium">Okres ubezpieczenia:</span> {props.paymentData.term === 'T_36' ? '36 miesięcy' : props.paymentData.term === 'T_24' ? '24 miesiące' : props.paymentData.term === 'T_12' ? '12 miesięcy' : props.paymentData.term}</p>
+            <p><span className="font-medium">Limit roszczenia:</span> {props.paymentData.claimLimit === 'CL_150000' ? '150 000 zł' : props.paymentData.claimLimit === 'CL_100000' ? '100 000 zł' : props.paymentData.claimLimit === 'CL_50000' ? '50 000 zł' : props.paymentData.claimLimit}</p>
           </div>
         </div>
 
         {/* Płatność */}
         <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4">Płatność</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+              <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+            </svg>
+            Płatność
+          </h3>
           <div className="space-y-4">
             <p><span className="font-medium">Składka:</span> <span className="text-xl font-bold text-[#300FE6]">{props.calculationResult.premium.toLocaleString()} zł</span></p>
-            <p><span className="font-medium">Sposób płatności:</span> {props.paymentData.paymentTerm === 'PT_LS' ? 'Jednorazowo' : 'Miesięcznie'}</p>
-            <p><span className="font-medium">Forma płatności:</span> {
+            <p><span className="font-medium">Schemat płatności:</span> {props.paymentData.paymentTerm === 'PT_LS' ? 'Jednorazowo' : 'Miesięcznie'}</p>
+            <p><span className="font-medium">Metoda płatności:</span> {
               props.paymentData.paymentMethod === 'PM_PBC' ? 'BLIK, karta, szybki przelew' :
               props.paymentData.paymentMethod === 'PM_BT' ? 'Przelew tradycyjny' :
               props.paymentData.paymentMethod === 'PM_PAYU_M' ? 'Raty miesięczne PayU' :
@@ -481,67 +539,151 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       </div>
 
       {/* Zgoda na warunki */}
-      <div className="mt-6">
-        <label className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={props.termsAgreed}
-            onChange={(e) => props.onTermsChange(e.target.checked)}
-            className="rounded border-gray-300 text-[#300FE6] focus:ring-[#300FE6]"
-          />
-          <span className="text-sm text-gray-600">
-            Akceptuję regulamin i politykę prywatności
-          </span>
-        </label>
+      <div className="mt-6 p-6 bg-white rounded-xl border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+            <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+          </svg>
+          Zgody i potwierdzenia
+        </h3>
+        <div className="space-y-4">
+          <div className="flex items-start">
+            <div className="flex items-center h-5 mt-0.5">
+              <input
+                type="checkbox"
+                id="termsAgreed"
+                checked={props.termsAgreed}
+                onChange={(e) => props.onTermsChange(e.target.checked)}
+                className="w-5 h-5 text-[#300FE6] border-gray-300 rounded focus:ring-[#300FE6] focus:ring-offset-0 focus:ring-1 cursor-pointer"
+              />
+            </div>
+            <label htmlFor="termsAgreed" className="ml-2 text-sm text-gray-600">
+              Oświadczam, że zapoznałem/am się z warunkami umowy ubezpieczenia GAP, Ogólnymi Warunkami Ubezpieczenia, Dokumentem zawierającym informacje o produkcie ubezpieczeniowym oraz Informacją Administratora Danych Osobowych i wyrażam zgodę na zawarcie umowy ubezpieczenia na tych warunkach.
+            </label>
+          </div>
+          
+          <div className="flex items-start">
+            <div className="flex items-center h-5 mt-0.5">
+              <input
+                type="checkbox"
+                id="confirmData"
+                checked={props.termsAgreed}
+                onChange={(e) => props.onTermsChange(e.target.checked)}
+                className="w-5 h-5 text-[#300FE6] border-gray-300 rounded focus:ring-[#300FE6] focus:ring-offset-0 focus:ring-1 cursor-pointer"
+              />
+            </div>
+            <label htmlFor="confirmData" className="ml-2 text-sm text-gray-600">
+              Potwierdzam, że wszystkie informacje podane przeze mnie w formularzu są zgodne z prawdą i kompletne. Jestem świadomy/a, że podanie nieprawdziwych danych może skutkować odmową wypłaty odszkodowania.
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Wyświetlanie błędów */}
       {registrationError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Błąd! </strong>
-          <span className="block sm:inline">{registrationError}</span>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl" role="alert">
+          <div className="flex">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <strong className="font-bold">Błąd rejestracji: </strong>
+              <span className="block sm:inline">{registrationError}</span>
+            </div>
+          </div>
         </div>
       )}
 
       {smsError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Błąd potwierdzenia SMS! </strong>
-          <span className="block sm:inline">{smsError}</span>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl" role="alert">
+          <div className="flex">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <strong className="font-bold">Błąd potwierdzenia SMS: </strong>
+              <span className="block sm:inline">{smsError}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Komunikat sukcesu SMS */}
+      {smsSuccess && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-xl" role="alert">
+          <div className="flex">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <strong className="font-bold">Sukces: </strong>
+              <span className="block sm:inline">{smsSuccess}</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Potwierdzenie SMS */}
       {showSmsConfirmation ? (
-        <div className="mt-6 space-y-4">
-          <p className="text-gray-700">
-            Na podany numer telefonu został wysłany kod SMS. 
-            Wprowadź go poniżej, aby potwierdzić zawarcie umowy.
-          </p>
-          <div className="flex space-x-4">
-            <Input
-              type="text"
-              value={confirmationCode}
-              onChange={(e) => setConfirmationCode(e.target.value)}
-              placeholder="Wprowadź kod z SMS"
-              className="max-w-xs"
-            />
-            <Button
-              onClick={confirmSmsSignature}
-              disabled={isConfirmingSms || !confirmationCode}
-              className="bg-[#300FE6] hover:bg-[#2507b3] text-white"
-            >
-              {isConfirmingSms ? 'Potwierdzanie...' : 'Potwierdź kod SMS'}
-            </Button>
+        <div className="mt-6 p-6 bg-white rounded-xl border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#300FE6]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+              <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+            </svg>
+            Potwierdź podpisem SMS
+          </h3>
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              Na numer telefonu <span className="font-bold">{props.personalData.phoneNumber}</span> został wysłany kod SMS. 
+              Wprowadź go poniżej, aby potwierdzić zawarcie umowy.
+            </p>
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+              <Input
+                type="text"
+                value={confirmationCode}
+                onChange={(e) => setConfirmationCode(e.target.value)}
+                placeholder="Wprowadź kod z SMS"
+                className="max-w-xs"
+              />
+              <Button
+                onClick={confirmSmsSignature}
+                disabled={isConfirmingSms || !confirmationCode}
+                className="bg-[#300FE6] hover:bg-[#2507b3] text-white"
+              >
+                {isConfirmingSms ? 
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Potwierdzanie...
+                  </div> : 
+                  'Potwierdź kod SMS'
+                }
+              </Button>
+            </div>
+            <p className="text-sm text-gray-500">Nie otrzymałeś/aś kodu? Możesz poprosić o ponowne wysłanie za <span className="font-semibold">60</span> sekund.</p>
           </div>
         </div>
       ) : (
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-end mt-8">
           <Button
             onClick={registerPolicy}
             disabled={isRegistering || !props.termsAgreed}
             className="bg-[#300FE6] hover:bg-[#2507b3] text-white px-8 py-3"
           >
-            {isRegistering ? 'Rejestrowanie polisy...' : 'Zarejestruj polisę'}
+            {isRegistering ? 
+              <div className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Przetwarzanie...
+              </div> : 
+              'Zamawiam i płacę'
+            }
           </Button>
         </div>
       )}

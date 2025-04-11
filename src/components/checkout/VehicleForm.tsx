@@ -118,12 +118,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
     });
   };
 
-  const handleModelSelect = (modelId: string | null) => {
-    setSelectedModel(modelId);
+  const handleModelSelect = (modelCode: string | null, modelName: string | null) => {
+    setSelectedModel(modelCode);
     onChange({
       ...data,
-      modelCode: modelId || '',
-      modelId: modelId || ''
+      modelCode: modelCode || '',
+      modelId: modelCode || '',
+      model: modelName || ''
     });
   };
 
@@ -303,8 +304,92 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             />
             {errors?.purchasePrice && (
               <p className="text-sm text-red-500">{errors.purchasePrice}</p>
-          )}
-        </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Podana wartość jest</Label>
+            <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-gray-300">
+              <button
+                type="button"
+                className={`py-2 px-4 text-center transition-colors ${
+                  data.purchasePriceInputType === 'WITH_VAT' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceInputType', 'WITH_VAT')}
+              >
+                Brutto
+              </button>
+              <button
+                type="button"
+                className={`py-2 px-4 text-center border-l border-r border-gray-300 transition-colors ${
+                  data.purchasePriceInputType === 'WITHOUT_VAT' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceInputType', 'WITHOUT_VAT')}
+              >
+                Netto
+              </button>
+              <button
+                type="button"
+                className={`py-2 px-4 text-center transition-colors ${
+                  data.purchasePriceInputType === 'VAT_INAPPLICABLE' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceInputType', 'VAT_INAPPLICABLE')}
+              >
+                Netto +<br />50% VAT
+              </button>
+            </div>
+            {errors?.purchasePriceInputType && (
+              <p className="text-sm text-red-500">{errors.purchasePriceInputType}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Czy wartość pojazdu na polisie AC jest wartością netto?</Label>
+            <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-gray-300">
+              <button
+                type="button"
+                className={`py-2 px-4 text-center transition-colors ${
+                  data.purchasePriceVatReclaimableCode === 'YES' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceVatReclaimableCode', 'YES')}
+              >
+                Tak
+              </button>
+              <button
+                type="button"
+                className={`py-2 px-4 text-center border-l border-r border-gray-300 transition-colors ${
+                  data.purchasePriceVatReclaimableCode === 'PARTIAL' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceVatReclaimableCode', 'PARTIAL')}
+              >
+                50%
+              </button>
+              <button
+                type="button"
+                className={`py-2 px-4 text-center transition-colors ${
+                  data.purchasePriceVatReclaimableCode === 'NO' 
+                    ? 'bg-[#300FE6] text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('purchasePriceVatReclaimableCode', 'NO')}
+              >
+                Nie
+              </button>
+            </div>
+            {errors?.purchasePriceVatReclaimableCode && (
+              <p className="text-sm text-red-500">{errors.purchasePriceVatReclaimableCode}</p>
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="mileage">Przebieg pojazdu (km)</Label>
@@ -320,24 +405,6 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             />
             {errors?.mileage && (
               <p className="text-sm text-red-500">{errors.mileage}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="purchasePriceInputType">Podana wartość jest</Label>
-            <Select
-              id="purchasePriceInputType"
-              value={data.purchasePriceInputType}
-              onChange={(e) => handleInputChange('purchasePriceInputType', e.target.value)}
-              className={errors?.purchasePriceInputType ? 'border-red-500' : ''}
-            >
-              <option value="">Wybierz typ wartości</option>
-              <option value="WITH_VAT">Brutto (z VAT)</option>
-              <option value="WITHOUT_VAT">Netto (bez VAT)</option>
-              <option value="VAT_INAPPLICABLE">VAT nie ma zastosowania</option>
-            </Select>
-            {errors?.purchasePriceInputType && (
-              <p className="text-sm text-red-500">{errors.purchasePriceInputType}</p>
             )}
           </div>
         </div>

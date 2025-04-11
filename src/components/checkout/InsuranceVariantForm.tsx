@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Truck } from 'lucide-react';
-import { VehicleMakeSelect } from './VehicleMakeSelect';
-import { VehicleModelSelect } from './VehicleModelSelect';
 
 interface InsuranceVariantFormProps {
   data: InsuranceVariant;
@@ -21,9 +19,7 @@ interface InsuranceVariant {
     code: string;
     value: string | number;
   }>;
-  vehicleMake: string | null;
   vehicleTypes?: string[];
-  vehicleModel: string | null;
 }
 
 interface Portfolio {
@@ -171,8 +167,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
       signatureTypeCode: "AUTHORIZED_BY_SMS",
       options: portfolio.optionTypes.map(option => ({ code: option.code, value: '' })),
       vehicleTypes: portfolio.vehicleTypes,
-      vehicleMake: data.vehicleMake,
-      vehicleModel: data.vehicleModel
     };
 
     onChange(selectedVariant);
@@ -182,21 +176,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
     if (onInputPathsChange) {
       onInputPathsChange(inputPaths);
     }
-  };
-
-  const handleMakeSelect = (make: string | null) => {
-    onChange({
-      ...data,
-      vehicleMake: make,
-      vehicleModel: '' // Reset modelu przy zmianie marki
-    });
-  };
-
-  const handleModelSelect = (model: string | null) => {
-    onChange({
-      ...data,
-      vehicleModel: model
-    });
   };
 
   if (isLoading) {
@@ -275,23 +254,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         {errors?.productCode && (
           <p className="text-sm text-red-500 mt-2">{errors.productCode}</p>
         )}
-
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Wybierz pojazd</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <VehicleMakeSelect
-              selectedMakeId={data.vehicleMake ?? null}
-              onMakeSelect={handleMakeSelect}
-              error={errors?.vehicleMake}
-            />
-            <VehicleModelSelect
-              selectedModelId={data.vehicleModel ?? null}
-              onModelSelect={handleModelSelect}
-              error={errors?.vehicleModel}
-              makeId={data.vehicleMake ?? null}
-            />
-          </div>
-        </div>
       </div>
     </form>
   );
