@@ -175,7 +175,7 @@ const CheckoutContent = () => {
   });
   
   // Stany określające role klienta
-  const [isPolicyHolder, setIsPolicyHolder] = useState(true);
+  const [, setIsPolicyHolder] = useState(true);
   const [isInsured, setIsInsured] = useState(true);
   const [isVehicleOwner, setIsVehicleOwner] = useState(true);
   
