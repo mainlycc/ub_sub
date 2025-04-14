@@ -12,16 +12,13 @@ export async function POST(request: NextRequest) {
     // Parsowanie danych z zapytania
     const reqData = await request.json();
     console.log('Dane wejściowe od formularza:', reqData);
-    const { price, purchaseDate, months, type } = reqData;
+    const { price, months, type } = reqData;
     
     // Dla obu typów ubezpieczenia ustawiam ten sam kod produktu
     const productCode = '5_DCGAP_MG25_GEN';
     const productName = 'DEFEND Gap MAX AC';
     
     console.log(`Wybrany typ ubezpieczenia: ${type}, kod produktu: ${productCode}`);
-    
-    // Format daty YYYY-MM-DD dla dzisiejszej daty
-    const today = new Date().toISOString().split('T')[0];
     
     // Ustawiamy stałą datę zakupu
     const purchasedOn = "2023-02-02";
