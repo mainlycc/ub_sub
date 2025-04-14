@@ -60,7 +60,7 @@ const InsuranceTypeCards = (): React.ReactElement => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium">Ochrona do</p>
-                  <p className="text-2xl font-bold">150 000 PLN</p>
+                  <p className="text-2xl font-bold">300 000 PLN</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Okres ubezpieczenia</p>
@@ -114,11 +114,11 @@ const InsuranceTypeCards = (): React.ReactElement => {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium">Ochrona do</p>
-                  <p className="text-2xl font-bold">100 000 PLN</p>
+                  <p className="text-2xl font-bold">300 000 PLN</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Okres ubezpieczenia</p>
-                  <p className="text-xl font-bold">do 3 lat</p>
+                  <p className="text-xl font-bold">do 5 lat</p>
                 </div>
               </div>
             </div>

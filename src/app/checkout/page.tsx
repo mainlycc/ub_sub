@@ -12,6 +12,7 @@ import { Summary } from '@/components/checkout/Summary';
 import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
 import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
 import { VehicleData } from '@/types/vehicle';
+import Footer from '@/components/Footer';
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -684,16 +685,19 @@ const CheckoutContent = () => {
 // Główny komponent strony
 const CheckoutPage = () => {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-[#300FE6] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-medium text-gray-600">Ładowanie formularza...</p>
+    <>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-t-[#300FE6] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg font-medium text-gray-600">Ładowanie formularza...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <CheckoutContent />
-    </Suspense>
+      }>
+        <CheckoutContent />
+      </Suspense>
+      <Footer />
+    </>
   );
 };
 

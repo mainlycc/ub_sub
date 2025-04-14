@@ -431,13 +431,6 @@ const InsuranceCalculator = () => {
                       >
                         Kup teraz
                       </Button>
-                      <Button 
-                        variant="outline"
-                        className="flex-shrink-0 border-[#300FE6] text-[#300FE6] hover:bg-[#300FE6]/10 py-1.5"
-                        onClick={() => setCalculationResult(null)}
-                      >
-                        Nowa kalkulacja
-                      </Button>
                     </div>
                   </div>
                 </div>

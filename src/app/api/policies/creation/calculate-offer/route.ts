@@ -10,6 +10,7 @@ interface ValidationViolation {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log('Dane wejściowe otrzymane w API:', data);
     
     // Walidacja podstawowych danych
     if (!data.vehicleSnapshot || !data.options) {
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log('Wysyłanie danych do zewnętrznego API...');
     // Wysyłamy żądanie do API
     const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
       method: 'POST',
@@ -39,12 +41,16 @@ export async function POST(request: Request) {
       body: JSON.stringify(data),
     });
 
+    console.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
+    
     // Pobieramy odpowiedź jako tekst, aby móc ją zalogować w przypadku błędu
     const responseText = await apiResponse.text();
+    console.log('Odpowiedź z API (surowa):', responseText);
     
     try {
       // Próbujemy sparsować odpowiedź jako JSON
       const responseData = JSON.parse(responseText);
+      console.log('Odpowiedź z API (JSON):', JSON.stringify(responseData, null, 2));
       
       if (!apiResponse.ok) {
         console.error('API odpowiedziało błędem:', responseText);
@@ -54,6 +60,8 @@ export async function POST(request: Request) {
           const errors = responseData.violations.map((v: ValidationViolation) => 
             `${v.propertyPath}: ${v.message}`
           ).join('\n');
+          
+          console.log('Znaleziono błędy walidacji:', errors);
           
           return NextResponse.json(
             { error: `Błędy walidacji:\n${errors}` },
@@ -68,6 +76,7 @@ export async function POST(request: Request) {
       }
 
       // Przekazujemy odpowiedź z API
+      console.log('Odpowiedź została poprawnie przetworzona, zwracam dane do klienta');
       return NextResponse.json(responseData);
 
     } catch (error) {
