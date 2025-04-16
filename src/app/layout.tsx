@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: 'Ubezpieczenie GAP',
   description: 'Platforma ubezpieczeniowa do obsługi ubezpieczeń GAP',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };
 
 export default function RootLayout({
@@ -15,10 +16,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pl">
-      <body className={inter.className}>
+    <html lang="pl" className="h-full">
+      <body className={`${inter.className} bg-[#EAE7FC] min-h-screen flex flex-col m-0 p-0`}>
         <Navbar />
-        {children}
+        <main className="flex-grow">
+          {children}
+        </main>
       </body>
     </html>
   );

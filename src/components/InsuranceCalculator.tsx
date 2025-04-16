@@ -167,7 +167,7 @@ const InsuranceCalculator = () => {
   );
   
   return (
-    <section className="py-12 bg-gradient-to-br from-white to-gray-50">
+    <section className="py-12 bg-[#EAE7FC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:hidden">
           <h2 className="text-3xl font-bold text-gray-900">Oblicz składkę ubezpieczenia GAP</h2>
@@ -178,34 +178,33 @@ const InsuranceCalculator = () => {
         
         <div className="md:flex md:space-x-8 md:items-stretch">
           <div className="md:w-1/2">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 
+            <div className="bg-white rounded-[20px] shadow-lg border border-gray-200 overflow-hidden mb-6 
                           transform transition-all duration-300 hover:shadow-xl
                           bg-gradient-to-br from-white via-white to-gray-50">
-              <div className="bg-gradient-to-r from-[#300FE6] to-[#2208B0] h-2 w-full"></div>
               
               <div className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="bg-[#300FE6]/10 p-3 rounded-full mr-4">
+                <div className="flex flex-col items-center mb-6 text-center">
+                  <div className="bg-[#300FE6]/10 p-3 rounded-full mb-3">
                     <Calculator className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">Kalkulator składki</h3>
                 </div>
                 
                 <Tabs defaultValue="fakturowy" onValueChange={(value) => setActiveInsuranceType(value as InsuranceType)}>
-                  <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsList className="grid w-full grid-cols-2 mb-8 rounded-[20px]">
                     <TabsTrigger 
                       value="fakturowy" 
-                      className="py-3 text-base rounded-tl-md rounded-bl-md data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white"
+                      className="py-3 text-xs sm:text-sm md:text-base rounded-tl-[20px] rounded-bl-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
                     >
-                      GAP Fakturowy
-                      {renderTooltip(tooltips.gapFakturowy)}
+                      <span className="whitespace-nowrap">GAP Fakturowy</span>
+                      <span className="ml-0 sm:ml-1 mt-1 sm:mt-0">{renderTooltip(tooltips.gapFakturowy)}</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="casco" 
-                      className="py-3 text-base rounded-tr-md rounded-br-md data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white"
+                      className="py-3 text-xs sm:text-sm md:text-base rounded-tr-[20px] rounded-br-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
                     >
-                      GAP Casco
-                      {renderTooltip(tooltips.gapCasco)}
+                      <span className="whitespace-nowrap">GAP Casco</span>
+                      <span className="ml-0 sm:ml-1 mt-1 sm:mt-0">{renderTooltip(tooltips.gapCasco)}</span>
                     </TabsTrigger>
                   </TabsList>
                   
@@ -218,7 +217,7 @@ const InsuranceCalculator = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-[20px]`}
                           value={formatPrice(calculatorData.carPrice)}
                           onChange={(e) => {
                             const numericValue = parsePrice(e.target.value);
@@ -239,7 +238,7 @@ const InsuranceCalculator = () => {
                         {renderTooltip(tooltips.year)}
                       </label>
                       <select
-                        className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-[20px]`}
                         value={calculatorData.year}
                         onChange={(e) => setCalculatorData(prev => ({ ...prev, year: parseInt(e.target.value) }))}
                       >
@@ -263,7 +262,7 @@ const InsuranceCalculator = () => {
                             type="button"
                             onClick={() => setCalculatorData(prev => ({ ...prev, months: period }))}
                             className={`
-                              py-2 px-3 rounded-md font-medium text-center
+                              py-2 px-3 rounded-[20px] font-medium text-center
                               ${isPeriodActive(period) 
                                 ? 'bg-[#300FE6] text-white' 
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
@@ -306,7 +305,7 @@ const InsuranceCalculator = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                          className={`w-full p-3 border ${errors.carPrice ? 'border-red-500' : 'border-gray-300'} rounded-[20px]`}
                           value={formatPrice(calculatorData.carPrice)}
                           onChange={(e) => {
                             const numericValue = parsePrice(e.target.value);
@@ -327,7 +326,7 @@ const InsuranceCalculator = () => {
                         {renderTooltip(tooltips.year)}
                       </label>
                       <select
-                        className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                        className={`w-full p-3 border ${errors.year ? 'border-red-500' : 'border-gray-300'} rounded-[20px]`}
                         value={calculatorData.year}
                         onChange={(e) => setCalculatorData(prev => ({ ...prev, year: parseInt(e.target.value) }))}
                       >
@@ -351,7 +350,7 @@ const InsuranceCalculator = () => {
                             type="button"
                             onClick={() => setCalculatorData(prev => ({ ...prev, months: period }))}
                             className={`
-                              py-2 px-3 rounded-md font-medium text-center
+                              py-2 px-3 rounded-[20px] font-medium text-center
                               ${isPeriodActive(period) 
                                 ? 'bg-[#300FE6] text-white' 
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
@@ -393,7 +392,7 @@ const InsuranceCalculator = () => {
                 ref={resultRef} 
                 className="mx-auto mb-4 transform transition-all duration-500 animate-fade-in-down"
               >
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-[#300FE6] animate-pulse-once">
+                <div className="bg-white rounded-[20px] shadow-lg overflow-hidden border-2 border-[#300FE6] animate-pulse-once">
                   <div className="flex items-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-4 py-2">
                     <div>
                       <h3 className="text-xl font-bold text-white">Twoja jednorazowa składka: {calculationResult.premium.toFixed(2)} zł</h3>
@@ -402,19 +401,19 @@ const InsuranceCalculator = () => {
                   
                   <div className="p-3">
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="bg-gray-50 p-2 rounded">
+                      <div className="bg-gray-50 p-2 rounded-[20px]">
                         <div className="text-xs text-gray-500">Produkt</div>
                         <div className="font-medium">{calculationResult.details.productName}</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded">
+                      <div className="bg-gray-50 p-2 rounded-[20px]">
                         <div className="text-xs text-gray-500">Okres ochrony</div>
                         <div className="font-medium">{calculationResult.details.coveragePeriod}</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded">
+                      <div className="bg-gray-50 p-2 rounded-[20px]">
                         <div className="text-xs text-gray-500">Wartość pojazdu</div>
                         <div className="font-medium">{calculationResult.details.vehicleValue.toLocaleString()} zł</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded">
+                      <div className="bg-gray-50 p-2 rounded-[20px]">
                         <div className="text-xs text-gray-500">Maksymalny limit</div>
                         <div className="font-medium">{calculationResult.details.maxCoverage}</div>
                       </div>
@@ -422,7 +421,7 @@ const InsuranceCalculator = () => {
                     
                     <div className="flex mt-3 space-x-2">
                       <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-[20px]"
                         onClick={() => {
                           // Zapisz dane w localStorage przed przekierowaniem
                           localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
@@ -444,18 +443,21 @@ const InsuranceCalculator = () => {
                 Nie daj się <span className="text-orange-600">zaskoczyć</span> utratą wartości swojego auta
               </h2>
               
-              <div className="relative w-full h-[400px]">
+              <div className="relative w-full h-[400px] rounded-[20px] border-4 border-white shadow-xl overflow-hidden bg-[#e8f4ff]">
                 <Image
                   src="/front.png"
                   alt="Ubezpieczenie samochodu"
                   fill
-                  style={{ objectFit: 'contain' }}
+                  style={{ 
+                    objectFit: 'cover',
+                    borderRadius: '20px'
+                  }}
                   priority
                 />
               </div>
               
               {!calculationResult && (
-                <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg md:block hidden">
+                <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-[20px] md:block hidden">
                   <p className="text-gray-600 italic">
                     Oblicz składkę ubezpieczenia GAP, wprowadzając dane pojazdu w formularzu po lewej stronie.
                   </p>
