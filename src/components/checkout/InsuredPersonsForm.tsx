@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { Check, X, ChevronDown, User, Building, UserCircle } from 'lucide-react';
+import { User, Building, UserCircle } from 'lucide-react';
 
 interface InsuredPersonsFormProps {
   data: {
@@ -47,14 +47,6 @@ export const InsuredPersonsForm = ({
 }: InsuredPersonsFormProps): React.ReactElement => {
   const [showInsuredSelect, setShowInsuredSelect] = useState(false);
   const [showVehicleOwnerSelect, setShowVehicleOwnerSelect] = useState(false);
-
-  const handlePersonToggle = (role: 'insured' | 'vehicleOwner') => {
-    if (role === 'insured') {
-      setShowInsuredSelect(!showInsuredSelect);
-    } else {
-      setShowVehicleOwnerSelect(!showVehicleOwnerSelect);
-    }
-  };
 
   // Funkcja do przełączania aktywności policyHolder
   const togglePolicyHolderEnabled = () => {
@@ -106,50 +98,6 @@ export const InsuredPersonsForm = ({
     console.log(`Zmieniono źródło danych dla roli ${role}:`, updatedData[role]);
     
     onChange(updatedData);
-  };
-
-  const handleRoleSelection = (role: 'insured' | 'vehicleOwner', selection: 'policyHolder' | 'other') => {
-    const updatedData = { ...data };
-    
-    if (selection === 'policyHolder') {
-      updatedData[role] = {
-        inheritFrom: 'policyHolder',
-        personData: undefined,
-        enabled: true
-      };
-    } else {
-      // Jeśli wybrano "inna osoba", ale nie ma jeszcze danych, zainicjuj je pustymi wartościami
-      if (!updatedData[role].personData) {
-        updatedData[role] = {
-          inheritFrom: undefined,
-          enabled: true,
-          personData: {
-            firstName: '',
-            lastName: '',
-            identificationNumber: '',
-            type: 'person',
-            phoneNumber: '',
-            email: '',
-            address: {
-              street: '',
-              city: '',
-              postCode: '',
-              countryCode: 'PL',
-              addressLine1: ''
-            }
-          }
-        };
-      }
-    }
-    
-    onChange(updatedData);
-    
-    // Zamknij dropdown po wyborze
-    if (role === 'insured') {
-      setShowInsuredSelect(false);
-    } else {
-      setShowVehicleOwnerSelect(false);
-    }
   };
 
   // Obsługa zmiany danych osobowych dla konkretnej roli
@@ -579,7 +527,71 @@ export const convertToApiFormat = (data: {
     return {};
   }
 
-  const apiData: any = {
+  // Definiujemy typ interfejsu dla danych API
+  interface ApiData {
+    client: {
+      policyHolder: {
+        type: string;
+        phoneNumber: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        identificationNumber: string;
+        companyName?: string;
+        taxId?: string;
+        address: {
+          addressLine1: string;
+          street: string;
+          city: string;
+          postCode: string;
+          countryCode: string;
+        };
+      };
+      insured: { 
+        inheritFrom?: string;
+        type?: string;
+        phoneNumber?: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        identificationNumber?: string;
+        companyName?: string;
+        taxId?: string;
+        address?: {
+          addressLine1: string;
+          street: string;
+          city: string;
+          postCode: string;
+          countryCode: string;
+        };
+      };
+      beneficiary: { inheritFrom: string };
+    };
+    vehicleSnapshot: {
+      owners: Array<{
+        contact: { 
+          inheritFrom?: string;
+          type?: string;
+          phoneNumber?: string;
+          firstName?: string;
+          lastName?: string;
+          email?: string;
+          identificationNumber?: string;
+          companyName?: string;
+          taxId?: string;
+          address?: {
+            addressLine1: string;
+            street: string;
+            city: string;
+            postCode: string;
+            countryCode: string;
+          };
+        };
+      }>;
+    };
+  }
+
+  const apiData: ApiData = {
     client: {
       policyHolder: {
         type: data.policyHolder.type,
