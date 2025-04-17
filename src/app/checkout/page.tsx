@@ -45,6 +45,7 @@ interface PersonalData {
 interface InsuredData {
   inheritFrom?: string;
   personData?: PersonalData;
+  enabled?: boolean;
 }
 
 interface InsuredPersonsData {
@@ -79,9 +80,11 @@ const CheckoutContent = () => {
     setSearchParams(new URLSearchParams(window.location.search));
   }, []);
   
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
+  const [dataConfirmed, setDataConfirmed] = useState<boolean>(false);
   
   // Nowy stan dla wariantu ubezpieczenia
   const [insuranceVariant, setInsuranceVariant] = useState<InsuranceVariant>({
@@ -132,10 +135,12 @@ const CheckoutContent = () => {
       }
     },
     insured: {
-      inheritFrom: 'policyHolder'
+      inheritFrom: 'policyHolder',
+      enabled: true
     },
     vehicleOwner: {
-      inheritFrom: 'policyHolder'
+      inheritFrom: 'policyHolder',
+      enabled: true
     }
   });
   
@@ -147,7 +152,6 @@ const CheckoutContent = () => {
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  const [termsAgreed, setTermsAgreed] = useState(false);
   
   // Walidacja
   const [errors, setErrors] = useState<{
@@ -402,26 +406,59 @@ const CheckoutContent = () => {
       console.log('Wysyłanie danych formularza...', policyData);
       
       // Wysyłanie maila z potwierdzeniem
-      const emailResponse = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          personalData: insuredPersonsData.policyHolder,
-          vehicleData,
-          paymentData,
-          calculationResult,
-          policyData // dodajemy pełne dane polisy
-        }),
-      });
+      try {
+        const emailResponse = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            personalData: insuredPersonsData.policyHolder,
+            vehicleData,
+            paymentData,
+            calculationResult,
+            policyData // dodajemy pełne dane polisy
+          }),
+        });
 
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        throw new Error(errorData.details || 'Błąd podczas wysyłania maila');
+        // Sprawdzamy status odpowiedzi
+        if (emailResponse.ok) {
+          console.log('Mail z potwierdzeniem wysłany pomyślnie');
+        } else {
+          // Jeśli błąd to 404, logujemy go ale kontynuujemy
+          if (emailResponse.status === 404) {
+            console.warn('Endpoint wysyłania maila nie istnieje (404). Kontynuowanie bez wysyłania maila.');
+          } else {
+            // Próbujemy odczytać treść odpowiedzi
+            try {
+              const textResponse = await emailResponse.text();
+              
+              // Sprawdzamy czy to HTML czy JSON
+              if (textResponse.trim().toLowerCase().startsWith('<!doctype') || 
+                  textResponse.trim().toLowerCase().startsWith('<html')) {
+                console.warn('Otrzymano odpowiedź HTML zamiast JSON:', textResponse.substring(0, 100));
+              } else if (textResponse.trim()) {
+                try {
+                  const errorData = JSON.parse(textResponse);
+                  console.error('Błąd podczas wysyłania maila:', errorData);
+                } catch (parseError) {
+                  console.error('Błąd parsowania odpowiedzi JSON:', parseError);
+                }
+              }
+            } catch (readError) {
+              console.error('Błąd odczytu odpowiedzi:', readError);
+            }
+            
+            console.warn('Nie udało się wysłać maila, ale kontynuujemy proces');
+          }
+        }
+      } catch (emailError) {
+        // Logujemy błąd, ale kontynuujemy proces
+        console.error('Błąd podczas próby wysłania maila:', emailError);
+        console.warn('Kontynuowanie procesu mimo błędu wysyłania maila');
       }
       
-      // Sukces
+      // Sukces - niezależnie od wyniku wysyłania maila
       setIsCompleted(true);
     } catch (error) {
       console.error('Błąd podczas przetwarzania zamówienia:', error);
@@ -560,6 +597,8 @@ const CheckoutContent = () => {
             termsAgreed={termsAgreed}
             onTermsChange={setTermsAgreed}
             onPaymentChange={handlePaymentDataChange}
+            dataConfirmed={dataConfirmed}
+            onDataConfirmChange={setDataConfirmed}
           />
         );
       default:

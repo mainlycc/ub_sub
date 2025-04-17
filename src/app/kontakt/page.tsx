@@ -246,7 +246,7 @@ const KontaktPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Telefon</h3>
-                    <p className="text-gray-700">796 148 577</p>
+                    <p className="text-gray-700">+48 796 148 577</p>
                     <p className="text-sm text-gray-500">Pon-Pt: 9:00 - 17:00</p>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ const KontaktPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-700">d.piwowarczyk@bclease.pl</p>
+                    <p className="text-gray-700">biuro@gapauto.pl</p>
                     <p className="text-sm text-gray-500">Odpowiadamy w ciągu 24h</p>
                   </div>
                 </div>
