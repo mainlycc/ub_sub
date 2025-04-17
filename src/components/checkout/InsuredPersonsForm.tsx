@@ -522,10 +522,33 @@ export const convertToApiFormat = (data: {
   // Uwzględniamy enabled dla policyHolder
   const isPolicyHolderEnabled = data.policyHolder.enabled !== false;
   
-  // Jeśli policyHolder nie jest aktywny, to zwracamy pusty obiekt (lub można określić domyślne zachowanie)
+  // Jeśli policyHolder nie jest aktywny, to zwracamy podstawowy obiekt z pustymi właściwościami
   if (!isPolicyHolderEnabled) {
-    console.log('Ubezpieczający nie jest aktywny - zwracam pusty obiekt API');
-    return {};
+    console.log('Ubezpieczający nie jest aktywny - zwracam pusty obiekt API z wymaganą strukturą');
+    return {
+      client: {
+        policyHolder: {
+          type: 'person',
+          phoneNumber: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          identificationNumber: '',
+          address: {
+            addressLine1: '',
+            street: '',
+            city: '',
+            postCode: '',
+            countryCode: 'PL'
+          }
+        },
+        insured: { inheritFrom: 'policyHolder' },
+        beneficiary: { inheritFrom: 'policyHolder' }
+      },
+      vehicleSnapshot: {
+        owners: [{ contact: { inheritFrom: 'policyHolder' } }]
+      }
+    };
   }
 
   // Definiujemy typ interfejsu dla danych API
