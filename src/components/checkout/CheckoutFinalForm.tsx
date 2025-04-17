@@ -479,7 +479,7 @@ export const CheckoutFinalForm = ({
           insured: data.insured,
           vehicleOwner: data.vehicleOwner
         }}
-        onChange={(newData) => {
+        onChangeAction={(newData) => {
           onChange({
             ...data,
             policyHolder: newData.policyHolder,

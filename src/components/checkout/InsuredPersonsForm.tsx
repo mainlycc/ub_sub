@@ -9,7 +9,7 @@ interface InsuredPersonsFormProps {
     insured: InsuredData;
     vehicleOwner: InsuredData;
   };
-  onChange: (data: {
+  onChangeAction: (data: {
     policyHolder: PersonalData & { enabled?: boolean };
     insured: InsuredData;
     vehicleOwner: InsuredData;
@@ -43,10 +43,11 @@ interface InsuredData {
 
 export const InsuredPersonsForm = ({ 
   data, 
-  onChange 
+  onChangeAction 
 }: InsuredPersonsFormProps): React.ReactElement => {
-  const [showInsuredSelect, setShowInsuredSelect] = useState(false);
-  const [showVehicleOwnerSelect, setShowVehicleOwnerSelect] = useState(false);
+  // Usuwam nieużywane zmienne stanu
+  // const [showInsuredSelect, setShowInsuredSelect] = useState(false);
+  // const [showVehicleOwnerSelect, setShowVehicleOwnerSelect] = useState(false);
 
   // Funkcja do przełączania aktywności policyHolder
   const togglePolicyHolderEnabled = () => {
@@ -58,7 +59,7 @@ export const InsuredPersonsForm = ({
     };
     
     console.log('Przełączono aktywność ubezpieczającego:', updatedData.policyHolder.enabled);
-    onChange(updatedData);
+    onChangeAction(updatedData);
   };
 
   // Funkcja do przełączania roli między policyHolder a inną osobą
@@ -97,7 +98,7 @@ export const InsuredPersonsForm = ({
     
     console.log(`Zmieniono źródło danych dla roli ${role}:`, updatedData[role]);
     
-    onChange(updatedData);
+    onChangeAction(updatedData);
   };
 
   // Obsługa zmiany danych osobowych dla konkretnej roli
@@ -160,7 +161,7 @@ export const InsuredPersonsForm = ({
       }
     }
     
-    onChange(updatedData);
+    onChangeAction(updatedData);
   };
 
   // Obsługa zmiany typu podmiotu
@@ -179,7 +180,7 @@ export const InsuredPersonsForm = ({
       };
     }
     
-    onChange(updatedData);
+    onChangeAction(updatedData);
   };
 
   // Przygotuj dane do wyświetlenia w UI (kto jest kim)
