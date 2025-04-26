@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { getAuthToken } from './auth';
+import { getCurrentEnvironment } from './environment';
 
 // Stałe konfiguracyjne
 const API_BASE_URL = 'https://test.v2.idefend.eu/api/jwt-token';
@@ -58,9 +59,10 @@ export async function authenticate(): Promise<string | null> {
     }
 
     console.log('Pobieranie nowego tokenu...');
+    const environment = getCurrentEnvironment();
     
     const response = await axios.post<AuthResponse>(
-      'https://test.v2.idefend.eu/api/jwt-token',
+      `${environment.apiUrl}/jwt-token`,
       {
         username: "GAP_2025_PL",
         password: "LEaBY4TXgWa4QJX"
@@ -115,6 +117,7 @@ export async function callApiWithAuth<T>(
   try {
     // Pobierz token autoryzacyjny
     const token = await authenticate();
+    const environment = getCurrentEnvironment();
     
     if (!token) {
       throw new Error('Brak tokenu autoryzacyjnego');
@@ -122,7 +125,7 @@ export async function callApiWithAuth<T>(
     
     const response = await axios<T>({
       method,
-      url: `https://test.v2.idefend.eu/api/${endpoint}`,
+      url: `${environment.apiUrl}/${endpoint}`,
       headers: {
         'Content-Type': 'application/json',
         'X-NODE-JWT-AUTH-TOKEN': token
@@ -148,6 +151,8 @@ export async function callApiWithAuth<T>(
 export async function calculateGapOffer(params: GapOfferParams): Promise<GapOfferResponse> {
   try {
     const token = await getAuthToken();
+    const environment = getCurrentEnvironment();
+    
     if (!token) {
       throw new Error('Brak tokenu autoryzacji');
     }
@@ -187,7 +192,7 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
     };
 
     const response = await axios.post<GapOfferResponse>(
-      'https://test.v2.idefend.eu/api/policies/creation/calculate-offer',
+      `${environment.apiUrl}/policies/creation/calculate-offer`,
       calculationData,
       {
         headers: {
@@ -210,9 +215,10 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
 export async function getVehicleModels(): Promise<VehicleModel[]> {
   try {
     const token = await authenticate();
+    const environment = getCurrentEnvironment();
     
     const response = await axios.get<VehicleModel[]>(
-      `${API_BASE_URL}/vehicles/makes?pagination=false`,
+      `${environment.apiUrl}/vehicles/makes?pagination=false`,
       {
         headers: {
           'X-NODE-JWT-AUTH-TOKEN': token
@@ -232,9 +238,10 @@ export async function getVehicleModels(): Promise<VehicleModel[]> {
 export async function registerPolicy(policyData: PolicyData): Promise<PolicyResponse> {
   try {
     const token = await authenticate();
+    const environment = getCurrentEnvironment();
     
     const response = await axios.post<PolicyResponse>(
-      `${API_BASE_URL}/policies/creation/lock`,
+      `${environment.apiUrl}/policies/creation/lock`,
       policyData,
       {
         headers: {
@@ -248,6 +255,6 @@ export async function registerPolicy(policyData: PolicyData): Promise<PolicyResp
   } catch (error: unknown) {
     const apiError = error as AxiosError;
     console.error('Błąd rejestracji polisy:', apiError);
-    throw new Error('Nie udało się zarejestrować polisy');
+    throw new Error((apiError.response as AxiosResponse)?.data?.message || apiError.message);
   }
 } 

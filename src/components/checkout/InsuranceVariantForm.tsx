@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Truck } from 'lucide-react';
+import { EnvironmentSwitch } from './EnvironmentSwitch';
+import { useEnvironmentStore } from '@/lib/environment';
 
 interface InsuranceVariantFormProps {
   data: InsuranceVariant;
@@ -103,9 +105,17 @@ const variantOptions: VariantOption[] = [
 export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors /* showOnlyVariantSelection */ }: InsuranceVariantFormProps): React.ReactElement => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const { isProduction } = useEnvironmentStore();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchPortfolios = async () => {
+      if (!isMounted) return;
+
       try {
         setIsLoading(true);
         setLoadError(null);
@@ -119,14 +129,14 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         const data = await response.json();
         console.log('Dane z API:', data);
 
-        // Filtrujemy i mapujemy produkty - usunięto niepotrzebne przypisanie do zmiennej portfolios
+        // Filtrujemy i mapujemy produkty
         data
           .filter((item: PortfolioApiResponse) => 
             !['5_DCGAP_F25_GEN', '5_DCGAP_FG25_GEN'].includes(item.productCode)
           )
           .map((portfolio: PortfolioApiResponse) => ({
             productCode: portfolio.productCode,
-            sellerNodeCode: "PL_TEST_GAP_25",
+            sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25", // Dynamiczny sellerNodeCode
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
             description: getProductDescription(portfolio),
             signatureTypes: [{ 
@@ -147,7 +157,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
     };
 
     fetchPortfolios();
-  }, []);
+  }, [isMounted, isProduction]); // Dodajemy isProduction do zależności
 
   // Funkcja pomocnicza do generowania opisów produktów
   const getProductDescription = (portfolio: PortfolioApiResponse): string => {
@@ -177,6 +187,21 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
       onInputPathsChange(inputPaths);
     }
   };
+
+  if (!isMounted) {
+    return (
+      <div className="space-y-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -212,6 +237,10 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
           Wybierz wariant ubezpieczenia
         </h2>
         
+        <div className="mb-6">
+          <EnvironmentSwitch />
+        </div>
+        
         <div className="grid grid-cols-1 gap-4">
           {variantOptions.map((variant) => {
             const Icon = variant.icon;
@@ -223,7 +252,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
                 type="button"
                 onClick={() => handleVariantSelect({
                   productCode: variant.code,
-                  sellerNodeCode: "PL_TEST_GAP_25",
+                  sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25",
                   name: variant.name,
                   signatureTypes: [{ code: "AUTHORIZED_BY_SMS", name: "Autoryzacja SMS" }],
                   optionTypes: [],
