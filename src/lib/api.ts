@@ -2,9 +2,6 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { getAuthToken } from './auth';
 import { getCurrentEnvironment } from './environment';
 
-// Stałe konfiguracyjne
-const API_BASE_URL = 'https://test.v2.idefend.eu/api/jwt-token';
-
 // Interfejsy dla typów danych
 interface AuthResponse {
   token: string;
