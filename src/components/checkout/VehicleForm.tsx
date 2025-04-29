@@ -8,6 +8,17 @@ import { VehicleMakeSelect } from './VehicleMakeSelect';
 import { VehicleModelSelect } from './VehicleModelSelect';
 import { VehicleData } from '@/types/vehicle';
 
+// Funkcja do formatowania liczb z separatorami tysięcy
+const formatNumber = (value: number | string): string => {
+  if (!value) return '';
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+};
+
+// Funkcja do usuwania separatorów i konwersji na liczbę
+const parseFormattedNumber = (value: string): number => {
+  return parseInt(value.replace(/\s/g, '')) || 0;
+};
+
 interface VehicleFormProps {
   data: VehicleData;
   onChange: (data: VehicleData) => void;
@@ -296,10 +307,10 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
           <div className="space-y-2">
             <Label htmlFor="purchasePrice">Wartość pojazdu</Label>
             <Input
-              type="number"
+              type="text"
               id="purchasePrice"
-              value={data.purchasePrice || ''}
-              onChange={(e) => handleInputChange('purchasePrice', parseFloat(e.target.value) || 0)}
+              value={formatNumber(data.purchasePrice || '')}
+              onChange={(e) => handleInputChange('purchasePrice', parseFormattedNumber(e.target.value))}
               className={errors?.purchasePrice ? 'border-red-500' : ''}
             />
             {errors?.purchasePrice && (
@@ -394,12 +405,10 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
           <div className="space-y-2">
             <Label htmlFor="mileage">Przebieg pojazdu (km)</Label>
             <Input
-              type="number"
+              type="text"
               id="mileage"
-              min="0"
-              step="1"
-              value={data.mileage || ''}
-              onChange={(e) => handleInputChange('mileage', parseInt(e.target.value) || 0)}
+              value={formatNumber(data.mileage || '')}
+              onChange={(e) => handleInputChange('mileage', parseFormattedNumber(e.target.value))}
               className={errors?.mileage ? 'border-red-500' : ''}
               placeholder="Wprowadź przebieg w kilometrach"
             />

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 const Navbar = () => {
   const router = useRouter();
@@ -60,7 +61,14 @@ const Navbar = () => {
             onClick={navigateToHome} 
             className="flex items-center cursor-pointer"
           >
-            <span className="text-xl sm:text-2xl font-bold text-[#300FE6]">Business Care</span>
+            <Image
+              src="/BC.png"
+              alt="BC Logo"
+              width={120}
+              height={40}
+              className="h-8 sm:h-10 w-auto"
+              priority
+            />
           </div>
           
           {/* Menu desktopowe */}

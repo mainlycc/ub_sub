@@ -10,12 +10,12 @@ export const ENVIRONMENTS: Record<'TEST' | 'PRODUCTION', EnvironmentConfig> = {
   TEST: {
     baseUrl: 'https://test.v2.idefend.eu',
     apiUrl: 'https://test.v2.idefend.eu/api',
-    label: 'Środowisko testowe'
+    label: 'Tryb testowy'
   },
   PRODUCTION: {
     baseUrl: 'https://v2.idefend.eu',
     apiUrl: 'https://v2.idefend.eu/api',
-    label: 'Środowisko produkcyjne'
+    label: 'Tryb rzeczywisty'
   }
 } as const;
 

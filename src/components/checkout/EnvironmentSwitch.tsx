@@ -15,7 +15,7 @@ export const EnvironmentSwitch = () => {
 
   const handleEnvironmentChange = (checked: boolean) => {
     if (checked) {
-      if (window.confirm('UWAGA: Czy na pewno chcesz przełączyć na środowisko produkcyjne? Ta operacja może mieć wpływ na rzeczywiste dane.')) {
+      if (window.confirm('UWAGA: Czy na pewno chcesz przełączyć na tryb rzeczywisty? Ta operacja będzie miała wpływ na prawdziwe dane.')) {
         setIsProduction(true);
       }
     } else {
@@ -34,14 +34,14 @@ export const EnvironmentSwitch = () => {
           checked={isProduction}
           onCheckedChange={handleEnvironmentChange}
         />
-        <span className={`font-medium ${isProduction ? 'text-red-600' : 'text-green-600'}`}>
+        <span className={`font-medium ${isProduction ? 'text-[#300FE6]' : 'text-green-600'}`}>
           {isProduction ? ENVIRONMENTS.PRODUCTION.label : ENVIRONMENTS.TEST.label}
         </span>
       </div>
       {isProduction && (
-        <div className="flex items-center gap-1 text-red-600">
+        <div className="flex items-center gap-1 text-[#300FE6]">
           <AlertCircle size={16} />
-          <span className="text-sm">Środowisko produkcyjne</span>
+          <span className="text-sm">Tryb rzeczywisty</span>
         </div>
       )}
     </div>
