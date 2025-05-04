@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function POST(
   request: Request
@@ -52,8 +53,9 @@ export async function POST(
     apiFormData.append('file', file);
     apiFormData.append('documentType', documentType);
 
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API
-    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/uploads`, {
+    const response = await fetch(`${environment.apiUrl}/policies/${id}/uploads`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

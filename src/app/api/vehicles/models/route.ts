@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function GET(request: Request) {
   console.log('[vehicles/models] Otrzymano zapytanie GET');
@@ -23,8 +24,9 @@ export async function GET(request: Request) {
     
     console.log('[vehicles/models] Token otrzymany pomyślnie, makeId:', makeId);
 
+    const environment = getCurrentEnvironment();
     // Konstruowanie URL API
-    let apiUrl = 'https://test.v2.idefend.eu/api/vehicles/models';
+    let apiUrl = `${environment.apiUrl}/vehicles/models`;
     
     // Dodajemy parametry do URL
     const params = new URLSearchParams();

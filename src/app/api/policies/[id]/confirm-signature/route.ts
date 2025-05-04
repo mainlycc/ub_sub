@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function POST(
   request: NextRequest
@@ -41,8 +42,9 @@ export async function POST(
     
     console.log('Wysyłanie żądania do API Defend...');
     
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API - ZMIANA Z POST NA PUT!
-    const responseAPI = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/confirm-signature`, {
+    const responseAPI = await fetch(`${environment.apiUrl}/policies/${id}/confirm-signature`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

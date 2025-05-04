@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getSellerNodeCode } from '@/lib/seller';
 
 interface VehicleData {
   purchasedOn: string;
@@ -177,7 +178,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         extApiNo: null,
         extReferenceNo: null,
         extTenderNo: null,
-        sellerNodeCode: "PL_TEST_GAP_25",
+        sellerNodeCode: getSellerNodeCode(),
         productCode: "5_DCGAP_MG25_GEN",
         saleInitiatedOn: getValidSaleInitiatedDate(),
         signatureTypeCode: "AUTHORIZED_BY_SMS",

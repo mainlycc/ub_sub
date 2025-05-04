@@ -1,6 +1,8 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { getAuthToken } from './auth';
 import { getCurrentEnvironment } from './environment';
+import { getSellerNodeCode } from './seller';
+import { AUTH_CREDENTIALS } from './auth';
 
 // Interfejsy dla typów danych
 interface AuthResponse {
@@ -60,10 +62,7 @@ export async function authenticate(): Promise<string | null> {
     
     const response = await axios.post<AuthResponse>(
       `${environment.apiUrl}/jwt-token`,
-      {
-        username: "GAP_2025_PL",
-        password: "LEaBY4TXgWa4QJX"
-      },
+      AUTH_CREDENTIALS,
       {
         headers: {
           'Content-Type': 'application/json'
@@ -86,6 +85,7 @@ export async function authenticate(): Promise<string | null> {
     
     tokenExpiration = Date.now() + expiresInMs;
     console.log('Nowy token zapisany, wygaśnie za', expiresInMs / 60000, 'minut');
+    console.log('Środowisko API:', environment.label);
 
     return cachedToken;
 
@@ -94,7 +94,8 @@ export async function authenticate(): Promise<string | null> {
     console.error('Błąd autoryzacji:', {
       message: apiError.message,
       response: (apiError.response as AxiosResponse)?.data,
-      status: (apiError.response as AxiosResponse)?.status
+      status: (apiError.response as AxiosResponse)?.status,
+      environment: getCurrentEnvironment().label
     });
     
     // Resetuj cache w przypadku błędu
@@ -161,7 +162,7 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
     const registrationDate = `${params.year}-01-01T00:00:00+02:00`;
 
     const calculationData = {
-      sellerNodeCode: "PL_TEST_GAP_25",
+      sellerNodeCode: getSellerNodeCode(),
       productCode: "5_DCGAP_MG25_GEN", // Domyślnie GAP MAX
       saleInitiatedOn: today,
       

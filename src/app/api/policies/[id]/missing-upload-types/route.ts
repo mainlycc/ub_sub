@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function GET(
   request: Request
@@ -22,8 +23,9 @@ export async function GET(
 
     console.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
 
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API
-    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/missing-upload-types`, {
+    const response = await fetch(`${environment.apiUrl}/policies/${id}/missing-upload-types`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

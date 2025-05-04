@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function GET() {
   console.log('[policies/portfolios] Otrzymano zapytanie GET');
@@ -17,7 +18,8 @@ export async function GET() {
     
     console.log('[policies/portfolios] Token otrzymany pomyślnie');
 
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/creation/portfolios', {
+    const environment = getCurrentEnvironment();
+    const response = await fetch(`${environment.apiUrl}/policies/creation/portfolios`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

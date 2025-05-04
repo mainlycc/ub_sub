@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
+import { getSellerNodeCode } from '@/lib/seller';
 
 // Dodajemy interfejs dla violation
 interface ValidationViolation {
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
     
     // Przygotuj dane do kalkulacji zgodnie ze specyfikacją
     const calculationData = {
-      sellerNodeCode: "PL_TEST_GAP_25",
+      sellerNodeCode: getSellerNodeCode(),
       productCode: productCode,
       saleInitiatedOn: "2025-04-14",
       
@@ -76,8 +78,9 @@ export async function POST(request: NextRequest) {
 
     console.log('Token JWT otrzymany, wysyłam żądanie do API');
 
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API
-    const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
+    const apiResponse = await fetch(`${environment.apiUrl}/policies/creation/calculate-offer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

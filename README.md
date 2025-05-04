@@ -1,3 +1,30 @@
+# UB_SUB - Aplikacja do obsługi ubezpieczeń
+
+## Konfiguracja środowisk
+
+Aplikacja obsługuje dwa środowiska:
+
+### Środowisko produkcyjne (domyślne)
+- URL: https://v2.idefend.eu
+- API URL: https://v2.idefend.eu/api
+- Kod sprzedawcy: PL_TEST_GAP_25
+
+### Środowisko testowe
+- URL: https://test.v2.idefend.eu
+- API URL: https://test.v2.idefend.eu/api
+- Kod sprzedawcy: PL_TEST_GAP_25 (ten sam kod jest używany dla obu środowisk)
+
+## Przełączanie między środowiskami
+
+Aplikacja posiada przełącznik środowisk w interfejsie użytkownika. Przy przełączaniu na środowisko testowe wyświetlane jest dodatkowe ostrzeżenie i wymagane jest potwierdzenie operacji.
+
+### Ważne informacje:
+- Domyślnie aplikacja uruchamia się w trybie produkcyjnym
+- Ten sam kod sprzedawcy (PL_TEST_GAP_25) jest używany zarówno w środowisku testowym jak i produkcyjnym
+- Dane uwierzytelniające są takie same dla obu środowisk
+- Token JWT jest ważny przez 15 minut
+- Wszystkie daty powinny być aktualne, aby uniknąć błędów
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { VehicleData } from '@/types/vehicle';
+import { getSellerNodeCode } from '@/lib/seller';
 
 interface CalculationFormProps {
   vehicleData: VehicleData;
@@ -88,7 +89,7 @@ export const CalculationForm = ({
       }
 
       const requestData = {
-        sellerNodeCode: "PL_TEST_GAP_25",
+        sellerNodeCode: getSellerNodeCode(),
         productCode: "5_DCGAP_MG25_GEN",
         saleInitiatedOn: today.toISOString().split('T')[0],
         vehicleSnapshot: {

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
+import { validateSellerNodeCode } from '@/lib/seller';
 
 // Interfejs dla danych polisy
 interface PolicyData {
@@ -133,6 +135,18 @@ export async function POST(request: Request) {
     const data = await request.json();
     console.log('Otrzymane dane:', JSON.stringify(data, null, 2));
 
+    // Walidacja sellerNodeCode
+    if (!validateSellerNodeCode(data.sellerNodeCode)) {
+      console.error('Nieprawidłowy kod sprzedawcy:', data.sellerNodeCode);
+      return NextResponse.json(
+        { 
+          error: 'Nieprawidłowy kod sprzedawcy dla bieżącego środowiska',
+          details: ['Kod sprzedawcy nie jest zgodny z aktualnym środowiskiem']
+        },
+        { status: 400 }
+      );
+    }
+
     // Walidacja danych
     const validation = validatePolicyData(data as PolicyData);
     if (!validation.isValid) {
@@ -164,8 +178,9 @@ export async function POST(request: Request) {
 
     console.log('Token autoryzacyjny uzyskany:', !!token);
 
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/creation/lock', {
+    const response = await fetch(`${environment.apiUrl}/policies/creation/lock`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

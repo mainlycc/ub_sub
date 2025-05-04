@@ -1,0 +1,39 @@
+TEST environment
+API testing environment is a space, where you find all available calls for the API. 
+
+Please note: the test environment resets each night!
+
+URL of the environment: https://test.v2.idefend.eu/api/
+
+Necessary credentials: 
+
+Username: [node_token.code] 
+
+Password: [key from description] 
+
+Note: these credentials are only for API access. If you would like access to the frontend, please let us know and we will create an account for you. 
+
+Note: we will issue new API credentials for the test and live environments once the business is fully set up.
+
+Note: In urgent cases, the generic test account can be sent to partner’s developers.
+
+PROD Environment
+URL of the environment: https://v2.idefend.eu/api/
+
+API Playground
+The playground is a working example of the flow for creating a policy. The partners can use the playground to test their own systems and calls.
+
+The link for API Playground: https://apiplayground.test.v2.idefend.eu/
+
+Sample files
+Below you can find Insomnia file with some of the most common API methods for easy testing.
+
+Sample files:
+
+API for WMS
+
+JSON example - Quota
+
+JSON example - Cancellation
+
+JSON example - Policy group

@@ -1,13 +1,14 @@
 import axios, { AxiosError } from 'axios';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 let cachedToken: string | null = null;
 let tokenExpiration: number | null = null;
 
-// Stałe konfiguracyjne
-const AUTH_CREDENTIALS = {
+// Stałe konfiguracyjne zgodne z dokumentacją GAP - te same dla obu środowisk
+export const AUTH_CREDENTIALS = {
   username: "GAP_2025_PL",
   password: "LEaBY4TXgWa4QJX"
-};
+} as const;
 
 interface AuthResponse {
   token: string;
@@ -30,10 +31,11 @@ export async function getAuthToken(): Promise<string | null> {
       return cachedToken;
     }
 
-    console.log('Pobieranie nowego tokenu...');
+    const environment = getCurrentEnvironment();
+    console.log('Pobieranie nowego tokenu dla środowiska:', environment.label);
     
     const response = await axios.post<AuthResponse>(
-      'https://test.v2.idefend.eu/api/jwt-token',
+      `${environment.apiUrl}/jwt-token`,
       AUTH_CREDENTIALS,
       {
         headers: {
@@ -43,12 +45,6 @@ export async function getAuthToken(): Promise<string | null> {
       }
     );
 
-    console.log('Odpowiedź z serwera autoryzacji:', {
-      status: response.status,
-      hasToken: !!response.data?.token,
-      expiresIn: response.data?.expiresIn
-    });
-
     if (!response.data?.token) {
       console.error('Brak tokenu w odpowiedzi:', response.data);
       throw new Error('Brak tokenu w odpowiedzi z serwera autoryzacji');
@@ -56,13 +52,12 @@ export async function getAuthToken(): Promise<string | null> {
     
     // Zapisz token w cache
     cachedToken = response.data.token;
-    // Jeśli serwer zwraca expiresIn, użyj tej wartości, w przeciwnym razie użyj 14 minut
     const expirationTime = response.data.expiresIn 
-      ? response.data.expiresIn * 1000  // konwersja na milisekundy
-      : 14 * 60 * 1000; // 14 minut
+      ? response.data.expiresIn * 1000
+      : 14 * 60 * 1000; // 14 minut domyślnie
     
     tokenExpiration = Date.now() + expirationTime;
-    console.log('Nowy token zapisany, wygasa za:', Math.floor(expirationTime / 1000 / 60), 'minut');
+    console.log(`Token otrzymany dla środowiska ${environment.label}, wygasa za:`, Math.floor(expirationTime / 1000 / 60), 'minut');
 
     return cachedToken;
 
@@ -73,7 +68,10 @@ export async function getAuthToken(): Promise<string | null> {
     
     if (axios.isAxiosError(error)) {
       const apiError = error as AxiosError<ErrorResponse>;
+      const environment = getCurrentEnvironment();
+
       console.error('Błąd autoryzacji:', {
+        environment: environment.label,
         message: apiError.message,
         response: apiError.response?.data,
         status: apiError.response?.status,
@@ -81,11 +79,11 @@ export async function getAuthToken(): Promise<string | null> {
       });
       
       if (apiError.response?.status === 401) {
-        throw new Error('Nieprawidłowe dane uwierzytelniające');
+        throw new Error(`Błąd autoryzacji w środowisku ${environment.label}. Sprawdź poprawność kredencjałów.`);
       } else if (apiError.code === 'ECONNABORTED') {
-        throw new Error('Timeout podczas próby autoryzacji');
+        throw new Error(`Timeout podczas próby autoryzacji w środowisku ${environment.label}`);
       } else if (!apiError.response) {
-        throw new Error('Brak połączenia z serwerem autoryzacji');
+        throw new Error(`Brak połączenia z serwerem autoryzacji ${environment.label}`);
       }
     }
     

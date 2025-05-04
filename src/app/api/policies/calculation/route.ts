@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
+import { getSellerNodeCode, validateSellerNodeCode } from '@/lib/seller';
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    
+    // Walidacja sellerNodeCode
+    if (!validateSellerNodeCode(data.sellerNodeCode)) {
+      return NextResponse.json(
+        { error: 'Nieprawidłowy kod sprzedawcy dla bieżącego środowiska' },
+        { status: 400 }
+      );
+    }
     
     // Pobierz token autoryzacyjny
     let token: string;
@@ -17,8 +27,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/calculation', {
+    const response = await fetch(`${environment.apiUrl}/policies/calculation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,7 +37,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         ...data,
-        sellerNodeCode: 'PL_TEST_GAP_25', // Stały kod sprzedawcy z dokumentacji
+        sellerNodeCode: getSellerNodeCode(), // Używamy prawidłowego kodu sprzedawcy
       }),
     });
 

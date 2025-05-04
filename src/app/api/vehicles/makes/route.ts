@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { getCurrentEnvironment } from '@/lib/environment';
 
 export async function GET() {
   console.log('[vehicles/makes] Otrzymano zapytanie GET');
@@ -19,8 +20,9 @@ export async function GET() {
     
     console.log('[vehicles/makes] Token otrzymany pomyślnie');
 
+    const environment = getCurrentEnvironment();
     // Wywołanie API DEFEND
-    const response = await fetch('https://test.v2.idefend.eu/api/vehicles/makes?pagination=false', {
+    const response = await fetch(`${environment.apiUrl}/vehicles/makes?pagination=false`, {
       headers: {
         'Content-Type': 'application/json',
         'X-NODE-JWT-AUTH-TOKEN': token

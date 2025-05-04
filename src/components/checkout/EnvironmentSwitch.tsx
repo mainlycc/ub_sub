@@ -10,21 +10,55 @@ export const EnvironmentSwitch = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    console.log('EnvironmentSwitch - montowanie komponentu, isProduction:', isProduction);
+    
+    // Sprawdź localStorage przy montowaniu
+    try {
+      const stored = window.localStorage.getItem('environment-storage');
+      if (stored) {
+        const { state } = JSON.parse(stored);
+        console.log('EnvironmentSwitch - odczytany stan z localStorage:', state);
+        if (state.isProduction !== isProduction) {
+          console.log('EnvironmentSwitch - wykryto różnicę w stanie, aktualizacja...');
+          setIsProduction(state.isProduction);
+        }
+      }
+    } catch (error) {
+      console.error('EnvironmentSwitch - błąd odczytu stanu:', error);
+    }
+    
     setIsMounted(true);
   }, []);
 
-  const handleEnvironmentChange = (checked: boolean) => {
-    if (checked) {
-      if (window.confirm('UWAGA: Czy na pewno chcesz przełączyć na tryb rzeczywisty? Ta operacja będzie miała wpływ na prawdziwe dane.')) {
-        setIsProduction(true);
+  const handleEnvironmentChange = async (checked: boolean) => {
+    if (!checked) {
+      if (window.confirm('UWAGA: Czy na pewno chcesz przełączyć na środowisko testowe?\n\n' +
+        'Ta operacja spowoduje, że:\n' +
+        '- Aplikacja będzie używać testowego API (https://test.v2.idefend.eu)\n' +
+        '- Wszystkie operacje będą wykonywane na danych testowych\n' +
+        '- Polisy będą rejestrowane w systemie testowym\n\n' +
+        'Czy jesteś pewien?')) {
+        console.log('EnvironmentSwitch - przełączanie na TESTOWE');
+        setIsProduction(false);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        window.location.reload();
       }
     } else {
-      setIsProduction(false);
+      console.log('EnvironmentSwitch - przełączanie na PRODUKCYJNE');
+      setIsProduction(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      window.location.reload();
     }
   };
 
+  // Nie renderuj nic podczas SSR
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  // Nie renderuj nic przed zamontowaniem
   if (!isMounted) {
-    return null; // lub możesz zwrócić skeleton/placeholder
+    return null;
   }
 
   return (
@@ -34,14 +68,14 @@ export const EnvironmentSwitch = () => {
           checked={isProduction}
           onCheckedChange={handleEnvironmentChange}
         />
-        <span className={`font-medium ${isProduction ? 'text-[#300FE6]' : 'text-green-600'}`}>
+        <span className={`font-medium ${isProduction ? 'text-[#300FE6]' : 'text-yellow-600'}`}>
           {isProduction ? ENVIRONMENTS.PRODUCTION.label : ENVIRONMENTS.TEST.label}
         </span>
       </div>
-      {isProduction && (
-        <div className="flex items-center gap-1 text-[#300FE6]">
+      {!isProduction && (
+        <div className="flex items-center gap-1 text-yellow-600">
           <AlertCircle size={16} />
-          <span className="text-sm">Tryb rzeczywisty</span>
+          <span className="text-sm font-bold">Tryb testowy - wszystkie operacje są wykonywane w systemie testowym</span>
         </div>
       )}
     </div>
