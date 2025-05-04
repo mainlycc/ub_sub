@@ -1,5 +1,3 @@
-import { getCurrentEnvironment } from './environment';
-
 // Konfiguracja kodu sprzedawcy zgodnie z dokumentacją GAP
 const SELLER_NODE_CODE = "PL_TEST_GAP_25";
 

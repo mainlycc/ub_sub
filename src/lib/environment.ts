@@ -48,7 +48,7 @@ const getInitialState = () => {
 
 export const useEnvironmentStore = create<EnvironmentStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isProduction: getInitialState(),
       initialized: false,
       setIsProduction: (value: boolean) => {
