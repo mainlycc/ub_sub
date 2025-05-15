@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
+const API_BASE_URL = 'https://v2.idefend.eu/api';
+
 export async function POST(
   request: Request
 ) {
@@ -52,8 +54,8 @@ export async function POST(
     apiFormData.append('file', file);
     apiFormData.append('documentType', documentType);
 
-    // Wysyłamy żądanie do właściwego API
-    const response = await fetch(`https://test.v2.idefend.eu/api/policies/${id}/uploads`, {
+    // Wysyłamy żądanie do API
+    const response = await fetch(`${API_BASE_URL}/policies/${id}/uploads`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -62,57 +64,22 @@ export async function POST(
       body: apiFormData,
     });
 
-    // Sprawdzamy typ zawartości odpowiedzi
-    const responseContentType = response.headers.get('content-type');
-    if (!responseContentType || !responseContentType.includes('application/json')) {
-      // Jeśli to nie JSON, odczytujemy jako tekst
-      const textResponse = await response.text();
-      console.error('Odpowiedź API nie jest w formacie JSON:', textResponse.substring(0, 200));
-      
-      return NextResponse.json(
-        { 
-          error: 'Otrzymano nieprawidłową odpowiedź z API (nie JSON)',
-          details: {
-            contentType: responseContentType, 
-            responsePreview: textResponse.substring(0, 100)
-          }
-        },
-        { status: 500 }
-      );
-    }
-
-    // Odczytaj odpowiedź jako JSON
-    let responseData;
-    try {
-      responseData = await response.json();
-    } catch (error) {
-      console.error('Błąd parsowania JSON:', error);
-      return NextResponse.json(
-        { 
-          error: 'Nie udało się sparsować odpowiedzi JSON z API',
-          details: error instanceof Error ? error.message : 'Nieznany błąd'
-        },
-        { status: 500 }
-      );
-    }
-
     if (!response.ok) {
-      console.error('Błąd odpowiedzi API:', responseData);
+      const errorData = await response.text();
+      console.error('Błąd odpowiedzi API:', errorData);
       return NextResponse.json(
-        { error: responseData.error || 'Błąd podczas wysyłania dokumentu' },
+        { error: 'Błąd podczas przesyłania pliku' },
         { status: response.status }
       );
     }
 
+    const responseData = await response.json();
     return NextResponse.json(responseData);
     
   } catch (error) {
     console.error('Błąd podczas przetwarzania żądania:', error);
     return NextResponse.json(
-      { 
-        error: 'Wystąpił błąd podczas przetwarzania żądania',
-        details: error instanceof Error ? error.message : 'Nieznany błąd'
-      },
+      { error: 'Wystąpił błąd podczas przetwarzania żądania' },
       { status: 500 }
     );
   }

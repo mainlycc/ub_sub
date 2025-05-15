@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Footer = (): React.ReactElement => {
   return (
@@ -10,7 +11,18 @@ const Footer = (): React.ReactElement => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo i opis */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-            <h3 className="text-xl font-bold mb-4 text-white">Ubezpieczenia GAP</h3>
+            <div className="mb-4">
+              <Image
+                src="/BC.png"
+                alt="BC Logo"
+                width={150}
+                height={75}
+                className="w-32"
+                priority
+                key="bc-logo-footer"
+                unoptimized={true}
+              />
+            </div>
             <p className="text-white text-sm sm:text-base">
               Oferujemy kompleksową ochronę przed utratą wartości Twojego pojazdu. 
               Zabezpiecz swoją inwestycję już dziś.

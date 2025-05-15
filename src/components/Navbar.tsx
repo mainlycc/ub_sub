@@ -68,6 +68,8 @@ const Navbar = () => {
               height={40}
               className="h-8 sm:h-10 w-auto"
               priority
+              key="bc-logo"
+              unoptimized={true}
             />
           </div>
           

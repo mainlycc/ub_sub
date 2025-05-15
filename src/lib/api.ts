@@ -3,7 +3,7 @@ import { getAuthToken } from './auth';
 import { getCurrentEnvironment } from './environment';
 
 // Stałe konfiguracyjne
-const API_BASE_URL = 'https://test.v2.idefend.eu/api/jwt-token';
+const API_BASE_URL = 'https://v2.idefend.eu/api';
 
 // Interfejsy dla typów danych
 interface AuthResponse {
@@ -151,7 +151,6 @@ export async function callApiWithAuth<T>(
 export async function calculateGapOffer(params: GapOfferParams): Promise<GapOfferResponse> {
   try {
     const token = await getAuthToken();
-    const environment = getCurrentEnvironment();
     
     if (!token) {
       throw new Error('Brak tokenu autoryzacji');
@@ -164,8 +163,8 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
     const registrationDate = `${params.year}-01-01T00:00:00+02:00`;
 
     const calculationData = {
-      sellerNodeCode: "PL_TEST_GAP_25",
-      productCode: "5_DCGAP_MG25_GEN", // Domyślnie GAP MAX
+      sellerNodeCode: "PL_TEST_GAP_25", // Ten sam kod dla obu środowisk
+      productCode: "5_DCGAP_MG25_GEN",
       saleInitiatedOn: today,
       
       vehicleSnapshot: {
@@ -192,7 +191,7 @@ export async function calculateGapOffer(params: GapOfferParams): Promise<GapOffe
     };
 
     const response = await axios.post<GapOfferResponse>(
-      `${environment.apiUrl}/policies/creation/calculate-offer`,
+      `${API_BASE_URL}/policies/creation/calculate-offer`,
       calculationData,
       {
         headers: {

@@ -17,7 +17,7 @@ export async function GET() {
     
     console.log('[policies/portfolios] Token otrzymany pomyślnie');
 
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/creation/portfolios', {
+    const response = await fetch('https://v2.idefend.eu/api/policies/creation/portfolios', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

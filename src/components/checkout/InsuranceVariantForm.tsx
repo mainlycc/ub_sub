@@ -4,42 +4,28 @@ import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Truck } from 'lucide-react';
 import { EnvironmentSwitch } from './EnvironmentSwitch';
 import { useEnvironmentStore } from '@/lib/environment';
-
-interface InsuranceVariantFormProps {
-  data: InsuranceVariant;
-  onChange: (data: InsuranceVariant) => void;
-  onInputPathsChange?: (paths: { vehicle: InputPath[]; contact: InputPath[]; }) => void;
-  errors?: { [key: string]: string };
-  showOnlyVariantSelection?: boolean;
-}
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card } from "@/components/ui/card";
+import { getCurrentEnvironment } from '@/lib/environment';
 
 interface InsuranceVariant {
   productCode: string;
   sellerNodeCode: string;
   signatureTypeCode: string;
-  options: Array<{
-    code: string;
-    value: string | number;
-  }>;
-  vehicleTypes?: string[];
+  options: Array<{ code: string; value: string }>;
+  vehicleTypes: string[];
 }
 
 interface Portfolio {
   productCode: string;
   sellerNodeCode: string;
   name: string;
-  description?: string;
-  signatureTypes: Array<{
-    code: string;
-    name: string;
-  }>;
-  optionTypes: Array<{
-    code: string;
-    name: string;
-  }>;
-  vehicleTypes?: string[];
-  productGroupAlias?: string;
-  productDerivativeAlias?: string;
+  description: string;
+  signatureTypes: Array<{ code: string; name: string }>;
+  optionTypes: Array<{ code: string }>;
+  vehicleTypes: string[];
+  productGroupAlias: string;
 }
 
 interface InputPath {
@@ -102,11 +88,28 @@ const variantOptions: VariantOption[] = [
   }
 ];
 
-export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors /* showOnlyVariantSelection */ }: InsuranceVariantFormProps): React.ReactElement => {
+interface InsuranceVariantFormProps {
+  data: InsuranceVariant;
+  onChange: (variant: InsuranceVariant) => void;
+  onInputPathsChange?: (paths: string[]) => void;
+  errors?: Record<string, string>;
+}
+
+// Funkcja pomocnicza do generowania opisów produktów
+const getProductDescription = (portfolio: any): string => {
+  if (portfolio.productCode.includes('DTGAP')) {
+    return 'Ubezpieczenie GAP dla pojazdów ciężarowych';
+  }
+  return portfolio.productCode.includes('MG25') 
+    ? 'Ubezpieczenie GAP MAX - chroni przed spadkiem wartości pojazdu' 
+    : 'Ubezpieczenie GAP Fakturowy - gwarantuje zwrot różnicy w cenie';
+};
+
+export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, errors }: InsuranceVariantFormProps): React.ReactElement => {
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const { isProduction } = useEnvironmentStore();
 
   useEffect(() => {
     setIsMounted(true);
@@ -130,13 +133,13 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         console.log('Dane z API:', data);
 
         // Filtrujemy i mapujemy produkty
-        data
-          .filter((item: PortfolioApiResponse) => 
+        const mappedPortfolios = data
+          .filter((item: any) => 
             !['5_DCGAP_F25_GEN', '5_DCGAP_FG25_GEN'].includes(item.productCode)
           )
-          .map((portfolio: PortfolioApiResponse) => ({
+          .map((portfolio: any) => ({
             productCode: portfolio.productCode,
-            sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25", // Dynamiczny sellerNodeCode
+            sellerNodeCode: "PL_GAP_25", // Stały kod dla produkcji
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
             description: getProductDescription(portfolio),
             signatureTypes: [{ 
@@ -148,6 +151,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
             productGroupAlias: portfolio.productGroupAlias
           }));
 
+        setPortfolios(mappedPortfolios);
       } catch (error) {
         console.error('Błąd podczas pobierania produktów:', error);
         setLoadError(error instanceof Error ? error.message : 'Nie udało się pobrać listy produktów');
@@ -157,133 +161,55 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
     };
 
     fetchPortfolios();
-  }, [isMounted, isProduction]); // Dodajemy isProduction do zależności
+  }, [isMounted]);
 
-  // Funkcja pomocnicza do generowania opisów produktów
-  const getProductDescription = (portfolio: PortfolioApiResponse): string => {
-    const isCommercial = portfolio.productCode.includes('DTGAP');
-    const hasAC = portfolio.productDerivativeAlias?.includes('AC') || false;
-    
-    if (isCommercial) {
-      return `Ubezpieczenie dla pojazdów ciężarowych${hasAC ? ' z AC' : ''}`;
-    }
-    return `Ubezpieczenie dla samochodów osobowych${hasAC ? ' z AC' : ''}`;
-  };
-
-  const handleVariantSelect = (portfolio: Portfolio) => {
-    const selectedVariant: InsuranceVariant = {
-      productCode: portfolio.productCode,
-      sellerNodeCode: portfolio.sellerNodeCode,
-      signatureTypeCode: "AUTHORIZED_BY_SMS",
-      options: portfolio.optionTypes.map(option => ({ code: option.code, value: '' })),
-      vehicleTypes: portfolio.vehicleTypes,
-    };
-
-    onChange(selectedVariant);
-
-    // Pobranie ścieżek wejściowych
-    const inputPaths = getInputPathsForProduct();
-    if (onInputPathsChange) {
-      onInputPathsChange(inputPaths);
+  const handleVariantSelect = (value: string) => {
+    const selectedPortfolio = portfolios.find(p => p.productCode === value);
+    if (selectedPortfolio) {
+      const variant: InsuranceVariant = {
+        productCode: selectedPortfolio.productCode,
+        sellerNodeCode: selectedPortfolio.sellerNodeCode,
+        signatureTypeCode: "AUTHORIZED_BY_SMS",
+        options: selectedPortfolio.optionTypes.map(option => ({ 
+          code: option.code, 
+          value: '' 
+        })),
+        vehicleTypes: selectedPortfolio.vehicleTypes
+      };
+      onChange(variant);
     }
   };
-
-  if (!isMounted) {
-    return (
-      <div className="space-y-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-xl"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-xl"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <div>Ładowanie...</div>;
   }
 
   if (loadError) {
-    return (
-      <div className="p-4 border border-red-300 rounded-md bg-red-50 text-red-700">
-        <p className="font-medium">Wystąpił błąd podczas ładowania produktów</p>
-        <p className="text-sm mt-1">{loadError}</p>
-      </div>
-    );
+    return <div className="text-red-500">Błąd: {loadError}</div>;
   }
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-      <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-        <div className="bg-[#FF8E3D]/20 p-2 rounded-full mr-3">
-          <span className="text-[#FF8E3D] font-bold">1</span>
-        </div>
-          Wybierz wariant ubezpieczenia
-        </h2>
-        
-        <div className="mb-6">
-          <EnvironmentSwitch />
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4">
-          {variantOptions.map((variant) => {
-            const Icon = variant.icon;
-            const isSelected = data.productCode === variant.code;
-
-            return (
-              <button
-                key={variant.code}
-                type="button"
-                onClick={() => handleVariantSelect({
-                  productCode: variant.code,
-                  sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25",
-                  name: variant.name,
-                  signatureTypes: [{ code: "AUTHORIZED_BY_SMS", name: "Autoryzacja SMS" }],
-                  optionTypes: [],
-                  vehicleTypes: variant.vehicleTypes
-                })}
-                className={`p-6 rounded-lg border-2 transition-all text-left ${
-                  isSelected
-                    ? 'border-[#300FE6] bg-[#300FE6]/5'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-full ${
-                    isSelected ? 'bg-[#300FE6]/20 text-[#300FE6]' : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{variant.name}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{variant.description}</p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <RadioGroup
+          value={data.productCode}
+          onValueChange={handleVariantSelect}
+          className="grid grid-cols-1 gap-4 pt-2"
+        >
+          {portfolios.map((portfolio) => (
+            <div key={portfolio.productCode} className="flex items-center space-x-3">
+              <RadioGroupItem value={portfolio.productCode} id={portfolio.productCode} />
+              <Label htmlFor={portfolio.productCode}>
+                <div className="font-medium">{portfolio.name}</div>
+                <div className="text-sm text-gray-500">{portfolio.description}</div>
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
         {errors?.productCode && (
           <p className="text-sm text-red-500 mt-2">{errors.productCode}</p>
         )}
       </div>
-    </form>
+    </div>
   );
 }; 

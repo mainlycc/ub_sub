@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 
+const API_BASE_URL = 'https://v2.idefend.eu/api';
+
 export async function GET(request: Request) {
   console.log('[vehicles/models] Otrzymano zapytanie GET');
   
@@ -24,14 +26,13 @@ export async function GET(request: Request) {
     console.log('[vehicles/models] Token otrzymany pomyślnie, makeId:', makeId);
 
     // Konstruowanie URL API
-    let apiUrl = 'https://test.v2.idefend.eu/api/vehicles/models';
+    let apiUrl = `${API_BASE_URL}/vehicles/models`;
     
     // Dodajemy parametry do URL
     const params = new URLSearchParams();
     params.append('pagination', 'false');
     
     if (makeId) {
-      // Używamy makeId jako parametru do filtrowania
       params.append('makeId', makeId);
     }
     
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
 
     console.log('[vehicles/models] Wywołanie API:', apiUrl);
 
-    // Wywołanie API DEFEND z poprawnym nagłówkiem autoryzacji
+    // Wywołanie API z poprawnym nagłówkiem autoryzacji
     const response = await fetch(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -58,13 +59,12 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
-    console.log('[vehicles/models] Pobrano dane:', data);
-    
     return NextResponse.json(data);
+    
   } catch (error) {
-    console.error('[vehicles/models] Nieoczekiwany błąd:', error);
+    console.error('[vehicles/models] Błąd:', error);
     return NextResponse.json(
-      { error: 'Wystąpił błąd podczas pobierania modeli' },
+      { error: 'Wystąpił nieoczekiwany błąd podczas pobierania modeli' },
       { status: 500 }
     );
   }

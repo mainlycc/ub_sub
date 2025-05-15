@@ -1,18 +1,22 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
-let cachedToken: string | null = null;
-let tokenExpiration: number | null = null;
-
-// Stałe konfiguracyjne
+// Stałe konfiguracyjne dla autoryzacji
 const AUTH_CREDENTIALS = {
-  username: "GAP_2025_PL",
-  password: "LEaBY4TXgWa4QJX"
+  username: 'GAP_2025_PL',
+  password: 'LEaBY4TXgWa4QJX'
 };
 
+const API_AUTH_URL = 'https://v2.idefend.eu/api/jwt-token';
+
+// Interfejsy dla typów danych
 interface AuthResponse {
   token: string;
   expiresIn?: number;
 }
+
+// Cache dla tokena
+let cachedToken: string | null = null;
+let tokenExpiration: number | null = null;
 
 interface ErrorResponse {
   error?: string;
@@ -33,7 +37,7 @@ export async function getAuthToken(): Promise<string | null> {
     console.log('Pobieranie nowego tokenu...');
     
     const response = await axios.post<AuthResponse>(
-      'https://test.v2.idefend.eu/api/jwt-token',
+      API_AUTH_URL,
       AUTH_CREDENTIALS,
       {
         headers: {
@@ -67,29 +71,12 @@ export async function getAuthToken(): Promise<string | null> {
     return cachedToken;
 
   } catch (error) {
-    // Resetuj cache w przypadku błędu
-    cachedToken = null;
-    tokenExpiration = null;
-    
-    if (axios.isAxiosError(error)) {
-      const apiError = error as AxiosError<ErrorResponse>;
-      console.error('Błąd autoryzacji:', {
-        message: apiError.message,
-        response: apiError.response?.data,
-        status: apiError.response?.status,
-        code: apiError.code
-      });
-      
-      if (apiError.response?.status === 401) {
-        throw new Error('Nieprawidłowe dane uwierzytelniające');
-      } else if (apiError.code === 'ECONNABORTED') {
-        throw new Error('Timeout podczas próby autoryzacji');
-      } else if (!apiError.response) {
-        throw new Error('Brak połączenia z serwerem autoryzacji');
-      }
-    }
-    
-    throw new Error('Nieoczekiwany błąd podczas autoryzacji');
+    const axiosError = error as AxiosError;
+    console.error('Błąd podczas pobierania tokenu:', {
+      message: axiosError.message,
+      response: axiosError.response?.data
+    });
+    return null;
   }
 }
 

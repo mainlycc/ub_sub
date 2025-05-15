@@ -165,7 +165,7 @@ export async function POST(request: Request) {
     console.log('Token autoryzacyjny uzyskany:', !!token);
 
     // Wysyłamy żądanie do API
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/creation/lock', {
+    const response = await fetch('https://v2.idefend.eu/api/policies/creation/lock', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

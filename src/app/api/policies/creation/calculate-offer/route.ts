@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     console.log('Wysyłanie danych do zewnętrznego API...');
     // Wysyłamy żądanie do API
-    const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
+    const apiResponse = await fetch('https://v2.idefend.eu/api/policies/creation/calculate-offer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

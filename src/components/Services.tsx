@@ -16,6 +16,8 @@ export function Services() {
               height={75}
               className="w-32 sm:w-36 md:w-40"
               priority
+              key="bc-logo-services"
+              unoptimized={true}
             />
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4">

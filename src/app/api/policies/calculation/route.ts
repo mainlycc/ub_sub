@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     // Wysyłamy żądanie do właściwego API
-    const response = await fetch('https://test.v2.idefend.eu/api/policies/calculation', {
+    const response = await fetch('https://v2.idefend.eu/api/policies/calculation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

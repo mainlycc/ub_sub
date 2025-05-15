@@ -20,7 +20,7 @@ export async function GET() {
     console.log('[vehicles/makes] Token otrzymany pomyślnie');
 
     // Wywołanie API DEFEND
-    const response = await fetch('https://test.v2.idefend.eu/api/vehicles/makes?pagination=false', {
+    const response = await fetch('https://v2.idefend.eu/api/vehicles/makes?pagination=false', {
       headers: {
         'Content-Type': 'application/json',
         'X-NODE-JWT-AUTH-TOKEN': token
