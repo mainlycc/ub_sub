@@ -1,5 +1,5 @@
 // Konfiguracja kodu sprzedawcy zgodnie z dokumentacją GAP
-const SELLER_NODE_CODE = "PL_TEST_GAP_25";
+export const SELLER_NODE_CODE = process.env.GAP_SELLER_NODE_CODE || "";
 
 export const getSellerNodeCode = () => {
   return SELLER_NODE_CODE;

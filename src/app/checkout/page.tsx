@@ -89,7 +89,7 @@ const CheckoutContent = () => {
   // Nowy stan dla wariantu ubezpieczenia
   const [insuranceVariant, setInsuranceVariant] = useState<InsuranceVariant>({
     productCode: "5_DCGAP_MG25_GEN",
-    sellerNodeCode: "PL_TEST_GAP_25",
+    sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || "PL_TEST_GAP_25",
     signatureTypeCode: "AUTHORIZED_BY_SMS",
     options: [],
     vehicleTypes: ['PC']

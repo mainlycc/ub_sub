@@ -419,6 +419,10 @@ const InsuranceCalculator = () => {
                       </div>
                     </div>
                     
+                    <p className="text-sm text-gray-600 mt-4 italic">
+                      Suma ubezpieczenia wskazana w kalkulacji jest przykładowa - do wyliczenia ostatecznej składki prosimy o uzupełnienie wszystkich wymaganych informacji
+                    </p>
+                    
                     <div className="flex mt-3 space-x-2">
                       <Button 
                         className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-[20px]"

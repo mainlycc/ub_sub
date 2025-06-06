@@ -136,7 +136,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
           )
           .map((portfolio: PortfolioApiResponse) => ({
             productCode: portfolio.productCode,
-            sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25", // Dynamiczny sellerNodeCode
+            sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || (isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25"),
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
             description: getProductDescription(portfolio),
             signatureTypes: [{ 
@@ -252,7 +252,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
                 type="button"
                 onClick={() => handleVariantSelect({
                   productCode: variant.code,
-                  sellerNodeCode: isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25",
+                  sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || (isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25"),
                   name: variant.name,
                   signatureTypes: [{ code: "AUTHORIZED_BY_SMS", name: "Autoryzacja SMS" }],
                   optionTypes: [],

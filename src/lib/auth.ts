@@ -6,8 +6,8 @@ let tokenExpiration: number | null = null;
 
 // Stałe konfiguracyjne zgodne z dokumentacją GAP - te same dla obu środowisk
 export const AUTH_CREDENTIALS = {
-  username: "GAP_2025_PL",
-  password: "LEaBY4TXgWa4QJX"
+  username: process.env.GAP_API_USERNAME || "",
+  password: process.env.GAP_API_PASSWORD || ""
 } as const;
 
 interface AuthResponse {

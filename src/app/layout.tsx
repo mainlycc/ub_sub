@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { CallToActionPopup } from "@/components/CallToActionPopup";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({
         <main className="flex-grow">
           {children}
         </main>
+        <CallToActionPopup />
       </body>
     </html>
   );
