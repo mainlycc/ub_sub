@@ -33,111 +33,113 @@ const Terms = () => {
             
             <div className="space-y-8 text-gray-600">
               <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
-                <div className="flex items-start">
-                  <div className="bg-[#300FE6]/10 p-2 rounded-lg mr-4">
-                    <Scale className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§1. Postanowienia ogólne</h2>
-                    <p>
-                      Niniejszy regulamin określa zasady korzystania z serwisu internetowego oferującego ubezpieczenia GAP, 
-                      zasady zawierania umów ubezpieczenia oraz prawa i obowiązki Użytkowników i Ubezpieczyciela.
-                    </p>
-                  </div>
-                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Postanowienia ogólne</h2>
+                <p>
+                  Administratorem serwisu GapAuto.pl (dalej „Serwis”) jest Ubezpieczenia GAP z siedzibą w Skubiance (05‑140), ul. Przyszłości 6.<br />
+                  Kontakt: tel. +48 796 148 577, e‑mail: biuro@gapauto.pl. Godziny pracy: pon.–pt. 9:00–17:00, sob. 9:00–14:00, nd. – nieczynne.<br />
+                  Celem Serwisu jest prezentacja i sprzedaż ubezpieczeń GAP („GAP Fakturowy” i „GAP Casco”), kalkulator składki, pomoc i kontakt z obsługą klienta.
+                </p>
               </section>
 
               <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
-                <div className="flex items-start">
-                  <div className="bg-[#300FE6]/10 p-2 rounded-lg mr-4">
-                    <Users className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§2. Definicje</h2>
-                    <div className="grid gap-4">
-                      {[
-                        { term: "Serwis", def: "platforma internetowa służąca do zawierania umów ubezpieczenia GAP" },
-                        { term: "Użytkownik", def: "osoba korzystająca z Serwisu" },
-                        { term: "Ubezpieczyciel", def: "podmiot świadczący usługi ubezpieczeniowe" },
-                        { term: "GAP", def: "ubezpieczenie straty finansowej" }
-                      ].map((item, index) => (
-                        <div key={index} className="p-4 bg-white rounded-lg border border-[#E1EDFF]">
-                          <span className="font-semibold text-[#300FE6]">{item.term}</span>
-                          <span className="mx-2">-</span>
-                          <span>{item.def}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Definicje</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>
+                    <b>Ubezpieczenie GAP</b> – dodatkowa umowa ubezpieczeniowa pokrywająca różnicę między wartością rynkową pojazdu a wartością faktury lub AC w przypadku szkody całkowitej lub kradzieży.
+                  </li>
+                  <li>
+                    <b>GAP Fakturowy</b> – ubezpieczenie pokrywające różnicę do wartości z faktury.
+                  </li>
+                  <li>
+                    <b>GAP Casco</b> – ubezpieczenie pokrywające różnicę do wartości określonej w polisie AC.
+                  </li>
+                </ul>
               </section>
 
               <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
-                <div className="flex items-start">
-                  <div className="bg-[#300FE6]/10 p-2 rounded-lg mr-4">
-                    <FileText className="h-6 w-6 text-[#300FE6]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§3. Zawarcie umowy ubezpieczenia</h2>
-                    <div className="space-y-3">
-                      {[
-                        "Wypełnienie formularza z danymi pojazdu i właściciela",
-                        "Zaakceptowanie warunków ubezpieczenia",
-                        "Opłacenie składki ubezpieczeniowej",
-                        "Otrzymanie potwierdzenia zawarcia umowy"
-                      ].map((step, index) => (
-                        <div key={index} className="flex items-center p-4 bg-white rounded-lg border border-[#E1EDFF]">
-                          <div className="w-6 h-6 rounded-full bg-[#300FE6]/10 flex items-center justify-center mr-3">
-                            <span className="text-[#300FE6] font-semibold">{index + 1}</span>
-                          </div>
-                          <span>{step}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">§4. Płatności</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">3. Oferta i kalkulator składki</h2>
                 <p>
-                  Płatności za ubezpieczenie można dokonać:
-                </p>
-                <ul className="list-disc pl-6 mt-2 space-y-2">
-                  <li>Przelewem bankowym</li>
-                  <li>Za pomocą szybkich płatności online</li>
-                  <li>W systemie ratalnym (po spełnieniu określonych warunków)</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">§5. Odstąpienie od umowy</h2>
-                <p>
-                  Użytkownik ma prawo odstąpić od umowy ubezpieczenia w terminie 30 dni od dnia jej zawarcia. 
-                  Odstąpienie wymaga formy pisemnej lub elektronicznej.
+                  Klient może skorzystać z kalkulatora w celu wyceny składki, podając cenę pojazdu, rok produkcji i okres ubezpieczenia (12–60 miesięcy).<br />
+                  Oferta obejmuje ubezpieczenia do wartości 300 000 PLN, w okresie do 5 lat od daty zakupu pojazdu.
                 </p>
               </section>
 
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">§6. Reklamacje</h2>
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Zawarcie umowy</h2>
                 <p>
-                  Reklamacje można składać:
-                </p>
-                <ul className="list-disc pl-6 mt-2 space-y-2">
-                  <li>Pisemnie na adres siedziby</li>
-                  <li>Elektronicznie poprzez formularz na stronie</li>
-                  <li>Telefonicznie</li>
-                </ul>
-                <p className="mt-2">
-                  Reklamacje rozpatrywane są w terminie 30 dni od dnia ich otrzymania.
+                  Umowa ubezpieczenia zawierana jest poprzez złożenie wniosku online lub kontakt telefoniczny/mailowy.<br />
+                  Umowa obowiązuje od daty wskazanej w polisie.<br />
+                  Umowa może zostać zawarta na okres 12, 24, 36, 48 lub 60 miesięcy.
                 </p>
               </section>
 
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">§7. Postanowienia końcowe</h2>
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Składka i płatności</h2>
                 <p>
-                  W sprawach nieuregulowanych niniejszym regulaminem zastosowanie mają przepisy prawa polskiego, 
-                  w szczególności Kodeksu cywilnego oraz ustawy o działalności ubezpieczeniowej i reasekuracyjnej.
+                  Składka ustalana jest w oparciu o: wartość pojazdu, jego wiek, okres ochrony i wybrany limit ubezpieczenia.<br />
+                  Istnieje możliwość płatności jednorazowej lub w ratach (miesięcznej, kwartalnej, półrocznej), z ewentualnymi dodatkowymi opłatami administracyjnymi.<br />
+                  Akceptowane metody płatności: karta płatnicza, przelew, systemy płatności online – zgodnie z polityką bezpieczeństwa.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">6. Ochrona ubezpieczeniowa i zakres odpowiedzialności</h2>
+                <p>
+                  Ochrona dotyczy szkód całkowitych oraz kradzieży pojazdu objętego polisą AC (GAP Casco) lub zakupionego na fakturę (GAP Fakturowy).<br />
+                  Odszkodowanie wypłacane jest do wysokości różnicy między kwotą odszkodowania AC (lub wartością rynkową) a wartością fakturową lub sumą ubezpieczenia.<br />
+                  Standardowy limit odszkodowania wynosi do 100 000 PLN; dostępna jest opcja podniesienia limitu do 150 000 PLN.<br />
+                  Wypłata odszkodowania następuje w ciągu 14 dni roboczych od dostarczenia kompletnej dokumentacji.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Zgłaszanie szkód i roszczenia</h2>
+                <p>
+                  Zgłoszenia należy dokonać za pomocą formularza online lub telefonicznie.<br />
+                  Do zgłoszenia należy dołączyć: decyzję odszkodowawczą z AC/OC lub dokument potwierdzający kradzież.<br />
+                  Po analizie dokumentów, decyzja i wypłata następuje do 14 dni roboczych.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">8. Prawo odstąpienia i zwrot składki</h2>
+                <p>
+                  Klient ma prawo odstąpić od umowy w ciągu 30 dni od jej zawarcia – zwrot pełnej składki.<br />
+                  Po 30 dniach możliwy jest zwrot proporcjonalny za niewykorzystany okres ochrony.<br />
+                  Zwrot składki następuje w ciągu 60 dni od daty rozwiązania umowy.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">9. Obowiązki urzędowe klienta</h2>
+                <p>
+                  Klient jest zobowiązany: zgłosić szkodę, udostępnić wymagane dokumenty i umożliwić kontakt z ubezpieczycielem AC.<br />
+                  W razie konieczności klient współpracuje w procesie likwidacji szkody.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">10. Ochrona danych osobowych</h2>
+                <p>
+                  Dane osobowe przetwarzane są zgodnie z Polityką Prywatności dostępną w Serwisie.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Reklamacje</h2>
+                <p>
+                  Reklamacje można składać drogą mailową lub telefoniczną.<br />
+                  Reklamacje rozpatrywane są w terminie 30 dni roboczych od ich otrzymania.<br />
+                  O decyzji klient zostanie poinformowany pisemnie lub mailowo.
+                </p>
+              </section>
+
+              <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">12. Postanowienia końcowe</h2>
+                <p>
+                  Rozstrzyganie sporów następuje polubownie, a w przypadku braku porozumienia – przed sądem właściwym dla siedziby Ubezpieczenia GAP.<br />
+                  Serwis zastrzega sobie prawo do zmiany Regulaminu – o zmianach użytkownicy będą informowani co najmniej 14 dni przed wejściem w życie.<br />
+                  W sprawach nieuregulowanych obowiązują przepisy Kodeksu cywilnego oraz odpowiednich ustaw.
                 </p>
               </section>
             </div>

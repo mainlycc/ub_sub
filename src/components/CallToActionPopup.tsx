@@ -54,7 +54,7 @@ export const CallToActionPopup = () => {
 
           <p className="text-white/60 text-xs text-center mt-3">
             Od poniedziałku do piątku<br />
-            8:00 - 20:00
+            8:00 - 17:00
           </p>
         </div>
       </div>
