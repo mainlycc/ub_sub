@@ -3,6 +3,7 @@
 import { ArrowLeft, Shield, Lock, UserCheck, Database, FileCheck, ShieldCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
+import Footer from "@/components/Footer";
 
 const PrivacyPolicy = () => {
   const router = useRouter();
@@ -145,6 +146,7 @@ const PrivacyPolicy = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
