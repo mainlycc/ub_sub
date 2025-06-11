@@ -28,7 +28,7 @@ export const EnvironmentSwitch = () => {
     }
     
     setIsMounted(true);
-  }, []);
+  }, [isProduction, setIsProduction]);
 
   const handleEnvironmentChange = async (checked: boolean) => {
     if (!checked) {

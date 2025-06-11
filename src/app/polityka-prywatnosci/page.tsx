@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Shield, Lock, UserCheck, Database, FileCheck, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Shield } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import Footer from "@/components/Footer";
