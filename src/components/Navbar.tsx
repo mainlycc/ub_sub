@@ -80,6 +80,12 @@ const Navbar = () => {
               O nas
             </button>
             <button 
+              onClick={() => router.push('/blog')} 
+              className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+            >
+              Blog
+            </button>
+            <button 
               onClick={() => scrollToSection('faq')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
             >
@@ -125,6 +131,12 @@ const Navbar = () => {
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
             >
               O nas
+            </button>
+            <button 
+              onClick={() => router.push('/blog')} 
+              className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+            >
+              Blog
             </button>
             <button 
               onClick={() => scrollToSection('faq')} 
