@@ -1,7 +1,15 @@
 // Facebook Pixel Event Tracking
+
+type FacebookPixelCommand = 'init' | 'track';
+type FacebookPixelEvent = 'PageView' | 'ViewContent' | 'Lead' | 'InitiateCheckout' | 'AddToCart' | 'Purchase';
+
 declare global {
   interface Window {
-    fbq: any;
+    fbq: (
+      command: FacebookPixelCommand,
+      eventName?: FacebookPixelEvent | string,
+      parameters?: Record<string, unknown>
+    ) => void;
   }
 }
 
