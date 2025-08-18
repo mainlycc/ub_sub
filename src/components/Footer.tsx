@@ -49,6 +49,55 @@ const Footer = (): React.ReactElement => {
             </ul>
           </div>
 
+                    {/* Pliki do pobrania - Kolumna 1 */}
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Pliki do pobrania</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Ogólne Warunki Ubezpieczenia (OWU) DEFEND Gap
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap MAX (Fakturowy)
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap MAX AC (Casco)
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap FLEX
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Pliki do pobrania - Kolumna 2 */}
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">&nbsp;</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap Truck MAX (Fakturowy)
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap Truck MAX AC (Casco)
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
+                  ZOBACZ WSZYSTKIE
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Kontakt */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Kontakt</h3>
@@ -76,16 +125,6 @@ const Footer = (): React.ReactElement => {
                 </svg>
                 Przyszłości 6, 05-140 Skubianka
               </li>
-            </ul>
-          </div>
-
-          {/* Kolumna 4 - Godziny otwarcia */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Godziny otwarcia</h3>
-            <ul className="space-y-2">
-              <li className="text-white text-sm sm:text-base">Poniedziałek - Piątek: 9:00 - 17:00</li>
-              <li className="text-white text-sm sm:text-base">Sobota: 9:00 - 14:00</li>
-              <li className="text-white text-sm sm:text-base">Niedziela: Zamknięte</li>
             </ul>
             <div className="mt-4 flex space-x-4">
               <a 
