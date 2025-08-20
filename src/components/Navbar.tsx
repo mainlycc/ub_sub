@@ -88,6 +88,12 @@ const Navbar = () => {
               O nas
             </button>
             <button 
+              onClick={() => scrollToSection('customer-reviews')} 
+              className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+            >
+              Opinie
+            </button>
+            <button 
               onClick={() => router.push('/blog')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
             >
@@ -139,6 +145,12 @@ const Navbar = () => {
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
             >
               O nas
+            </button>
+            <button 
+              onClick={() => scrollToSection('customer-reviews')} 
+              className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+            >
+              Opinie
             </button>
             <button 
               onClick={() => router.push('/blog')} 
