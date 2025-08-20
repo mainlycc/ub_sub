@@ -121,10 +121,10 @@ const CustomerReviews: React.FC = () => {
                 </span>
               </div>
 
-              {/* Komentarz */}
-              <blockquote className="text-gray-700 mb-4 italic">
-                "{review.comment}"
-              </blockquote>
+                             {/* Komentarz */}
+               <blockquote className="text-gray-700 mb-4 italic">
+                 &ldquo;{review.comment}&rdquo;
+               </blockquote>
 
               {/* Informacje o kliencie */}
               <div className="flex items-center justify-between">
