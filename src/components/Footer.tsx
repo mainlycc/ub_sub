@@ -27,76 +27,149 @@ const Footer = (): React.ReactElement => {
             </p>
           </div>
 
-          {/* Linki */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-white">Ważne linki</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/regulamin" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
-                  Regulamin
-                </Link>
-              </li>
-              <li>
-                <Link href="/polityka-prywatnosci" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
-                  Polityka prywatności
-                </Link>
-              </li>
-              <li>
-                <Link href="/kontakt" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
-                  Kontakt
-                </Link>
-              </li>
-            </ul>
-          </div>
+                     {/* Linki */}
+           <div>
+             <h4 className="text-lg font-semibold mb-4 text-white">Ważne linki</h4>
+             <ul className="space-y-2">
+               <li>
+                 <Link href="/regulamin" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
+                   Regulamin
+                 </Link>
+               </li>
+               <li>
+                 <Link href="/polityka-prywatnosci" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
+                   Polityka prywatności
+                 </Link>
+               </li>
+               <li>
+                 <Link href="/kontakt" className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors">
+                   Kontakt
+                 </Link>
+               </li>
+                               <li>
+                  <a 
+                    href="/pdfs/BUSINESS CARE DANIEL PIWOWARCZYK- zmiana z umowy uproszczonej na pełną + nowe pełnomocnictwo-2.pdf" 
+                    download="BUSINESS_CARE_DANIEL_PIWOWARCZYK_zmiana_umowy_uproszczonej_na_pelna_nowe_pelnomocnictwo.pdf"
+                    className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors underline flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Pełnomocnictwo
+                  </a>
+                </li>
+             </ul>
+           </div>
 
-                    {/* Pliki do pobrania - Kolumna 1 */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Pliki do pobrania</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Ogólne Warunki Ubezpieczenia (OWU) DEFEND Gap
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap MAX (Fakturowy)
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap MAX AC (Casco)
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap FLEX
-                </a>
-              </li>
-            </ul>
-          </div>
+                                         {/* Pliki do pobrania - Kolumna 1 */}
+           <div>
+             <h3 className="text-lg font-semibold text-white mb-4">Ubezpieczenia GAP</h3>
+             <ul className="space-y-2">
+               <li>
+                 <a 
+                   href="/pdfs/OWU DEFEND Gap 2025.pdf" 
+                   download="OWU_DEFEND_Gap_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   OWU DEFEND Gap 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Gap MAX 2025.pdf" 
+                   download="SWU_DEFEND_Gap_MAX_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Gap MAX 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Gap MAX AC 2025.pdf" 
+                   download="SWU_DEFEND_Gap_MAX_AC_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Gap MAX AC 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Gap FLEX 2025.pdf" 
+                   download="SWU_DEFEND_Gap_FLEX_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Gap FLEX 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Gap FLEX GO 2025.pdf" 
+                   download="SWU_DEFEND_Gap_FLEX_GO_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Gap FLEX GO 2025
+                 </a>
+               </li>
+             </ul>
+           </div>
 
-          {/* Pliki do pobrania - Kolumna 2 */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">&nbsp;</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap Truck MAX (Fakturowy)
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  Szczegółowe Warunki Ubezpieczenia (SWU) DEFEND Gap Truck MAX AC (Casco)
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline">
-                  ZOBACZ WSZYSTKIE
-                </a>
-              </li>
-            </ul>
-          </div>
+           {/* Pliki do pobrania - Kolumna 2 */}
+           <div>
+             <h3 className="text-lg font-semibold text-white mb-4">Ubezpieczenia Truck GAP</h3>
+             <ul className="space-y-2">
+               <li>
+                 <a 
+                   href="/pdfs/OWU DEFEND Truck Gap 2025.pdf" 
+                   download="OWU_DEFEND_Truck_Gap_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   OWU DEFEND Truck Gap 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Truck Gap T-MAX 2025.pdf" 
+                   download="SWU_DEFEND_Truck_Gap_T-MAX_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Truck Gap T-MAX 2025
+                 </a>
+               </li>
+               <li>
+                 <a 
+                   href="/pdfs/SWU DEFEND Truck Gap T-MAX AC 2025.pdf" 
+                   download="SWU_DEFEND_Truck_Gap_T-MAX_AC_2025.pdf"
+                   className="text-white text-xs sm:text-sm hover:text-gray-300 transition-colors underline flex items-center"
+                 >
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                   </svg>
+                   SWU DEFEND Truck Gap T-MAX AC 2025
+                 </a>
+               </li>
+             </ul>
+           </div>
 
           {/* Social Media */}
           <div className="flex flex-col items-start">
