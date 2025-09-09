@@ -13,6 +13,7 @@ import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
 import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
 import { VehicleData } from '@/types/vehicle';
 import Footer from '@/components/Footer';
+import { DocumentUpload, DocumentUploadValue } from '@/components/checkout/DocumentUpload';
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -152,6 +153,12 @@ const CheckoutContent = () => {
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
+  
+  // Pliki dokumentów (prawo jazdy, dowód rejestracyjny)
+  const [documents, setDocuments] = useState<DocumentUploadValue>({
+    drivingLicenseFiles: [],
+    registrationCertificateFiles: []
+  });
   
   // Walidacja
   const [errors, setErrors] = useState<{
@@ -541,11 +548,24 @@ const CheckoutContent = () => {
         );
       case 2:
         return (
-          <VehicleForm
-            data={vehicleData}
-            onChange={handleVehicleChange}
-            errors={errors.vehicle}
-          />
+          <div className="space-y-8">
+            <VehicleForm
+              data={vehicleData}
+              onChange={handleVehicleChange}
+              errors={errors.vehicle}
+            />
+
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="text-xl font-semibold mb-3">Dodaj dokumenty</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Dodaj zdjęcia/skany prawa jazdy oraz dowodu rejestracyjnego. Obsługiwane formaty: JPG, PNG, PDF.
+              </p>
+              <DocumentUpload
+                value={documents}
+                onChange={setDocuments}
+              />
+            </div>
+          </div>
         );
       case 3:
         return (
