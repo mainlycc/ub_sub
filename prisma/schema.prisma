@@ -1,0 +1,30 @@
+// Datasource i generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Minimalny model Post dla startu mini CMS
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  excerpt     String?  // lead/description
+  content     String   // markdown lub html
+  status      String   @default("DRAFT")
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      String?
+  coverUrl    String?
+  tags        String?  // np. CSV lub JSON teksowy
+  seoTitle    String?
+  seoDesc     String?
+
+  @@index([status, publishedAt])
+  @@index([publishedAt])
+}
