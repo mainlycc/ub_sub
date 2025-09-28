@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 
 // Dane logowania - w produkcji powinny być w zmiennych środowiskowych
 const ADMIN_CREDENTIALS = {
-  username: process.env.ADMIN_USERNAME || 'admin',
-  password: process.env.ADMIN_PASSWORD || 'admin123'
+  username: process.env.ADMIN_USERNAME || 'business_care',
+  password: process.env.ADMIN_PASSWORD || 'brwinów34'
 };
 
 export async function POST(request: NextRequest) {

@@ -51,7 +51,7 @@ export default function NewPostPage() {
             : 'draft',
           title: result.title,
           slug: result.slug,
-          publishedAt: result.publishedAt
+          publishedAt: result.publishedAt || undefined
         });
         
         // Wyczyść formularz
