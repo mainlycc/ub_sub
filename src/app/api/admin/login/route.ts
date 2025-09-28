@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     // Sprawdź dane logowania
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       // Ustaw cookie z informacją o zalogowaniu
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       cookieStore.set('admin-auth', 'true', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
