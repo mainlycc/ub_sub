@@ -43,7 +43,7 @@ export default async function AdminBlogPage() {
                       <td className="p-3">{p.publishedAt ? new Date(p.publishedAt).toLocaleString('pl-PL') : '-'}</td>
                       <td className="p-3">
                         <DeletePostDialog 
-                          postId={p.id} 
+                          postId={p.id.toString()} 
                           postTitle={p.title}
                         />
                       </td>
