@@ -4,10 +4,11 @@ import { getPostBySlug } from '@/lib/blog';
 
 export const revalidate = 60;
 
-type Params = { params: { slug: string } };
+type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params) {
-  const post = await getPostBySlug(params.slug, { includeDrafts: true });
+  const { slug } = await params;
+  const post = await getPostBySlug(slug, { includeDrafts: true });
   if (!post) return { title: 'Artykuł nie znaleziony' };
   return {
     title: post.seoTitle || post.title,
@@ -21,7 +22,8 @@ export async function generateMetadata({ params }: Params) {
 }
 
 export default async function BlogPostPage({ params }: Params) {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
   return (
