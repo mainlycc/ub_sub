@@ -79,7 +79,7 @@ export default function NewPostPage() {
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-green-800">Wpis został opublikowany!</AlertTitle>
                 <AlertDescription className="text-green-700">
-                  Artykuł "{successMessage.title}" jest już dostępny na blogu. 
+                  Artykuł &quot;{successMessage.title}&quot; jest już dostępny na blogu. 
                   <Link href={`/blog/${successMessage.slug}`} className="underline ml-1">
                     Zobacz artykuł
                   </Link>
@@ -91,7 +91,7 @@ export default function NewPostPage() {
                 <Clock className="h-4 w-4 text-blue-600" />
                 <AlertTitle className="text-blue-800">Wpis został zaplanowany!</AlertTitle>
                 <AlertDescription className="text-blue-700">
-                  Artykuł "{successMessage.title}" zostanie opublikowany {successMessage.publishedAt && new Date(successMessage.publishedAt).toLocaleString('pl-PL')}.
+                  Artykuł &quot;{successMessage.title}&quot; zostanie opublikowany {successMessage.publishedAt && new Date(successMessage.publishedAt).toLocaleString('pl-PL')}.
                 </AlertDescription>
               </>
             )}
@@ -100,7 +100,7 @@ export default function NewPostPage() {
                 <CheckCircle className="h-4 w-4 text-gray-600" />
                 <AlertTitle className="text-gray-800">Wpis został zapisany jako draft!</AlertTitle>
                 <AlertDescription className="text-gray-700">
-                  Artykuł "{successMessage.title}" został zapisany i będzie widoczny tylko w panelu admina.
+                  Artykuł &quot;{successMessage.title}&quot; został zapisany i będzie widoczny tylko w panelu admina.
                 </AlertDescription>
               </>
             )}

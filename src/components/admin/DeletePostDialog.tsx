@@ -60,7 +60,7 @@ export function DeletePostDialog({ postId, postTitle }: DeletePostDialogProps) {
         <DialogHeader>
           <DialogTitle>Usuń wpis</DialogTitle>
           <DialogDescription>
-            Czy na pewno chcesz usunąć wpis "{postTitle}"? 
+            Czy na pewno chcesz usunąć wpis &quot;{postTitle}&quot;? 
             Ta operacja jest nieodwracalna.
           </DialogDescription>
         </DialogHeader>

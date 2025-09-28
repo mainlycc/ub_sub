@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
       } else {
         setError(data.error || 'Błąd logowania');
       }
-    } catch (error) {
+    } catch {
       setError('Wystąpił błąd podczas logowania');
     } finally {
       setIsLoading(false);

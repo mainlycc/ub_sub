@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas logowania' },
       { status: 500 }

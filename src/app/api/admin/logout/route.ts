@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas wylogowania' },
       { status: 500 }
