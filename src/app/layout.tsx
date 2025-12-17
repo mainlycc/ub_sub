@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { CallToActionPopup } from "@/components/CallToActionPopup";
+import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -79,6 +80,7 @@ export default function RootLayout({
           {children}
         </main>
         <CallToActionPopup />
+        <CookieBanner />
         <Analytics />
       </body>
     </html>
