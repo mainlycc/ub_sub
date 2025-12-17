@@ -20,6 +20,19 @@ export default function RootLayout({
   return (
     <html lang="pl" className="h-full">
       <head>
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17791274207" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17791274207');
+            `,
+          }}
+        />
+        {/* End Google tag (gtag.js) */}
         {/* Facebook Pixel Code */}
         <script
           dangerouslySetInnerHTML={{
