@@ -154,10 +154,11 @@ const CheckoutContent = () => {
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   
-  // Pliki dokumentów (prawo jazdy, dowód rejestracyjny)
+  // Pliki dokumentów (polisa AC, dowód rejestracyjny, faktura)
   const [documents, setDocuments] = useState<DocumentUploadValue>({
-    drivingLicenseFiles: [],
-    registrationCertificateFiles: []
+    acPolicyFiles: [],
+    registrationCertificateFiles: [],
+    invoiceFiles: []
   });
   
   // Walidacja
@@ -558,7 +559,7 @@ const CheckoutContent = () => {
             <div className="pt-4 border-t border-gray-200">
               <h3 className="text-xl font-semibold mb-3">Dodaj dokumenty</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Dodaj zdjęcia/skany prawa jazdy oraz dowodu rejestracyjnego. Obsługiwane formaty: JPG, PNG, PDF.
+                Dodaj zdjęcia/skany polisy AC, dowodu rejestracyjnego oraz faktury. Obsługiwane formaty: JPG, PNG, PDF.
               </p>
               <DocumentUpload
                 value={documents}
