@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
 
 const BlogPostPage = () => {
@@ -55,10 +56,13 @@ const BlogPostPage = () => {
 
             {/* Obraz ilustracyjny */}
             <div className="my-8">
-              <img
+              <Image
                 src="/ub4.jpg"
                 alt="Kalkulator i dokumenty finansowe - ilustracja do artykułu o ubezpieczeniu GAP"
+                width={1200}
+                height={675}
                 className="w-full h-auto rounded-lg shadow-lg"
+                loading="lazy"
               />
               <p className="text-sm text-gray-500 text-center mt-2">
                 Ubezpieczenie GAP chroni przed utratą wartości samochodu w przypadku szkody całkowitej

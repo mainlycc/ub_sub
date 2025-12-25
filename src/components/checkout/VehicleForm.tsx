@@ -319,10 +319,13 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
           </div>
 
           <div className="space-y-2">
-            <Label>Podana wartość jest</Label>
-            <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-gray-300">
+            <Label htmlFor="purchasePriceInputType">Podana wartość jest</Label>
+            <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-gray-300" role="group" aria-labelledby="purchasePriceInputType">
               <button
                 type="button"
+                id="purchasePriceInputType-brutto"
+                aria-label="Wartość brutto"
+                aria-pressed={data.purchasePriceInputType === 'WITH_VAT'}
                 className={`py-2 px-4 text-center transition-colors ${
                   data.purchasePriceInputType === 'WITH_VAT' 
                     ? 'bg-[#300FE6] text-white' 
@@ -334,6 +337,9 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               </button>
               <button
                 type="button"
+                id="purchasePriceInputType-netto"
+                aria-label="Wartość netto"
+                aria-pressed={data.purchasePriceInputType === 'WITHOUT_VAT'}
                 className={`py-2 px-4 text-center border-l border-r border-gray-300 transition-colors ${
                   data.purchasePriceInputType === 'WITHOUT_VAT' 
                     ? 'bg-[#300FE6] text-white' 
@@ -345,6 +351,9 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               </button>
               <button
                 type="button"
+                id="purchasePriceInputType-vat-inapplicable"
+                aria-label="VAT nie dotyczy"
+                aria-pressed={data.purchasePriceInputType === 'VAT_INAPPLICABLE'}
                 className={`py-2 px-4 text-center transition-colors ${
                   data.purchasePriceInputType === 'VAT_INAPPLICABLE' 
                     ? 'bg-[#300FE6] text-white' 

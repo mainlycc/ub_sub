@@ -27,12 +27,10 @@ export async function getAuthToken(): Promise<string | null> {
   try {
     // Sprawdź czy mamy ważny token w cache
     if (cachedToken && tokenExpiration && Date.now() < tokenExpiration) {
-      console.log('Używam zapisanego tokenu');
       return cachedToken;
     }
 
     const environment = getCurrentEnvironment();
-    console.log('Pobieranie nowego tokenu dla środowiska:', environment.label);
     
     const response = await axios.post<AuthResponse>(
       `${environment.apiUrl}/jwt-token`,
@@ -46,7 +44,9 @@ export async function getAuthToken(): Promise<string | null> {
     );
 
     if (!response.data?.token) {
-      console.error('Brak tokenu w odpowiedzi:', response.data);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Brak tokenu w odpowiedzi:', response.data);
+      }
       throw new Error('Brak tokenu w odpowiedzi z serwera autoryzacji');
     }
     
@@ -57,7 +57,6 @@ export async function getAuthToken(): Promise<string | null> {
       : 14 * 60 * 1000; // 14 minut domyślnie
     
     tokenExpiration = Date.now() + expirationTime;
-    console.log(`Token otrzymany dla środowiska ${environment.label}, wygasa za:`, Math.floor(expirationTime / 1000 / 60), 'minut');
 
     return cachedToken;
 
@@ -70,13 +69,15 @@ export async function getAuthToken(): Promise<string | null> {
       const apiError = error as AxiosError<ErrorResponse>;
       const environment = getCurrentEnvironment();
 
-      console.error('Błąd autoryzacji:', {
-        environment: environment.label,
-        message: apiError.message,
-        response: apiError.response?.data,
-        status: apiError.response?.status,
-        code: apiError.code
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Błąd autoryzacji:', {
+          environment: environment.label,
+          message: apiError.message,
+          response: apiError.response?.data,
+          status: apiError.response?.status,
+          code: apiError.code
+        });
+      }
       
       if (apiError.response?.status === 401) {
         throw new Error(`Błąd autoryzacji w środowisku ${environment.label}. Sprawdź poprawność kredencjałów.`);
@@ -97,7 +98,9 @@ export async function checkAuthStatus(): Promise<boolean> {
     const token = await getAuthToken();
     return !!token;
   } catch (error) {
-    console.error('Błąd sprawdzania statusu autoryzacji:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Błąd sprawdzania statusu autoryzacji:', error);
+    }
     return false;
   }
 } 

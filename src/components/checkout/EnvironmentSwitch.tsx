@@ -10,21 +10,20 @@ export const EnvironmentSwitch = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    console.log('EnvironmentSwitch - montowanie komponentu, isProduction:', isProduction);
-    
     // Sprawdź localStorage przy montowaniu
     try {
       const stored = window.localStorage.getItem('environment-storage');
       if (stored) {
         const { state } = JSON.parse(stored);
-        console.log('EnvironmentSwitch - odczytany stan z localStorage:', state);
         if (state.isProduction !== isProduction) {
-          console.log('EnvironmentSwitch - wykryto różnicę w stanie, aktualizacja...');
           setIsProduction(state.isProduction);
         }
       }
     } catch (error) {
-      console.error('EnvironmentSwitch - błąd odczytu stanu:', error);
+      // Błąd odczytu stanu - ignoruj w produkcji
+      if (process.env.NODE_ENV === 'development') {
+        console.error('EnvironmentSwitch - błąd odczytu stanu:', error);
+      }
     }
     
     setIsMounted(true);
@@ -38,13 +37,11 @@ export const EnvironmentSwitch = () => {
         '- Wszystkie operacje będą wykonywane na danych testowych\n' +
         '- Polisy będą rejestrowane w systemie testowym\n\n' +
         'Czy jesteś pewien?')) {
-        console.log('EnvironmentSwitch - przełączanie na TESTOWE');
         setIsProduction(false);
         await new Promise(resolve => setTimeout(resolve, 100));
         window.location.reload();
       }
     } else {
-      console.log('EnvironmentSwitch - przełączanie na PRODUKCYJNE');
       setIsProduction(true);
       await new Promise(resolve => setTimeout(resolve, 100));
       window.location.reload();

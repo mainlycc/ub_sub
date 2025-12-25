@@ -216,7 +216,6 @@ const CheckoutContent = () => {
   const validateVariant = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     
-    console.log('Walidacja wariantu:', insuranceVariant);
     
     if (!insuranceVariant.productCode) {
       newErrors.productCode = "Wybór wariantu ubezpieczenia jest wymagany";
@@ -224,7 +223,6 @@ const CheckoutContent = () => {
     
     setErrors(prev => ({ ...prev, variant: newErrors }));
     const isValid = Object.keys(newErrors).length === 0;
-    console.log('Wynik walidacji:', isValid, 'Błędy:', newErrors);
     return isValid;
   };
   
@@ -315,11 +313,9 @@ const CheckoutContent = () => {
   
   // Navigation functions
   const goToNextStep = () => {
-    console.log('Próba przejścia do następnego kroku. Obecny krok:', currentStep);
     
     if (currentStep === 1) {
       const isValid = validateVariant();
-      console.log('Walidacja kroku 1:', isValid);
       if (!isValid) return;
     }
     
@@ -336,7 +332,6 @@ const CheckoutContent = () => {
     }
     
     if (currentStep < 5) {  // Zmieniam maksymalny krok z 6 na 5
-      console.log('Przechodzę do kroku:', currentStep + 1);
       setCurrentStep(currentStep + 1);
       router.push(`/checkout?step=${currentStep + 1}`);
     }
@@ -411,8 +406,6 @@ const CheckoutContent = () => {
         premium: calculationResult ? Math.round(calculationResult.premium * 100) : 0
       };
       
-      console.log('Wysyłanie danych formularza...', policyData);
-      
       // Wysyłanie maila z potwierdzeniem
       try {
         const emailResponse = await fetch('/api/send-email', {
@@ -469,7 +462,9 @@ const CheckoutContent = () => {
       // Sukces - niezależnie od wyniku wysyłania maila
       setIsCompleted(true);
     } catch (error) {
-      console.error('Błąd podczas przetwarzania zamówienia:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Błąd podczas przetwarzania zamówienia:', error);
+      }
       alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
     } finally {
       setIsSubmitting(false);
@@ -524,7 +519,6 @@ const CheckoutContent = () => {
 
   // Funkcje do obsługi akcji w CheckoutFinalForm
   const handleSaveOffer = () => {
-    console.log('Zapisywanie oferty...');
     alert('Oferta została zapisana!');
   };
   

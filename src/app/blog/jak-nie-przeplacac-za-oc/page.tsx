@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
 import { trackBlogView } from '@/lib/facebook-pixel';
 
@@ -61,10 +62,13 @@ const BlogPostPage = () => {
 
             {/* Obraz ilustracyjny */}
             <div className="my-8">
-              <img
+              <Image
                 src="/ub1.jpg"
                 alt="Samochód na ulicy - ilustracja do artykułu o ubezpieczeniach OC"
+                width={1200}
+                height={675}
                 className="w-full h-auto rounded-lg shadow-lg"
+                loading="lazy"
               />
               <p className="text-sm text-gray-500 text-center mt-2">
                 Właściwy wybór ubezpieczenia OC może zaoszczędzić Ci setki złotych rocznie

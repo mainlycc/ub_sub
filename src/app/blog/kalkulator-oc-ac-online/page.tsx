@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
 
 const BlogPostPage = () => {
@@ -55,10 +56,13 @@ const BlogPostPage = () => {
 
             {/* Obraz ilustracyjny */}
             <div className="my-8">
-              <img
+              <Image
                 src="/ub5.jpg"
                 alt="Monety euro - ilustracja do artykułu o kalkulatorze OC/AC online"
+                width={1200}
+                height={675}
                 className="w-full h-auto rounded-lg shadow-lg"
+                loading="lazy"
               />
               <p className="text-sm text-gray-500 text-center mt-2">
                 Kalkulatory online pozwalają zaoszczędzić setki złotych na ubezpieczeniach samochodowych

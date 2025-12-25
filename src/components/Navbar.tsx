@@ -56,7 +56,7 @@ const Navbar = () => {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <nav className="flex justify-between items-center">
+        <nav className="flex justify-between items-center" role="navigation" aria-label="Główne menu nawigacyjne">
           <div 
             onClick={navigateToHome} 
             className="flex items-center cursor-pointer space-x-4"
@@ -84,36 +84,42 @@ const Navbar = () => {
             <button 
               onClick={() => scrollToSection('about-us')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+              aria-label="Przejdź do sekcji O nas"
             >
               O nas
             </button>
             <button 
               onClick={() => scrollToSection('customer-reviews')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+              aria-label="Przejdź do sekcji Opinie klientów"
             >
               Opinie
             </button>
             <button 
               onClick={() => router.push('/blog')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+              aria-label="Przejdź do bloga"
             >
               Blog
             </button>
             <button 
               onClick={() => scrollToSection('faq')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+              aria-label="Przejdź do sekcji Najczęściej zadawane pytania"
             >
               FAQ
             </button>
             <button 
               onClick={() => scrollToSection('contact')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
+              aria-label="Przejdź do strony kontaktowej"
             >
               Kontakt
             </button>
             <Button 
               className="text-lg px-6 py-2 bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6]"
               onClick={() => router.push('/gap')}
+              aria-label="Przejdź do zakupu ubezpieczenia GAP"
             >
               Kup GAP
             </Button>
@@ -139,40 +145,52 @@ const Navbar = () => {
 
         {/* Menu mobilne */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 flex flex-col space-y-4 border-t border-gray-200 mt-2">
+          <div className="md:hidden py-4 flex flex-col space-y-4 border-t border-gray-200 mt-2" role="menu" aria-label="Menu mobilne">
             <button 
               onClick={() => scrollToSection('about-us')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+              aria-label="Przejdź do sekcji O nas"
+              role="menuitem"
             >
               O nas
             </button>
             <button 
               onClick={() => scrollToSection('customer-reviews')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+              aria-label="Przejdź do sekcji Opinie klientów"
+              role="menuitem"
             >
               Opinie
             </button>
             <button 
               onClick={() => router.push('/blog')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+              aria-label="Przejdź do bloga"
+              role="menuitem"
             >
               Blog
             </button>
             <button 
               onClick={() => scrollToSection('faq')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+              aria-label="Przejdź do sekcji Najczęściej zadawane pytania"
+              role="menuitem"
             >
               FAQ
             </button>
             <button 
               onClick={() => scrollToSection('contact')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"
+              aria-label="Przejdź do strony kontaktowej"
+              role="menuitem"
             >
               Kontakt
             </button>
             <Button 
               className="text-lg px-6 py-2 bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] w-full"
               onClick={() => router.push('/gap')}
+              aria-label="Przejdź do zakupu ubezpieczenia GAP"
+              role="menuitem"
             >
               Kup GAP
             </Button>
