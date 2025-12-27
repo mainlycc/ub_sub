@@ -49,6 +49,7 @@ export async function listPublishedPosts(options: BlogListOptions = {}) {
       author: true,
       coverUrl: true,
       publishedAt: true,
+      updatedAt: true,
       status: true,
     },
   });
