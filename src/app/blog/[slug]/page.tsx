@@ -1,22 +1,43 @@
 import { notFound } from 'next/navigation';
 import Footer from '@/components/Footer';
 import { getPostBySlug } from '@/lib/blog';
+import { Metadata } from 'next';
 
 export const revalidate = 60;
 
 type Params = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Params) {
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL 
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || 'https://gapauto.pl';
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug, { includeDrafts: true });
   if (!post) return { title: 'Artykuł nie znaleziony' };
+  
+  const title = post.seoTitle || post.title;
+  const description = post.seoDesc || post.excerpt || undefined;
+  const url = `${baseUrl}/blog/${slug}`;
+  
   return {
-    title: post.seoTitle || post.title,
-    description: post.seoDesc || post.excerpt || undefined,
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
-      title: post.seoTitle || post.title,
-      description: post.seoDesc || post.excerpt || undefined,
-      images: post.coverUrl ? [{ url: post.coverUrl }] : undefined,
+      title,
+      description,
+      url,
+      type: 'article',
+      images: post.coverUrl ? [{ url: post.coverUrl, alt: title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: post.coverUrl ? [post.coverUrl] : undefined,
     },
   };
 }

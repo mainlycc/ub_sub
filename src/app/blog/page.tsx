@@ -36,7 +36,7 @@ export default async function BlogPage() {
           {posts.map((post) => (
             <Card key={post.slug} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
-                <img src={post.coverUrl ?? '/ub1.jpg'} alt={post.title} className="w-full h-full object-cover" />
+                <img src={post.coverUrl ?? '/ub1.jpg'} alt={`Okładka artykułu: ${post.title}`} className="w-full h-full object-cover" />
               </div>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
