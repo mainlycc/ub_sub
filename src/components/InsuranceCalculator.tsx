@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { trackCalculatePremium } from '@/lib/analytics';
 
 // Typy danych
 type CalculatorData = {
@@ -128,6 +129,13 @@ const InsuranceCalculator = () => {
         };
         
         setCalculationResult(calculationResult);
+        
+        // Track calculator usage
+        trackCalculatePremium({
+          carPrice: calculatorData.carPrice,
+          insuranceType: activeInsuranceType,
+          premium: data.premium
+        });
         
         // Zapisz dane w localStorage do wykorzystania w checkout
         localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));

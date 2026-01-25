@@ -3,15 +3,40 @@
 import Script from 'next/script';
 
 export function Scripts() {
+  // Placeholder dla GA4 - użytkownik musi wstawić swój GA4 Measurement ID
+  const GA4_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+  
   return (
     <>
-      {/* Google tag (gtag.js) */}
+      {/* Google Analytics 4 */}
+      {GA4_MEASUREMENT_ID && GA4_MEASUREMENT_ID !== 'G-XXXXXXXXXX' && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script
+            id="google-analytics-4"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA4_MEASUREMENT_ID}');
+              `,
+            }}
+          />
+        </>
+      )}
+
+      {/* Google tag (gtag.js) - Google Ads */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=AW-17791274207"
         strategy="afterInteractive"
       />
       <Script
-        id="google-analytics"
+        id="google-ads"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `

@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { trackCTAClick } from '@/lib/analytics';
 
 interface Review {
   id: number;
@@ -13,14 +15,15 @@ interface Review {
 }
 
 const CustomerReviews: React.FC = () => {
+  const router = useRouter();
   const reviews: Review[] = [
     {
       id: 1,
       name: "Marek Kowalski",
       rating: 5,
-      comment: "Świetna obsługa! Business Care pomógł mi znaleźć najlepsze OC za połowę ceny niż u poprzedniego ubezpieczyciela. Polecam każdemu kierowcy!",
+      comment: "Świetna obsługa! Business Care pomógł mi zabezpieczyć mój samochód najlepszym ubezpieczeniem GAP. Polecam każdemu kierowcy!",
       date: "15.01.2025",
-      insuranceType: "OC + AC"
+      insuranceType: "GAP Fakturowy"
     },
     {
       id: 2,
@@ -28,7 +31,7 @@ const CustomerReviews: React.FC = () => {
       rating: 5,
       comment: "Profesjonalne podejście i szybka pomoc w doborze ubezpieczenia. Dzięki Business Care mam kompleksową ochronę samochodu w atrakcyjnej cenie.",
       date: "08.01.2025",
-      insuranceType: "OC + AC + GAP"
+      insuranceType: "GAP + Assistance"
     },
     {
       id: 3,
@@ -36,7 +39,7 @@ const CustomerReviews: React.FC = () => {
       rating: 5,
       comment: "Po wypadku samochodowym Business Care załatwił wszystko za mnie. Szybka wypłata odszkodowania i pomoc w naprawie. Polecam!",
       date: "22.12.2024",
-      insuranceType: "OC + AC + Assistance"
+      insuranceType: "GAP + Assistance"
     },
     {
       id: 4,
@@ -44,7 +47,7 @@ const CustomerReviews: React.FC = () => {
       rating: 4,
       comment: "Business Care znalazł dla mnie ubezpieczenie w rozsądnej cenie. Obsługa klienta na najwyższym poziomie.",
       date: "05.12.2024",
-      insuranceType: "OC"
+      insuranceType: "GAP Casco"
     },
     {
       id: 5,
@@ -52,7 +55,7 @@ const CustomerReviews: React.FC = () => {
       rating: 5,
       comment: "Kupiłem ubezpieczenie GAP i jestem bardzo zadowolony. Business Care wyjaśnił wszystkie szczegóły i pomógł w wyborze najlepszej opcji.",
       date: "18.11.2024",
-      insuranceType: "OC + GAP"
+      insuranceType: "GAP Fakturowy"
     },
     {
       id: 6,
@@ -60,7 +63,7 @@ const CustomerReviews: React.FC = () => {
       rating: 4,
       comment: "Szybka kalkulacja online, przejrzyste warunki i konkurencyjne ceny. Business Care to mój wybór numer jeden dla ubezpieczeń samochodowych.",
       date: "12.11.2024",
-      insuranceType: "OC + AC + NNW"
+      insuranceType: "GAP + NNW"
     }
   ];
 
@@ -154,9 +157,16 @@ const CustomerReviews: React.FC = () => {
               Sprawdź naszą ofertę ubezpieczeń samochodowych i przekonaj się, 
               dlaczego tysiące kierowców wybiera Business Care
             </p>
-            <button className="bg-white text-[#300FE6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
-              Sprawdź ofertę
+            <button 
+              onClick={() => {
+                trackCTAClick('Oblicz składkę w 30 sekund', 'CustomerReviews');
+                router.push('/gap');
+              }}
+              className="bg-white text-[#300FE6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+            >
+              Oblicz składkę w 30 sekund
             </button>
+            <p className="text-sm mt-3 opacity-80">14 dni na rezygnację - pełny zwrot</p>
           </div>
         </div>
       </div>

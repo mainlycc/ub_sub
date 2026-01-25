@@ -30,7 +30,7 @@ const AboutUs = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Ubezpieczenia</h3>
             <p className="text-gray-800">
-              Oferujemy szeroki zakres ubezpieczeń dla firm i osób prywatnych, w tym OC, CASCO i ubezpieczenia mienia.
+              Oferujemy szeroki zakres ubezpieczeń dla firm i osób prywatnych, w tym ubezpieczenie GAP i ubezpieczenia mienia.
             </p>
           </div>
 

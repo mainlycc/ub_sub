@@ -55,6 +55,26 @@ const Navbar = () => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
+      {/* Top bar z numerem telefonu */}
+      <div className="bg-[#300FE6] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex flex-wrap items-center justify-center md:justify-between text-xs sm:text-sm gap-2 sm:gap-4">
+            <a href="tel:+48796148577" className="flex items-center hover:text-gray-200 transition-colors">
+              <span className="mr-1">📞</span>
+              <span className="font-semibold">796 148 577</span>
+            </a>
+            <a href="mailto:biuro@gapauto.pl" className="flex items-center hover:text-gray-200 transition-colors">
+              <span className="mr-1">✉️</span>
+              <span>biuro@gapauto.pl</span>
+            </a>
+            <div className="flex items-center">
+              <span className="mr-1">✓</span>
+              <span>14 dni na zwrot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <nav className="flex justify-between items-center" role="navigation" aria-label="Główne menu nawigacyjne">
           <div 
@@ -73,7 +93,7 @@ const Navbar = () => {
               src="/DI_logo_8.png"
               alt="Defend Insurance Logo"
               width={180}
-              height={60}
+              height={67}
               className="h-12 sm:h-16 w-auto"
               priority
             />

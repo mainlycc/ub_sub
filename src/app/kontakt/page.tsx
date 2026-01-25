@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 
+export const metadata = {
+  title: 'Kontakt',
+  description: 'Skontaktuj się z nami. Telefon: 796 148 577, Email: biuro@gapauto.pl. Odpowiadamy na pytania o ubezpieczenia GAP.',
+};
+
 const KontaktPage = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -307,11 +312,17 @@ const KontaktPage = () => {
         
         {/* Mapa */}
         <div className="mt-12 bg-white p-4 rounded-xl shadow-lg border border-gray-200">
-          <div className="rounded-lg overflow-hidden h-96 bg-[#E1EDFF]">
-            {/* Tutaj normalnie byłaby prawdziwa mapa, np. z Google Maps */}
-            <div className="w-full h-full flex items-center justify-center">
-              <p className="text-gray-700">Tutaj będzie osadzona mapa Google</p>
-            </div>
+          <div className="rounded-lg overflow-hidden h-96">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2442.7898!2d21.0839!3d52.3079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDE4JzI4LjQiTiAyMcKwMDUnMDIuMCJF!5e0!3m2!1spl!2spl!4v1234567890"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Mapa lokalizacji Business Care - Przyszłości 6, 05-140 Skubianka"
+            />
           </div>
         </div>
       </div>

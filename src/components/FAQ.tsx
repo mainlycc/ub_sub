@@ -85,11 +85,11 @@ const FAQ = () => {
       items: [
         {
           question: "Co to jest ubezpieczenie GAP?",
-          answer: "Ubezpieczenie GAP (Guaranteed Asset Protection) to dodatkowa ochrona finansowa, która pokrywa różnicę między kwotą odszkodowania z polisy AC a początkową wartością pojazdu lub kwotą pozostałą do spłaty leasingu/kredytu w przypadku całkowitego zniszczenia lub kradzieży pojazdu."
+          answer: "Ubezpieczenie GAP (Guaranteed Asset Protection) to dodatkowa ochrona finansowa, która pokrywa różnicę między kwotą odszkodowania z ubezpieczenia komunikacyjnego a początkową wartością pojazdu lub kwotą pozostałą do spłaty leasingu/kredytu w przypadku całkowitego zniszczenia lub kradzieży pojazdu."
         },
         {
           question: "Jakie są rodzaje ubezpieczeń GAP?",
-          answer: "Oferujemy dwa główne rodzaje ubezpieczeń GAP: GAP Fakturowy (pokrywa różnicę między wartością fakturową a odszkodowaniem z AC) oraz GAP MAX (pokrywa różnicę między wartością rynkową z dnia zakupu a odszkodowaniem z AC). Oba rodzaje zapewniają ochronę przed utratą wartości pojazdu."
+          answer: "Oferujemy dwa główne rodzaje ubezpieczeń GAP: GAP Fakturowy (pokrywa różnicę między wartością fakturową a odszkodowaniem z ubezpieczenia) oraz GAP MAX (pokrywa różnicę między wartością rynkową z dnia zakupu a odszkodowaniem z ubezpieczenia). Oba rodzaje zapewniają ochronę przed utratą wartości pojazdu."
         },
         {
           question: "Czy ubezpieczenie GAP jest obowiązkowe?",
@@ -133,7 +133,7 @@ const FAQ = () => {
       items: [
         {
           question: "Jak zgłosić szkodę z ubezpieczenia GAP?",
-          answer: "Aby zgłosić szkodę, należy skontaktować się z naszym działem obsługi klienta telefonicznie lub przez formularz na stronie internetowej. Następnie należy dostarczyć dokumentację dotyczącą szkody, w tym decyzję o wypłacie odszkodowania z ubezpieczenia AC/OC."
+          answer: "Aby zgłosić szkodę, należy skontaktować się z naszym działem obsługi klienta telefonicznie lub przez formularz na stronie internetowej. Następnie należy dostarczyć dokumentację dotyczącą szkody, w tym decyzję o wypłacie odszkodowania z ubezpieczenia komunikacyjnego."
         },
         {
           question: "Jaki jest maksymalny limit odszkodowania?",

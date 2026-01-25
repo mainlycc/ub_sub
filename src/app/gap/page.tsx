@@ -13,6 +13,11 @@ import {
 import { PhoneCall, Globe, CheckCircle } from 'lucide-react';
 import Footer from "@/components/Footer";
 
+export const metadata = {
+  title: 'Kup ubezpieczenie GAP',
+  description: 'Kup ubezpieczenie GAP online lub telefonicznie. Wybierz wygodny dla siebie sposób zakupu. Polisa w 5 minut.',
+};
+
 const GapPurchasePage = () => {
   const router = useRouter();
 

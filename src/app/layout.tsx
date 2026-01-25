@@ -4,7 +4,9 @@ import Navbar from "@/components/Navbar";
 import { Analytics } from "@vercel/analytics/next";
 import { Scripts } from "@/components/Scripts";
 import { ClientOnlyComponents } from "@/components/ClientOnlyComponents";
+import StickyCTA from "@/components/StickyCTA";
 import { Metadata } from "next";
+import { generateInsuranceAgencySchema } from "@/lib/structured-data";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -22,18 +24,17 @@ export const metadata: Metadata = {
     default: 'Ubezpieczenie GAP - Kalkulator Online | GapAuto.pl',
     template: '%s | GapAuto.pl'
   },
-  description: 'Kalkulator ubezpieczenia GAP online. Porównaj oferty ubezpieczeń GAP, OC i AC. Kompleksowa ochrona przed utratą wartości pojazdu. Szybkie obliczenie składki i wygodna polisa online. Sprawdź już dziś!',
+  description: 'Kalkulator ubezpieczenia GAP online. Kompleksowa ochrona przed utratą wartości pojazdu. Szybka wycena i polisa online w 5 minut.',
   keywords: [
     'ubezpieczenie GAP',
     'ubezpieczenie GAP online',
     'kalkulator GAP',
     'ubezpieczenie samochodu',
-    'OC AC',
-    'ubezpieczenie OC',
-    'ubezpieczenie AC',
     'ochrona wartości pojazdu',
     'ubezpieczenie komunikacyjne',
     'polisa GAP',
+    'GAP fakturowy',
+    'GAP casco',
     'GapAuto.pl'
   ],
   authors: [{ name: 'GapAuto.pl' }],
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     url: baseUrl,
     siteName: 'GapAuto.pl',
     title: 'Ubezpieczenie GAP - Kalkulator Online | GapAuto.pl',
-    description: 'Kalkulator ubezpieczenia GAP online. Porównaj oferty ubezpieczeń GAP, OC i AC. Kompleksowa ochrona przed utratą wartości pojazdu. Szybkie obliczenie składki i wygodna polisa online.',
+    description: 'Kalkulator ubezpieczenia GAP online. Kompleksowa ochrona przed utratą wartości pojazdu. Szybka wycena i polisa online w 5 minut.',
     images: [
       {
         url: `${baseUrl}/BC.png`,
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Ubezpieczenie GAP - Kalkulator Online | GapAuto.pl',
-    description: 'Kalkulator ubezpieczenia GAP online. Porównaj oferty ubezpieczeń GAP, OC i AC. Kompleksowa ochrona przed utratą wartości pojazdu.',
+    description: 'Kalkulator ubezpieczenia GAP online. Kompleksowa ochrona przed utratą wartości pojazdu. Szybka wycena i polisa online.',
     images: [`${baseUrl}/BC.png`],
   },
   alternates: {
@@ -86,11 +87,22 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const insuranceAgencySchema = generateInsuranceAgencySchema();
+  
   return (
     <html lang="pl" className="h-full">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(insuranceAgencySchema),
+          }}
+        />
+      </head>
       <body className={`${inter.className} bg-[#EAE7FC] min-h-screen flex flex-col m-0 p-0`}>
         <Scripts />
         <Navbar />
+        <StickyCTA />
         <main className="flex-grow">
           {children}
         </main>

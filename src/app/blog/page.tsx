@@ -4,6 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { listPublishedPosts } from '@/lib/blog';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description: 'Ekspercka wiedza o ubezpieczeniach GAP, porady i aktualności. Dowiedz się wszystkiego o ubezpieczeniu GAP.',
+  openGraph: {
+    title: 'Blog o ubezpieczeniach GAP | GapAuto.pl',
+    description: 'Ekspercka wiedza o ubezpieczeniach GAP, porady i aktualności. Dowiedz się wszystkiego o ubezpieczeniu GAP.',
+  },
+};
 
 function formatDate(dateString: string | null) {
   if (!dateString) return '';
