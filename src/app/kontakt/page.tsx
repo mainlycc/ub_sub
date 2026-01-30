@@ -4,11 +4,6 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 
-export const metadata = {
-  title: 'Kontakt',
-  description: 'Skontaktuj się z nami. Telefon: 796 148 577, Email: biuro@gapauto.pl. Odpowiadamy na pytania o ubezpieczenia GAP.',
-};
-
 const KontaktPage = () => {
   const [formData, setFormData] = useState({
     name: '',
