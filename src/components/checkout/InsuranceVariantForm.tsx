@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Truck } from 'lucide-react';
-import { EnvironmentSwitch } from './EnvironmentSwitch';
-import { useEnvironmentStore } from '@/lib/environment';
 
 interface InsuranceVariantFormProps {
   data: InsuranceVariant;
@@ -106,7 +104,8 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const { isProduction } = useEnvironmentStore();
+  // Zawsze używamy trybu produkcyjnego (rzeczywistego)
+  const isProduction = true;
 
   useEffect(() => {
     setIsMounted(true);
@@ -157,7 +156,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
     };
 
     fetchPortfolios();
-  }, [isMounted, isProduction]); // Dodajemy isProduction do zależności
+  }, [isMounted]); // isProduction jest zawsze true, więc nie jest potrzebne w zależnościach
 
   // Funkcja pomocnicza do generowania opisów produktów
   const getProductDescription = (portfolio: PortfolioApiResponse): string => {
@@ -236,10 +235,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         </div>
           Wybierz wariant ubezpieczenia
         </h2>
-        
-        <div className="mb-6">
-          <EnvironmentSwitch />
-        </div>
         
         <div className="grid grid-cols-1 gap-4">
           {variantOptions.map((variant) => {
