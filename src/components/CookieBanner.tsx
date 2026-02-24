@@ -5,6 +5,32 @@ import { Button } from "@/components/ui/button"
 import { Cookie, X } from "lucide-react"
 import Link from "next/link"
 
+type ConsentValue = "granted" | "denied"
+
+interface ConsentUpdateEvent {
+  event: "cookie_consent_update"
+  ad_storage: ConsentValue
+  analytics_storage: ConsentValue
+  ad_user_data: ConsentValue
+  ad_personalization: ConsentValue
+}
+
+declare global {
+  interface Window {
+    dataLayer?: ConsentUpdateEvent[]
+    gtag?: (
+      command: "consent",
+      action: "update",
+      params: {
+        ad_storage: ConsentValue
+        analytics_storage: ConsentValue
+        ad_user_data: ConsentValue
+        ad_personalization: ConsentValue
+      }
+    ) => void
+  }
+}
+
 export const CookieBanner = () => {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -18,29 +44,27 @@ export const CookieBanner = () => {
         setIsVisible(true)
       }, 1000)
       return () => clearTimeout(timer)
-    } else {
+    } else if (typeof window !== "undefined") {
       // Użytkownik już podjął decyzję - wyślij sygnał do GTM / Consent Mode
-      if (typeof window !== "undefined") {
-        const consent =
-          cookieConsent === "accepted" ? "granted" : "denied"
+      const consent: ConsentValue =
+        cookieConsent === "accepted" ? "granted" : "denied"
 
-        ;(window as any).dataLayer = (window as any).dataLayer || []
-        ;(window as any).dataLayer.push({
-          event: "cookie_consent_update",
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({
+        event: "cookie_consent_update",
+        ad_storage: consent,
+        analytics_storage: consent,
+        ad_user_data: consent,
+        ad_personalization: consent,
+      })
+
+      if (typeof window.gtag === "function") {
+        window.gtag("consent", "update", {
           ad_storage: consent,
           analytics_storage: consent,
           ad_user_data: consent,
           ad_personalization: consent,
         })
-
-        if (typeof (window as any).gtag === "function") {
-          ;(window as any).gtag("consent", "update", {
-            ad_storage: consent,
-            analytics_storage: consent,
-            ad_user_data: consent,
-            ad_personalization: consent,
-          })
-        }
       }
     }
   }, [])
@@ -49,8 +73,8 @@ export const CookieBanner = () => {
     localStorage.setItem("cookieConsent", "accepted")
 
     if (typeof window !== "undefined") {
-      ;(window as any).dataLayer = (window as any).dataLayer || []
-      ;(window as any).dataLayer.push({
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({
         event: "cookie_consent_update",
         ad_storage: "granted",
         analytics_storage: "granted",
@@ -58,8 +82,8 @@ export const CookieBanner = () => {
         ad_personalization: "granted",
       })
 
-      if (typeof (window as any).gtag === "function") {
-        ;(window as any).gtag("consent", "update", {
+      if (typeof window.gtag === "function") {
+        window.gtag("consent", "update", {
           ad_storage: "granted",
           analytics_storage: "granted",
           ad_user_data: "granted",
@@ -75,8 +99,8 @@ export const CookieBanner = () => {
     localStorage.setItem("cookieConsent", "rejected")
 
     if (typeof window !== "undefined") {
-      ;(window as any).dataLayer = (window as any).dataLayer || []
-      ;(window as any).dataLayer.push({
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({
         event: "cookie_consent_update",
         ad_storage: "denied",
         analytics_storage: "denied",
@@ -84,8 +108,8 @@ export const CookieBanner = () => {
         ad_personalization: "denied",
       })
 
-      if (typeof (window as any).gtag === "function") {
-        ;(window as any).gtag("consent", "update", {
+      if (typeof window.gtag === "function") {
+        window.gtag("consent", "update", {
           ad_storage: "denied",
           analytics_storage: "denied",
           ad_user_data: "denied",

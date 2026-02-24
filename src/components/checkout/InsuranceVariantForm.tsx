@@ -104,8 +104,6 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  // Zawsze używamy trybu produkcyjnego (rzeczywistego)
-  const isProduction = true;
 
   useEffect(() => {
     setIsMounted(true);
@@ -134,8 +132,8 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
             !['5_DCGAP_F25_GEN', '5_DCGAP_FG25_GEN'].includes(item.productCode)
           )
           .map((portfolio: PortfolioApiResponse) => ({
-            productCode: portfolio.productCode,
-            sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || (isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25"),
+              productCode: portfolio.productCode,
+              sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || "PL_GAP_25",
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
             description: getProductDescription(portfolio),
             signatureTypes: [{ 
@@ -247,7 +245,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
                 type="button"
                 onClick={() => handleVariantSelect({
                   productCode: variant.code,
-                  sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || (isProduction ? "PL_GAP_25" : "PL_TEST_GAP_25"),
+                  sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || "PL_GAP_25",
                   name: variant.name,
                   signatureTypes: [{ code: "AUTHORIZED_BY_SMS", name: "Autoryzacja SMS" }],
                   optionTypes: [],
