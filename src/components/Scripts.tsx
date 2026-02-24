@@ -5,24 +5,6 @@ import Script from 'next/script';
 export function Scripts() {
   return (
     <>
-      {/* Google tag (gtag.js) */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=AW-17791274207"
-        strategy="afterInteractive"
-      />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17791274207');
-          `,
-        }}
-      />
-
       {/* Facebook Pixel Code */}
       <Script
         id="facebook-pixel"

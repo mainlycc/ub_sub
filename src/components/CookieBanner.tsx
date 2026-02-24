@@ -11,22 +11,89 @@ export const CookieBanner = () => {
   useEffect(() => {
     // Sprawdź czy użytkownik już zaakceptował cookies
     const cookieConsent = localStorage.getItem("cookieConsent")
+
     if (!cookieConsent) {
       // Pokaż banner po krótkim opóźnieniu dla lepszego UX
       const timer = setTimeout(() => {
         setIsVisible(true)
       }, 1000)
       return () => clearTimeout(timer)
+    } else {
+      // Użytkownik już podjął decyzję - wyślij sygnał do GTM / Consent Mode
+      if (typeof window !== "undefined") {
+        const consent =
+          cookieConsent === "accepted" ? "granted" : "denied"
+
+        ;(window as any).dataLayer = (window as any).dataLayer || []
+        ;(window as any).dataLayer.push({
+          event: "cookie_consent_update",
+          ad_storage: consent,
+          analytics_storage: consent,
+          ad_user_data: consent,
+          ad_personalization: consent,
+        })
+
+        if (typeof (window as any).gtag === "function") {
+          ;(window as any).gtag("consent", "update", {
+            ad_storage: consent,
+            analytics_storage: consent,
+            ad_user_data: consent,
+            ad_personalization: consent,
+          })
+        }
+      }
     }
   }, [])
 
   const handleAccept = () => {
     localStorage.setItem("cookieConsent", "accepted")
+
+    if (typeof window !== "undefined") {
+      ;(window as any).dataLayer = (window as any).dataLayer || []
+      ;(window as any).dataLayer.push({
+        event: "cookie_consent_update",
+        ad_storage: "granted",
+        analytics_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+      })
+
+      if (typeof (window as any).gtag === "function") {
+        ;(window as any).gtag("consent", "update", {
+          ad_storage: "granted",
+          analytics_storage: "granted",
+          ad_user_data: "granted",
+          ad_personalization: "granted",
+        })
+      }
+    }
+
     setIsVisible(false)
   }
 
   const handleReject = () => {
     localStorage.setItem("cookieConsent", "rejected")
+
+    if (typeof window !== "undefined") {
+      ;(window as any).dataLayer = (window as any).dataLayer || []
+      ;(window as any).dataLayer.push({
+        event: "cookie_consent_update",
+        ad_storage: "denied",
+        analytics_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+      })
+
+      if (typeof (window as any).gtag === "function") {
+        ;(window as any).gtag("consent", "update", {
+          ad_storage: "denied",
+          analytics_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+        })
+      }
+    }
+
     setIsVisible(false)
   }
 
