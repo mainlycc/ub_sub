@@ -93,6 +93,7 @@ export const PolicyRegistration = ({
         : insuranceVariant.productCode.replace('_MG', '_M');
 
       // Usuwamy evaluationDate z vehicleData jeśli nie jest late solicitation
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { evaluationDate: _evalDate, ...vehicleDataWithoutEval } = vehicleData;
 
       const policyData = {
