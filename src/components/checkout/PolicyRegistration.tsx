@@ -83,17 +83,30 @@ export const PolicyRegistration = ({
     setRegistrationError(null);
 
     try {
+      // Dynamiczny wybór produktu: MAX (M) dla <=180 dni od zakupu, MAX AC (MG) dla >180 dni
+      const purchaseDate = new Date(vehicleData.purchasedOn);
+      const now = new Date();
+      const daysSincePurchase = Math.floor((now.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
+      const isLateSolicitation = daysSincePurchase > 180;
+      const resolvedProductCode = isLateSolicitation 
+        ? insuranceVariant.productCode 
+        : insuranceVariant.productCode.replace('_MG', '_M');
+
+      // Usuwamy evaluationDate z vehicleData jeśli nie jest late solicitation
+      const { evaluationDate: _evalDate, ...vehicleDataWithoutEval } = vehicleData;
+
       const policyData = {
         extApiNo: null,
         extReferenceNo: null,
         extTenderNo: null,
         sellerNodeCode: insuranceVariant.sellerNodeCode,
-        productCode: insuranceVariant.productCode,
+        productCode: resolvedProductCode,
         saleInitiatedOn: getValidSaleInitiatedDate(),
         signatureTypeCode: insuranceVariant.signatureTypeCode,
         confirmedByDefault: null,
         vehicleSnapshot: {
-          ...vehicleData,
+          ...vehicleDataWithoutEval,
+          ...(isLateSolicitation ? { evaluationDate: getValidSaleInitiatedDate() } : {}),
           purchasePrice: Math.round(vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
           owners: [{ contact: { inheritFrom: "policyHolder" } }]

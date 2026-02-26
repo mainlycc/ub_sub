@@ -174,12 +174,19 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       // Upewnij się, że mamy kod kraju
       const countryCode = props.personalData.address?.countryCode || 'PL';
 
+      // Dynamiczny wybór produktu: MAX (M) dla <=180 dni od zakupu, MAX AC (MG) dla >180 dni
+      const purchaseDate = new Date(props.vehicleData.purchasedOn);
+      const now = new Date();
+      const daysSincePurchase = Math.floor((now.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
+      const isLateSolicitation = daysSincePurchase > 180;
+      const productCode = isLateSolicitation ? "5_DCGAP_MG25_GEN" : "5_DCGAP_M25_GEN";
+
       const policyData = {
         extApiNo: null,
         extReferenceNo: null,
         extTenderNo: null,
         sellerNodeCode: getSellerNodeCode(),
-        productCode: "5_DCGAP_MG25_GEN",
+        productCode,
         saleInitiatedOn: getValidSaleInitiatedDate(),
         signatureTypeCode: "AUTHORIZED_BY_SMS",
         confirmedByDefault: null,
@@ -192,7 +199,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           usageCode: "STANDARD",
           mileage: props.vehicleData.mileage,
           firstRegisteredOn: props.vehicleData.firstRegisteredOn + "T07:38:46+02:00",
-          evaluationDate: getValidSaleInitiatedDate(),
+          ...(isLateSolicitation ? { evaluationDate: getValidSaleInitiatedDate() } : {}),
           purchasePrice: Math.round(props.vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(props.vehicleData.purchasePriceNet * 100),
           purchasePriceVatReclaimableCode: "NO",

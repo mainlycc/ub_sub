@@ -82,15 +82,14 @@ export const CalculationForm = ({
         return;
       }
 
-      if (daysSincePurchase <= 180) {
-        setCalculationError('Dla tego pojazdu nie można wykonać kalkulacji - minimalny okres od zakupu to 181 dni');
-        setIsCalculating(false);
-        return;
-      }
+      // Dla zakupów <= 180 dni: produkt MAX (M), bez evaluationDate
+      // Dla zakupów > 180 dni: produkt MAX AC (MG), z evaluationDate
+      const isLateSolicitation = daysSincePurchase > 180;
+      const productCode = isLateSolicitation ? "5_DCGAP_MG25_GEN" : "5_DCGAP_M25_GEN";
 
       const requestData = {
         sellerNodeCode: getSellerNodeCode(),
-        productCode: "5_DCGAP_MG25_GEN",
+        productCode,
         saleInitiatedOn: today.toISOString().split('T')[0],
         vehicleSnapshot: {
           purchasedOn: vehicleData.purchasedOn,
@@ -99,7 +98,7 @@ export const CalculationForm = ({
           usageCode: "STANDARD",
           mileage: vehicleData.mileage,
           firstRegisteredOn: vehicleData.firstRegisteredOn + "T07:38:46+02:00",
-          evaluationDate: today.toISOString().split('T')[0],
+          ...(isLateSolicitation ? { evaluationDate: today.toISOString().split('T')[0] } : {}),
           purchasePrice: Math.round(vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
           purchasePriceVatReclaimableCode: "NO",

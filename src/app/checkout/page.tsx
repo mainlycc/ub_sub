@@ -366,13 +366,24 @@ const CheckoutContent = () => {
       // Przygotowanie danych w odpowiednim formacie API
       const apiFormatData = convertToApiFormat(insuredPersonsData);
       
+      // Dynamiczny wybór produktu: MAX (M) dla <=180 dni, MAX AC (MG) dla >180 dni
+      const purchaseDate = new Date(vehicleData.purchasedOn);
+      const now = new Date();
+      const daysSincePurchase = Math.floor((now.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
+      const isLateSolicitation = daysSincePurchase > 180;
+      
+      // Zamień kod MG na M jeśli zakup <= 180 dni
+      const resolvedProductCode = isLateSolicitation 
+        ? insuranceVariant.productCode 
+        : insuranceVariant.productCode.replace('_MG', '_M');
+
       const policyData = {
         extApiNo: null,
         extReferenceNo: null,
         extTenderNo: null,
         sellerNodeCode: insuranceVariant.sellerNodeCode,
-        productCode: insuranceVariant.productCode,
-        saleInitiatedOn: new Date().toISOString().split('T')[0],
+        productCode: resolvedProductCode,
+        saleInitiatedOn: now.toISOString().split('T')[0],
         signatureTypeCode: insuranceVariant.signatureTypeCode,
         confirmedByDefault: null,
         
@@ -384,7 +395,7 @@ const CheckoutContent = () => {
           usageCode: vehicleData.usageCode,
           mileage: vehicleData.mileage,
           firstRegisteredOn: new Date(vehicleData.firstRegisteredOn).toISOString(),
-          evaluationDate: new Date().toISOString().split('T')[0],
+          ...(isLateSolicitation ? { evaluationDate: now.toISOString().split('T')[0] } : {}),
           purchasePrice: Math.round(vehicleData.purchasePrice * 100),
           purchasePriceNet: Math.round(vehicleData.purchasePriceNet * 100),
           purchasePriceVatReclaimableCode: vehicleData.purchasePriceVatReclaimableCode,
