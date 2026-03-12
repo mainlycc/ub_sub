@@ -53,14 +53,39 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
     { value: 'LCV', label: 'Samochód dostawczy' }
   ];
 
-  const [selectedMakeId, setSelectedMakeId] = useState<string | null>(data.make || null);
+  const [selectedMakeId, setSelectedMakeId] = useState<string | null>(data.makeId || data.make || null);
+  const [selectedMakeName, setSelectedMakeName] = useState<string>((data.make && !/^\d+$/.test(String(data.make))) ? data.make : '');
   const [selectedModel, setSelectedModel] = useState<string | null>(data.modelCode || null);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setSelectedMakeId(data.make || null);
+    setSelectedMakeId(data.makeId || data.make || null);
     setSelectedModel(data.modelCode || null);
-  }, [data.make, data.modelCode]);
+    // Zachowaj nazwę marki jeśli data.make wygląda na nazwę (nie jest czystą liczbą = makeId)
+    if (data.make && !/^\d+$/.test(String(data.make))) {
+      setSelectedMakeName(data.make);
+    }
+  }, [data.make, data.makeId, data.modelCode]);
+
+  // Popraw legacy data: gdy data.make to makeId (np. "16"), pobierz nazwę marki z API
+  useEffect(() => {
+    const makeId = data.makeId || data.make;
+    if (!makeId || !/^\d+$/.test(String(makeId))) return;
+    if (data.make && !/^\d+$/.test(String(data.make))) return; // już mamy nazwę
+    let cancelled = false;
+    fetch('/api/vehicles/makes')
+      .then(res => res.ok ? res.json() : null)
+      .then((makes: Array<{ id: number; name: string }> | null) => {
+        if (cancelled || !Array.isArray(makes)) return;
+        const make = makes.find(m => String(m.id) === String(makeId));
+        if (make?.name) {
+          setSelectedMakeName(make.name);
+          onChange({ ...data, make: make.name });
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [data.makeId, data.make]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -106,26 +131,28 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Aktualizujemy dane pojazdu z wybranymi wartościami
+      // Aktualizujemy dane pojazdu z wybranymi wartościami (make = nazwa marki, nie ID)
       onChange({
         ...data,
         modelCode: selectedModel || '',
-        make: selectedMakeId || '',
+        make: selectedMakeName || data.make || '',
         makeId: selectedMakeId || '',
         modelId: selectedModel || '',
       });
     }
   };
 
-  const handleMakeSelect = (makeId: string | null) => {
+  const handleMakeSelect = (makeId: string | null, makeName: string) => {
     setSelectedMakeId(makeId);
+    setSelectedMakeName(makeName);
     setSelectedModel(null);
     onChange({
       ...data,
-      make: makeId || '',
+      make: makeName || '',
       makeId: makeId || '',
       modelCode: '',
-      modelId: ''
+      modelId: '',
+      model: ''
     });
   };
 

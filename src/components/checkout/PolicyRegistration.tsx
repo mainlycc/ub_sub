@@ -197,7 +197,7 @@ export const PolicyRegistration = ({
           <div className="space-y-2">
             <p><span className="font-medium">Produkt:</span> {calculationResult.details.productName}</p>
             <p><span className="font-medium">Okres ochrony:</span> {calculationResult.details.coveragePeriod}</p>
-            <p><span className="font-medium">Maksymalna ochrona:</span> {calculationResult.details.maxCoverage}</p>
+            <p><span className="font-medium">Limit odszkodowania:</span> {calculationResult.details.maxCoverage}</p>
             <p><span className="font-medium">Rodzaj płatności:</span> {
               paymentData.paymentTerm === 'PT_LS' ? 'Płatność jednorazowa' : 
               paymentData.paymentTerm === 'PT_A' ? 'Płatność roczna' : 

@@ -11,13 +11,13 @@ const Footer = (): React.ReactElement => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Logo i opis */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-            <div className="mb-4">
+            <div className="mb-4 flex items-center">
               <Image
                 src="/DI_logo_8.png"
                 alt="Defend Insurance Logo"
                 width={180}
                 height={60}
-                className="h-12 sm:h-16 w-auto"
+                className="h-10 sm:h-12 w-auto object-contain object-left"
                 priority
               />
             </div>

@@ -558,9 +558,9 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
             <p><span className="font-medium">Produkt:</span> {props.calculationResult.details.productName}</p>
             <p><span className="font-medium">Okres ochrony:</span> {props.calculationResult.details.coveragePeriod}</p>
             <p><span className="font-medium">Wartość pojazdu:</span> {props.calculationResult.details.vehicleValue.toLocaleString()} zł</p>
-            <p><span className="font-medium">Maksymalna ochrona:</span> {props.calculationResult.details.maxCoverage}</p>
+            <p><span className="font-medium">Limit odszkodowania:</span> {props.calculationResult.details.maxCoverage}</p>
             <p><span className="font-medium">Okres ubezpieczenia:</span> {props.paymentData.term === 'T_36' ? '36 miesięcy' : props.paymentData.term === 'T_24' ? '24 miesiące' : props.paymentData.term === 'T_12' ? '12 miesięcy' : props.paymentData.term}</p>
-            <p><span className="font-medium">Limit roszczenia:</span> {props.paymentData.claimLimit === 'CL_150000' ? '150 000 zł' : props.paymentData.claimLimit === 'CL_100000' ? '100 000 zł' : props.paymentData.claimLimit === 'CL_50000' ? '50 000 zł' : props.paymentData.claimLimit}</p>
+            <p><span className="font-medium">Limit odszkodowania:</span> {props.paymentData.claimLimit === 'CL_150000' ? '150 000 zł' : props.paymentData.claimLimit === 'CL_100000' ? '100 000 zł' : props.paymentData.claimLimit === 'CL_50000' ? '50 000 zł' : props.paymentData.claimLimit}</p>
           </div>
         </div>
 

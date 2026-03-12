@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { Calculator, Info } from 'lucide-react';
+import { Calculator, Info, Check, FileText, Receipt, Shield } from 'lucide-react';
 import Image from 'next/image';
 import {
   Tabs,
@@ -170,9 +170,9 @@ const InsuranceCalculator = () => {
     <section className="py-12 bg-[#EAE7FC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:hidden">
-          <h2 className="text-3xl font-bold text-gray-900">Oblicz składkę ubezpieczenia GAP</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-[1.05] tracking-tight max-w-xl mx-auto">Twoje auto <span className="text-orange-600 italic">nie musi</span> tracić na wartości !</h2>
           <p className="mt-3 text-xl text-gray-600">
-            Zabezpiecz się przed utratą wartości swojego pojazdu
+            Oblicz składkę ubezpieczenia GAP
           </p>
         </div>
         
@@ -188,6 +188,9 @@ const InsuranceCalculator = () => {
                     <Calculator className="h-6 w-6 text-[#300FE6]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">Kalkulator składki</h3>
+                  <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-md">
+                    Zabezpiecz 100% ceny z dnia zakupu nawet na 5 lat. Wybierz odpowiedni limit odszkodowania i zyskaj pełną ochronę finansową.
+                  </p>
                 </div>
                 
                 <Tabs defaultValue="fakturowy" onValueChange={(value) => setActiveInsuranceType(value as InsuranceType)}>
@@ -393,34 +396,36 @@ const InsuranceCalculator = () => {
                 className="mx-auto mb-4 transform transition-all duration-500 animate-fade-in-down"
               >
                 <div className="bg-white rounded-[20px] shadow-lg overflow-hidden border-2 border-[#300FE6] animate-pulse-once">
-                  <div className="flex items-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-4 py-2">
+                  <div className="flex items-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-4 py-3">
                     <div>
-                      <h3 className="text-xl font-bold text-white">Twoja jednorazowa składka: {calculationResult.premium.toFixed(2)} zł</h3>
+                      <h3 className="text-2xl font-bold text-white">Twoja jednorazowa składka: {calculationResult.premium.toFixed(2)} zł</h3>
                     </div>
                   </div>
                   
                   <div className="p-3">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="bg-gray-50 p-2 rounded-[20px]">
-                        <div className="text-xs text-gray-500">Produkt</div>
+                    <div className="grid grid-cols-2 gap-2 text-base">
+                      <div className="bg-gray-50 p-3 rounded-[20px]">
+                        <div className="text-sm text-gray-500">Produkt</div>
                         <div className="font-medium">{calculationResult.details.productName}</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded-[20px]">
-                        <div className="text-xs text-gray-500">Okres ochrony</div>
+                      <div className="bg-gray-50 p-3 rounded-[20px]">
+                        <div className="text-sm text-gray-500">Okres ochrony</div>
                         <div className="font-medium">{calculationResult.details.coveragePeriod}</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded-[20px]">
-                        <div className="text-xs text-gray-500">Wartość pojazdu</div>
+                      <div className="bg-gray-50 p-3 rounded-[20px]">
+                        <div className="text-sm text-gray-500">Wartość pojazdu</div>
                         <div className="font-medium">{calculationResult.details.vehicleValue.toLocaleString()} zł</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded-[20px]">
-                        <div className="text-xs text-gray-500">Maksymalny limit</div>
+                      <div className="bg-gray-50 p-3 rounded-[20px]">
+                        <div className="text-sm text-gray-500">Limit dla proponowanej składki</div>
                         <div className="font-medium">{calculationResult.details.maxCoverage}</div>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-gray-600 mt-4 italic">
-                      Suma ubezpieczenia wskazana w kalkulacji jest przykładowa - do wyliczenia ostatecznej składki prosimy o uzupełnienie wszystkich wymaganych informacji
+                    <p className="text-base text-gray-600 mt-4 italic text-center">
+                      Cena polisy wyliczona dla sumy ubezpieczenia {calculationResult.details.maxCoverage} (wysokość przyjętej utraty wartości).
+                      <br />
+                      Wybierz „Kup teraz”, aby zwiększyć sumę ubezpieczenia (wysokość utraty wartości Twojego pojazdu).
                     </p>
                     
                     <div className="flex mt-3 space-x-2">
@@ -443,25 +448,69 @@ const InsuranceCalculator = () => {
           
           <div className="md:w-1/2 mt-8 md:mt-0">
             <div className="hidden md:block">
-              <h2 className="text-4xl font-bold text-gray-900 leading-tight mb-8">
-                Nie daj się <span className="text-orange-600">zaskoczyć</span> utratą wartości swojego auta
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.05] tracking-tight mb-8 max-w-2xl mx-auto text-center">
+                Twoje auto <span className="text-orange-600 italic">nie musi</span> tracić na wartości !
               </h2>
               
-              <div className="relative w-full h-[400px] rounded-[20px] border-4 border-white shadow-xl overflow-hidden bg-[#e8f4ff]">
-                <Image
-                  src="/front.png"
-                  alt="Ubezpieczenie samochodu"
-                  fill
-                  style={{ 
-                    objectFit: 'cover',
-                    borderRadius: '20px'
-                  }}
-                  priority
-                />
+              <div className="mb-8 w-full rounded-[20px] border-4 border-white shadow-xl overflow-hidden bg-[#e8f4ff]">
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src="/front.png"
+                    alt="Ubezpieczenie samochodu"
+                    fill
+                    style={{ 
+                      objectFit: 'contain',
+                      borderRadius: '20px 20px 0 0'
+                    }}
+                    priority
+                  />
+                </div>
+                <p className="px-4 py-4 text-center text-sm sm:text-base text-gray-600 leading-relaxed bg-[#e8f4ff]">
+                  <span className="font-semibold text-gray-800">Limit odszkodowania GAP</span> to różnica pomiędzy <span className="text-[#300FE6] font-medium">wartością rynkową pojazdu</span> wynikającą z polisy AC a <span className="text-orange-600 font-medium">kwotą z faktury zakupu / umowy kupna-sprzedaży</span>.
+                </p>
+              </div>
+              
+              <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-[20px] border border-gray-200/80 shadow-sm overflow-hidden">
+                <div className="rounded-[20px] overflow-hidden">
+                  <div className="bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-5 py-4">
+                    <h4 className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                      Co przygotować do wyceny?
+                    </h4>
+                  </div>
+                  <div className="p-5 sm:p-6 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#16AB59] flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#300FE6]/10 flex items-center justify-center text-[#300FE6]">
+                        <FileText className="w-7 h-7" />
+                      </div>
+                      <span className="text-gray-900 font-medium">Dowód rejestracyjny pojazdu.</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#16AB59] flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#300FE6]/10 flex items-center justify-center text-[#300FE6]">
+                        <Receipt className="w-7 h-7" />
+                      </div>
+                      <span className="text-gray-900 font-medium">Fakturę zakupu lub umowę kupna-sprzedaży.</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#16AB59] flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#300FE6]/10 flex items-center justify-center text-[#300FE6]">
+                        <Shield className="w-7 h-7" />
+                      </div>
+                      <span className="text-gray-900 font-medium">Aktualną polisę OC/AC.</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               {!calculationResult && (
-                <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-[20px] md:block hidden">
+                <div className="mt-6 p-6 bg-gray-50 border border-gray-200 rounded-[20px] md:block hidden">
                   <p className="text-gray-600 italic">
                     Oblicz składkę ubezpieczenia GAP, wprowadzając dane pojazdu w formularzu po lewej stronie.
                   </p>

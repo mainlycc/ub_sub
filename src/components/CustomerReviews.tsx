@@ -16,7 +16,7 @@ const CustomerReviews: React.FC = () => {
   const reviews: Review[] = [
     {
       id: 1,
-      name: "Marek Kowalski",
+      name: "Marek",
       rating: 5,
       comment: "Świetna obsługa! Business Care pomógł mi znaleźć najlepsze OC za połowę ceny niż u poprzedniego ubezpieczyciela. Polecam każdemu kierowcy!",
       date: "15.01.2025",
@@ -24,7 +24,7 @@ const CustomerReviews: React.FC = () => {
     },
     {
       id: 2,
-      name: "Anna Nowak",
+      name: "Anna",
       rating: 5,
       comment: "Profesjonalne podejście i szybka pomoc w doborze ubezpieczenia. Dzięki Business Care mam kompleksową ochronę samochodu w atrakcyjnej cenie.",
       date: "08.01.2025",
@@ -32,7 +32,7 @@ const CustomerReviews: React.FC = () => {
     },
     {
       id: 3,
-      name: "Piotr Wiśniewski",
+      name: "Piotr",
       rating: 5,
       comment: "Po wypadku samochodowym Business Care załatwił wszystko za mnie. Szybka wypłata odszkodowania i pomoc w naprawie. Polecam!",
       date: "22.12.2024",
@@ -40,7 +40,7 @@ const CustomerReviews: React.FC = () => {
     },
     {
       id: 4,
-      name: "Katarzyna Zielińska",
+      name: "Katarzyna",
       rating: 4,
       comment: "Business Care znalazł dla mnie ubezpieczenie w rozsądnej cenie. Obsługa klienta na najwyższym poziomie.",
       date: "05.12.2024",
@@ -48,7 +48,7 @@ const CustomerReviews: React.FC = () => {
     },
     {
       id: 5,
-      name: "Tomasz Dąbrowski",
+      name: "Tomasz",
       rating: 5,
       comment: "Kupiłem ubezpieczenie GAP i jestem bardzo zadowolony. Business Care wyjaśnił wszystkie szczegóły i pomógł w wyborze najlepszej opcji.",
       date: "18.11.2024",
@@ -56,7 +56,7 @@ const CustomerReviews: React.FC = () => {
     },
     {
       id: 6,
-      name: "Magdalena Lewandowska",
+      name: "Magdalena",
       rating: 4,
       comment: "Szybka kalkulacja online, przejrzyste warunki i konkurencyjne ceny. Business Care to mój wybór numer jeden dla ubezpieczeń samochodowych.",
       date: "12.11.2024",

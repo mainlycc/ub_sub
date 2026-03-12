@@ -327,7 +327,7 @@ export const CalculationForm = ({
               {calculationResult.details.vehicleValue.toLocaleString()} PLN
             </p>
             <p>
-              <span className="font-medium">Maksymalna ochrona:</span>{' '}
+              <span className="font-medium">Limit odszkodowania:</span>{' '}
               {calculationResult.details.maxCoverage}
             </p>
           </div>

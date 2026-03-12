@@ -9,7 +9,7 @@ interface VehicleMake {
 
 interface VehicleMakeSelectProps {
   selectedMakeId: string | null;
-  onMakeSelect: (makeId: string) => void;
+  onMakeSelect: (makeId: string, makeName: string) => void;
   error?: string;
 }
 
@@ -87,8 +87,10 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
         className={`w-full p-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md bg-white`}
         value={selectedMakeId || ''}
         onChange={(e) => {
-          console.log('Wybrano markę:', e.target.value);
-          onMakeSelect(e.target.value);
+          const makeId = e.target.value;
+          const selectedMake = makes.find(m => String(m.id) === makeId);
+          console.log('Wybrano markę:', makeId, selectedMake?.name);
+          onMakeSelect(makeId, selectedMake?.name || '');
         }}
       >
         <option value="">Wybierz markę</option>
