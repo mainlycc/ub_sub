@@ -2,6 +2,8 @@
 
 import React, { useEffect } from 'react';
 import InsuranceCalculator from '@/components/InsuranceCalculator';
+import GapChartCard from '@/components/GapChartCard';
+import GapComparisonSection from '@/components/GapComparisonSection';
 import InsuranceTypeCards from '@/components/InsuranceTypeCards';
 import { Services } from '@/components/Services';
 import CustomerReviews from '@/components/CustomerReviews';
@@ -19,6 +21,8 @@ const HomePage = (): React.ReactNode => {
     <>
       <main className="min-h-screen px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 bg-[#EAE7FC]">
         <InsuranceCalculator />
+        <GapChartCard />
+        <GapComparisonSection />
         <InsuranceTypeCards />
         <Services />
         <CustomerReviews />

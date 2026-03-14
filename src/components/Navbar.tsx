@@ -80,7 +80,7 @@ const Navbar = () => {
           </div>
           
           {/* Menu desktopowe */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center gap-x-8">
             <button 
               onClick={() => scrollToSection('about-us')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6]"
@@ -145,7 +145,7 @@ const Navbar = () => {
 
         {/* Menu mobilne */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 flex flex-col space-y-4 border-t border-gray-200 mt-2" role="menu" aria-label="Menu mobilne">
+          <div className="md:hidden py-4 flex flex-col space-y-6 border-t border-gray-200 mt-2" role="menu" aria-label="Menu mobilne">
             <button 
               onClick={() => scrollToSection('about-us')} 
               className="text-lg font-bold text-gray-800 hover:text-[#300FE6] py-2"

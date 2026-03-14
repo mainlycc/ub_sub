@@ -3,42 +3,11 @@
 import React from 'react';
 import { Shield, FileText, Check } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const InsuranceTypeCards = (): React.ReactElement => {
   return (
     <section className="py-8 sm:py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Karta z wykresem GAP */}
-        <div className="mb-12 sm:mb-16 overflow-hidden">
-          <div className="bg-white rounded-[20px] shadow-xl border border-gray-200/80 overflow-hidden">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 px-6 sm:px-8 pt-6 sm:pt-8 pb-4 text-center sm:text-left">
-              Czym jest limit odszkodowania GAP?
-            </h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-              <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
-                <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
-                  To pokrycie różnicy pomiędzy <span className="text-[#300FE6] font-semibold">wartością rynkową pojazdu</span> (z polisy AC) a <span className="text-orange-600 font-semibold">kwotą na fakturze zakupu lub umowie kupna-sprzedaży</span>. Dzięki temu, w razie szkody całkowitej lub kradzieży, odzyskujesz pełną zainwestowaną kwotę.
-                </p>
-              </div>
-              <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[320px] bg-gradient-to-br from-[#e8f4ff] to-[#EAE7FC] p-6 sm:p-8 flex items-center justify-center">
-                <div className="relative w-full max-w-md mx-auto aspect-[4/3]">
-                  <Image
-                    src="/wykres.png"
-                    alt="Wykres przedstawiający różnicę między wartością rynkową a ceną zakupu - GAP ubezpieczenie"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                </div>
-              </div>
-            </div>
-            <p className="px-6 sm:px-8 pb-6 sm:pb-8 pt-4 text-gray-700 font-semibold text-base sm:text-lg lg:text-xl text-center">
-              Wybierz ubezpieczenie GAP akceptowane przez wszystkie firmy leasingowe.
-            </p>
-          </div>
-        </div>
-
         <div className="text-center mb-8 sm:mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Poznaj rodzaje ubezpieczeń GAP</h2>
           <p className="mt-2 sm:mt-3 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">

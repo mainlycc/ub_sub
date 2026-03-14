@@ -452,7 +452,7 @@ const InsuranceCalculator = () => {
                 Twoje auto <span className="text-orange-600 italic">nie musi</span> tracić na wartości !
               </h2>
               
-              <div className="mb-8 w-full rounded-[20px] border-4 border-white shadow-xl overflow-hidden bg-[#e8f4ff]">
+              <div className="mb-8 w-full rounded-[20px] border-4 border-white shadow-xl overflow-hidden bg-white">
                 <div className="relative aspect-[4/3]">
                   <Image
                     src="/front.png"
@@ -465,15 +465,15 @@ const InsuranceCalculator = () => {
                     priority
                   />
                 </div>
-                <p className="px-4 py-4 text-center text-sm sm:text-base text-gray-600 leading-relaxed bg-[#e8f4ff]">
-                  <span className="font-semibold text-gray-800">Limit odszkodowania GAP</span> to różnica pomiędzy <span className="text-[#300FE6] font-medium">wartością rynkową pojazdu</span> wynikającą z polisy AC a <span className="text-orange-600 font-medium">kwotą z faktury zakupu / umowy kupna-sprzedaży</span>.
+                <p className="px-4 py-4 text-center text-base sm:text-lg text-gray-700 leading-relaxed bg-white">
+                  <span className="font-semibold text-gray-900">Limit odszkodowania GAP</span> to różnica pomiędzy <span className="text-[#300FE6] font-semibold">wartością rynkową pojazdu</span> wynikającą z polisy AC a <span className="text-[#300FE6] font-semibold">kwotą z faktury zakupu / umowy kupna-sprzedaży</span>.
                 </p>
               </div>
               
               <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-[20px] border border-gray-200/80 shadow-sm overflow-hidden">
                 <div className="rounded-[20px] overflow-hidden">
                   <div className="bg-gradient-to-r from-[#300FE6] to-[#2208B0] px-5 py-4">
-                    <h4 className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">
+                    <h4 className="text-white font-bold text-lg sm:text-xl uppercase tracking-wide">
                       Co przygotować do wyceny?
                     </h4>
                   </div>
