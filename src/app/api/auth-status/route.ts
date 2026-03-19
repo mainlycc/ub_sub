@@ -1,4 +1,5 @@
 import { checkAuthStatus } from '@/lib/auth';
+import { safeLog } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -10,7 +11,7 @@ export async function GET() {
       timestamp: new Date().toISOString()
     });
   } catch (error: unknown) {
-    console.error('Błąd sprawdzania statusu:', error);
+    safeLog.error('Błąd sprawdzania statusu:', error);
     const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return Response.json({
       success: false,

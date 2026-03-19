@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { validateSellerNodeCode } from '@/lib/seller';
+import { safeLog } from '@/lib/logger';
 
 // Interfejs dla danych polisy
 interface PolicyData {
@@ -133,11 +134,11 @@ function validatePolicyData(data: PolicyData): { isValid: boolean; errors: strin
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('Otrzymane dane:', JSON.stringify(data, null, 2));
+    safeLog.log('Otrzymane dane:', JSON.stringify(data, null, 2));
 
     // Walidacja sellerNodeCode
     if (!validateSellerNodeCode(data.sellerNodeCode)) {
-      console.error('Nieprawidłowy kod sprzedawcy:', data.sellerNodeCode);
+      safeLog.error('Nieprawidłowy kod sprzedawcy:', data.sellerNodeCode);
       return NextResponse.json(
         { 
           error: 'Nieprawidłowy kod sprzedawcy dla bieżącego środowiska',
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
     // Walidacja danych
     const validation = validatePolicyData(data as PolicyData);
     if (!validation.isValid) {
-      console.error('Błędy walidacji:', validation.errors);
+      safeLog.error('Błędy walidacji:', validation.errors);
       return NextResponse.json(
         { 
           error: 'Nieprawidłowe dane polisy - brak wymaganych pól lub nieprawidłowy format',
@@ -169,14 +170,14 @@ export async function POST(request: Request) {
       }
       token = authToken;
     } catch (error) {
-      console.error('Błąd podczas pobierania tokenu:', error);
+      safeLog.error('Błąd podczas pobierania tokenu:', error);
       return NextResponse.json(
         { error: 'Błąd autoryzacji - nie udało się uzyskać tokenu' },
         { status: 401 }
       );
     }
 
-    console.log('Token autoryzacyjny uzyskany:', !!token);
+    safeLog.log('Token autoryzacyjny uzyskany:', !!token);
 
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API
@@ -193,9 +194,9 @@ export async function POST(request: Request) {
     const responseData = await response.json();
 
     if (!response.ok) {
-      console.error('Błąd odpowiedzi API:', responseData);
+      safeLog.error('Błąd odpowiedzi API:', responseData);
       if (response.status === 401) {
-        console.error('Szczegóły błędu autoryzacji:', {
+        safeLog.error('Szczegóły błędu autoryzacji:', {
           token: !!token,
           responseData
         });
@@ -218,7 +219,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(responseData);
   } catch (error) {
-    console.error('Błąd podczas przetwarzania żądania:', error);
+    safeLog.error('Błąd podczas przetwarzania żądania:', error);
     return NextResponse.json(
       { 
         error: 'Wystąpił błąd podczas przetwarzania żądania',

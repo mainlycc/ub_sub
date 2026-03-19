@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
+import { validateFile } from '@/lib/file-validation';
+import { safeLog } from '@/lib/logger';
 
 export async function POST(
   request: Request
@@ -39,6 +41,18 @@ export async function POST(
       );
     }
 
+    // Walidacja pliku (rozmiar, typ, rozszerzenie, magic bytes)
+    const validation = await validateFile(file);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { 
+          error: 'Nieprawidłowy plik',
+          details: validation.errors
+        },
+        { status: 400 }
+      );
+    }
+
     // Upewnijmy się, że mamy typ dokumentu
     const documentType = formData.get('documentType');
     if (!documentType || typeof documentType !== 'string') {
@@ -69,7 +83,7 @@ export async function POST(
     if (!responseContentType || !responseContentType.includes('application/json')) {
       // Jeśli to nie JSON, odczytujemy jako tekst
       const textResponse = await response.text();
-      console.error('Odpowiedź API nie jest w formacie JSON:', textResponse.substring(0, 200));
+      safeLog.error('Odpowiedź API nie jest w formacie JSON:', textResponse.substring(0, 200));
       
       return NextResponse.json(
         { 
@@ -88,7 +102,7 @@ export async function POST(
     try {
       responseData = await response.json();
     } catch (error) {
-      console.error('Błąd parsowania JSON:', error);
+      safeLog.error('Błąd parsowania JSON:', error);
       return NextResponse.json(
         { 
           error: 'Nie udało się sparsować odpowiedzi JSON z API',
@@ -99,7 +113,7 @@ export async function POST(
     }
 
     if (!response.ok) {
-      console.error('Błąd odpowiedzi API:', responseData);
+      safeLog.error('Błąd odpowiedzi API:', responseData);
       return NextResponse.json(
         { error: responseData.error || 'Błąd podczas wysyłania dokumentu' },
         { status: response.status }
@@ -109,7 +123,7 @@ export async function POST(
     return NextResponse.json(responseData);
     
   } catch (error) {
-    console.error('Błąd podczas przetwarzania żądania:', error);
+    safeLog.error('Błąd podczas przetwarzania żądania:', error);
     return NextResponse.json(
       { 
         error: 'Wystąpił błąd podczas przetwarzania żądania',

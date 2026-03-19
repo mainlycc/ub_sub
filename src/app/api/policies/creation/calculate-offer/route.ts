@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
+import { safeLog } from '@/lib/logger';
 
 // Dodajemy interfejs dla violation
 interface ValidationViolation {
@@ -10,7 +11,7 @@ interface ValidationViolation {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('Dane wejściowe otrzymane w API:', data);
+    safeLog.log('Dane wejściowe otrzymane w API:', data);
     
     // Walidacja podstawowych danych
     if (!data.vehicleSnapshot || !data.options) {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('Wysyłanie danych do zewnętrznego API...');
+    safeLog.log('Wysyłanie danych do zewnętrznego API...');
     // Wysyłamy żądanie do API
     const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
       method: 'POST',
@@ -41,19 +42,19 @@ export async function POST(request: Request) {
       body: JSON.stringify(data),
     });
 
-    console.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
+    safeLog.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
     
     // Pobieramy odpowiedź jako tekst, aby móc ją zalogować w przypadku błędu
     const responseText = await apiResponse.text();
-    console.log('Odpowiedź z API (surowa):', responseText);
+    safeLog.log('Odpowiedź z API (surowa):', responseText);
     
     try {
       // Próbujemy sparsować odpowiedź jako JSON
       const responseData = JSON.parse(responseText);
-      console.log('Odpowiedź z API (JSON):', JSON.stringify(responseData, null, 2));
+      safeLog.log('Odpowiedź z API (JSON):', JSON.stringify(responseData, null, 2));
       
       if (!apiResponse.ok) {
-        console.error('API odpowiedziało błędem:', responseText);
+        safeLog.error('API odpowiedziało błędem:', responseText);
         
         // Jeśli mamy błędy walidacji (422), formatujemy je w czytelny sposób
         if (apiResponse.status === 422 && responseData.violations) {
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
             `${v.propertyPath}: ${v.message}`
           ).join('\n');
           
-          console.log('Znaleziono błędy walidacji:', errors);
+          safeLog.log('Znaleziono błędy walidacji:', errors);
           
           return NextResponse.json(
             { error: `Błędy walidacji:\n${errors}` },
@@ -76,11 +77,11 @@ export async function POST(request: Request) {
       }
 
       // Przekazujemy odpowiedź z API
-      console.log('Odpowiedź została poprawnie przetworzona, zwracam dane do klienta');
+      safeLog.log('Odpowiedź została poprawnie przetworzona, zwracam dane do klienta');
       return NextResponse.json(responseData);
 
     } catch (error) {
-      console.error('Nie udało się sparsować odpowiedzi:', responseText, 'Błąd:', error);
+      safeLog.error('Nie udało się sparsować odpowiedzi:', responseText, 'Błąd:', error);
       return NextResponse.json(
         { error: 'Otrzymano nieprawidłową odpowiedź z API' },
         { status: 500 }
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
     }
 
   } catch (error) {
-    console.error('Błąd podczas kalkulacji:', error);
+    safeLog.error('Błąd podczas kalkulacji:', error);
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas kalkulacji' },
       { status: 500 }

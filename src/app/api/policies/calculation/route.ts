@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { getSellerNodeCode, validateSellerNodeCode } from '@/lib/seller';
+import { safeLog } from '@/lib/logger';
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     try {
       token = await getAuthToken() as string;
     } catch (error) {
-      console.error('Błąd autoryzacji:', error);
+      safeLog.error('Błąd autoryzacji:', error);
       return NextResponse.json(
         { error: 'Błąd autoryzacji - nie udało się uzyskać tokenu' },
         { status: 401 }
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
     const responseData = await response.json();
 
     if (!response.ok) {
-      console.error('Błąd odpowiedzi API:', responseData);
+      safeLog.error('Błąd odpowiedzi API:', responseData);
       return NextResponse.json(
         { error: responseData.error || 'Błąd podczas kalkulacji składki' },
         { status: response.status }
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json(responseData);
     
   } catch (error) {
-    console.error('Błąd podczas przetwarzania żądania:', error);
+    safeLog.error('Błąd podczas przetwarzania żądania:', error);
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas przetwarzania żądania' },
       { status: 500 }

@@ -2,23 +2,25 @@ import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { NextRequest } from 'next/server';
 import { getCurrentEnvironment } from '@/lib/environment';
+import { safeLog } from '@/lib/logger';
+import { confirmSignatureSchema, validateRequest } from '@/lib/validations';
 
 export async function POST(
   request: NextRequest
 ) {
   try {
-    const data = await request.json();
+    const body = await request.json();
     const url = new URL(request.url);
     const id = url.pathname.split('/').slice(-2, -1)[0];
     
-    console.log('Potwierdzanie SMS dla polisy ID:', id);
-    console.log('Dane żądania:', JSON.stringify(data));
+    safeLog.log('Potwierdzanie SMS dla polisy ID:', id);
     
-    // Sprawdź czy mamy kod potwierdzający
-    if (!data.confirmationCode) {
-      console.error('Brak kodu potwierdzającego w żądaniu');
+    // Walidacja danych wejściowych
+    const validation = await validateRequest(confirmSignatureSchema, body);
+    if (!validation.success) {
+      safeLog.error('Brak kodu potwierdzającego w żądaniu');
       return NextResponse.json(
-        { error: 'Brak kodu potwierdzającego' },
+        { error: 'Brak kodu potwierdzającego', details: validation.errors },
         { status: 400 }
       );
     }
@@ -26,21 +28,21 @@ export async function POST(
     // Pobierz token autoryzacyjny
     const token = await getAuthToken();
     if (!token) {
-      console.error('Nie udało się uzyskać tokenu autoryzacyjnego');
+      safeLog.error('Nie udało się uzyskać tokenu autoryzacyjnego');
       return NextResponse.json(
         { error: 'Nie udało się uzyskać tokenu autoryzacyjnego' },
         { status: 401 }
       );
     }
     
-    console.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
+    safeLog.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
 
     // Dane do wysłania do API
     const requestBody = {
-      confirmationCode: data.confirmationCode
+      confirmationCode: validation.data.confirmationCode
     };
     
-    console.log('Wysyłanie żądania do API Defend...');
+    safeLog.log('Wysyłanie żądania do API Defend...');
     
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API - ZMIANA Z POST NA PUT!
@@ -54,12 +56,12 @@ export async function POST(
       body: JSON.stringify(requestBody),
     });
     
-    console.log('Status odpowiedzi API:', responseAPI.status);
-    console.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...responseAPI.headers.entries()])));
+    safeLog.log('Status odpowiedzi API:', responseAPI.status);
+    safeLog.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...responseAPI.headers.entries()])));
 
     // Sprawdzamy najpierw status odpowiedzi
     if (responseAPI.status === 401 || responseAPI.status === 403) {
-      console.error('Błąd autoryzacji w API Defend');
+      safeLog.error('Błąd autoryzacji w API Defend');
       return NextResponse.json(
         { error: 'Błąd autoryzacji. Token wygasł lub jest nieprawidłowy.' },
         { status: 401 }
@@ -68,7 +70,7 @@ export async function POST(
     
     if (responseAPI.status === 400) {
       const textResponse = await responseAPI.text();
-      console.error('Błąd w żądaniu (400):', textResponse);
+      safeLog.error('Błąd w żądaniu (400):', textResponse);
       
       // Próbujemy sparsować odpowiedź jako JSON, ale obsługujemy przypadek gdy to nie jest JSON
       try {
@@ -88,20 +90,20 @@ export async function POST(
 
     // Dla wszystkich innych typów odpowiedzi, próbujemy odczytać jako tekst
     const textResponse = await responseAPI.text();
-    console.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
+    safeLog.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
     
     // Sprawdzamy czy to JSON
     let jsonResponse;
     try {
       if (textResponse.trim()) {
         jsonResponse = JSON.parse(textResponse);
-        console.log('Odpowiedź sparsowana jako JSON:', jsonResponse);
+        safeLog.log('Odpowiedź sparsowana jako JSON:', jsonResponse);
       } else {
-        console.log('Pusta odpowiedź z API');
+        safeLog.log('Pusta odpowiedź z API');
         jsonResponse = { success: true };
       }
     } catch (e) {
-      console.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
+      safeLog.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
       
       // Jeśli status jest OK, ale nie jest to JSON, zwracamy sukces
       if (responseAPI.ok) {
@@ -126,7 +128,7 @@ export async function POST(
 
     // Jeśli odpowiedź nie jest OK, ale mamy JSON
     if (!responseAPI.ok) {
-      console.error('Błąd odpowiedzi API:', jsonResponse);
+      safeLog.error('Błąd odpowiedzi API:', jsonResponse);
       return NextResponse.json(
         { error: jsonResponse.error || jsonResponse.message || 'Błąd podczas potwierdzania podpisu' },
         { status: responseAPI.status }
@@ -137,7 +139,7 @@ export async function POST(
     return NextResponse.json(jsonResponse || { success: true });
     
   } catch (error) {
-    console.error('Wyjątek podczas przetwarzania żądania:', error);
+    safeLog.error('Wyjątek podczas przetwarzania żądania:', error);
     return NextResponse.json(
       { 
         error: 'Wystąpił błąd podczas przetwarzania żądania',

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
+import { safeLog } from '@/lib/logger';
 
 export async function GET(
   request: Request
@@ -9,19 +10,19 @@ export async function GET(
     const url = new URL(request.url);
     const id = url.pathname.split('/').slice(-2, -1)[0];
     
-    console.log('Pobieranie typów dokumentów dla polisy ID:', id);
+    safeLog.log('Pobieranie typów dokumentów dla polisy ID:', id);
     
     // Pobierz token autoryzacyjny
     const token = await getAuthToken();
     if (!token) {
-      console.error('Nie udało się uzyskać tokenu autoryzacyjnego');
+      safeLog.error('Nie udało się uzyskać tokenu autoryzacyjnego');
       return NextResponse.json(
         { error: 'Nie udało się uzyskać tokenu autoryzacyjnego' },
         { status: 401 }
       );
     }
 
-    console.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
+    safeLog.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
 
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API
@@ -34,12 +35,12 @@ export async function GET(
       }
     });
     
-    console.log('Status odpowiedzi API:', response.status);
-    console.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...response.headers.entries()])));
+    safeLog.log('Status odpowiedzi API:', response.status);
+    safeLog.log('Nagłówki odpowiedzi:', JSON.stringify(Object.fromEntries([...response.headers.entries()])));
 
     // Sprawdzamy najpierw status odpowiedzi
     if (response.status === 401 || response.status === 403) {
-      console.error('Błąd autoryzacji w API Defend');
+      safeLog.error('Błąd autoryzacji w API Defend');
       return NextResponse.json(
         { error: 'Błąd autoryzacji. Token wygasł lub jest nieprawidłowy.' },
         { status: 401 }
@@ -48,20 +49,20 @@ export async function GET(
 
     // Dla wszystkich typów odpowiedzi, próbujemy odczytać jako tekst
     const textResponse = await response.text();
-    console.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
+    safeLog.log('Odpowiedź API (pierwsze 200 znaków):', textResponse.substring(0, 200));
     
     // Sprawdzamy czy to JSON
     let jsonResponse;
     try {
       if (textResponse.trim()) {
         jsonResponse = JSON.parse(textResponse);
-        console.log('Odpowiedź sparsowana jako JSON:', jsonResponse);
+        safeLog.log('Odpowiedź sparsowana jako JSON:', jsonResponse);
       } else {
-        console.log('Pusta odpowiedź z API - brak wymaganych dokumentów');
+        safeLog.log('Pusta odpowiedź z API - brak wymaganych dokumentów');
         jsonResponse = [];
       }
     } catch (e) {
-      console.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
+      safeLog.error('Nie udało się sparsować odpowiedzi jako JSON:', e);
       
       // Jeśli status jest OK, ale nie jest to JSON, zwracamy pustą tablicę
       if (response.ok) {
@@ -83,7 +84,7 @@ export async function GET(
 
     // Jeśli odpowiedź nie jest OK, ale mamy JSON
     if (!response.ok) {
-      console.error('Błąd odpowiedzi API:', jsonResponse);
+      safeLog.error('Błąd odpowiedzi API:', jsonResponse);
       return NextResponse.json(
         { error: jsonResponse.error || jsonResponse.message || 'Błąd podczas pobierania typów dokumentów' },
         { status: response.status }
@@ -95,12 +96,12 @@ export async function GET(
       return NextResponse.json(jsonResponse);
     } else {
       // Jeśli to nie jest tablica, ale mamy poprawną odpowiedź, zwracamy pustą tablicę
-      console.warn('Odpowiedź API nie jest tablicą:', jsonResponse);
+      safeLog.warn('Odpowiedź API nie jest tablicą:', jsonResponse);
       return NextResponse.json([]);
     }
     
   } catch (error) {
-    console.error('Wyjątek podczas przetwarzania żądania:', error);
+    safeLog.error('Wyjątek podczas przetwarzania żądania:', error);
     return NextResponse.json(
       { 
         error: 'Wystąpił błąd podczas przetwarzania żądania',

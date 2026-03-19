@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { getSellerNodeCode } from '@/lib/seller';
+import { safeLog } from '@/lib/logger';
+import { calculateSchema, validateRequest } from '@/lib/validations';
 
 // Dodajemy interfejs dla violation
 interface ValidationViolation {
@@ -13,14 +15,24 @@ export async function POST(request: NextRequest) {
   try {
     // Parsowanie danych z zapytania
     const reqData = await request.json();
-    console.log('Dane wejściowe od formularza:', reqData);
-    const { price, months, type } = reqData;
+    
+    // Walidacja danych wejściowych
+    const validation = await validateRequest(calculateSchema, reqData);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Nieprawidłowe dane wejściowe', details: validation.errors },
+        { status: 400 }
+      );
+    }
+    
+    const { price, months, type } = validation.data;
+    safeLog.log('Dane wejściowe od formularza (z maskowaniem):', validation.data);
     
     // Dla obu typów ubezpieczenia ustawiam ten sam kod produktu
     const productCode = '5_DCGAP_MG25_GEN';
     const productName = 'DEFEND Gap MAX AC';
     
-    console.log(`Wybrany typ ubezpieczenia: ${type}, kod produktu: ${productCode}`);
+    safeLog.log(`Wybrany typ ubezpieczenia: ${type}, kod produktu: ${productCode}`);
     
     // Ustawiamy stałą datę zakupu
     const purchasedOn = "2023-02-02";
@@ -63,8 +75,8 @@ export async function POST(request: NextRequest) {
       }
     };
     
-    // Wyświetl dane wysyłane do API
-    console.log('Dane wysyłane do API:', JSON.stringify(calculationData, null, 2));
+    // Wyświetl dane wysyłane do API (z maskowaniem)
+    safeLog.log('Dane wysyłane do API:', calculationData);
     
     // Pobieramy token autoryzacyjny
     const token = await getAuthToken();
@@ -76,7 +88,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Token JWT otrzymany, wysyłam żądanie do API');
+    safeLog.log('Token JWT otrzymany, wysyłam żądanie do API');
 
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API
@@ -89,19 +101,19 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(calculationData),
     });
 
-    console.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
+    safeLog.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
     
     // Pobieramy odpowiedź jako tekst, aby móc ją zalogować w przypadku błędu
     const responseText = await apiResponse.text();
-    console.log('Odpowiedź z API (surowa):', responseText);
+    safeLog.log('Odpowiedź z API (z maskowaniem):', responseText.substring(0, 200));
     
     try {
       // Próbujemy sparsować odpowiedź jako JSON
       const responseData = JSON.parse(responseText);
-      console.log('Odpowiedź z API (JSON):', JSON.stringify(responseData, null, 2));
+      safeLog.log('Odpowiedź z API (JSON, z maskowaniem):', responseData);
       
       if (!apiResponse.ok) {
-        console.error('API odpowiedziało błędem:', responseText);
+        safeLog.error('API odpowiedziało błędem:', responseText.substring(0, 200));
         
         // Jeśli mamy błędy walidacji (422), formatujemy je w czytelny sposób
         if (apiResponse.status === 422 && responseData.violations) {
@@ -109,7 +121,7 @@ export async function POST(request: NextRequest) {
             `${v.propertyPath}: ${v.message}`
           ).join('\n');
           
-          console.log('Znaleziono błędy walidacji:', errors);
+          safeLog.log('Znaleziono błędy walidacji:', errors);
           
           return NextResponse.json(
             { error: `Błędy walidacji:\n${errors}` },
@@ -128,7 +140,7 @@ export async function POST(request: NextRequest) {
         ? Math.round((responseData.premiumSuggested / 100) * 100) / 100 
         : 0;
       
-      console.log('Przeliczona wartość składki:', premiumAmount);
+      safeLog.log('Przeliczona wartość składki:', premiumAmount);
       
       // Przygotowanie odpowiedzi w oczekiwanym formacie
       return NextResponse.json({
@@ -143,7 +155,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (error) {
-      console.error('Nie udało się sparsować odpowiedzi:', responseText, 'Błąd:', error);
+      safeLog.error('Nie udało się sparsować odpowiedzi:', error);
       return NextResponse.json(
         { error: 'Otrzymano nieprawidłową odpowiedź z API' },
         { status: 500 }
@@ -151,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Błąd podczas kalkulacji:', error);
+    safeLog.error('Błąd podczas kalkulacji:', error);
     const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return NextResponse.json(
       { error: errorMessage || 'Wystąpił błąd podczas kalkulacji' },

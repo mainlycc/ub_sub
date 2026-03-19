@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { verifyCsrfRequest } from "@/lib/csrf-verify";
+import { safeLog } from "@/lib/logger";
+import { z } from "zod";
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Weryfikacja CSRF
+  if (!verifyCsrfRequest(request)) {
+    return NextResponse.json(
+      { error: "Nieprawidłowe żądanie" },
+      { status: 403 }
+    );
+  }
+
   try {
     const { id } = await params;
-    const postId = parseInt(id);
-
-    if (!id || isNaN(postId)) {
+    
+    // Walidacja ID
+    const idValidation = z.string().regex(/^\d+$/).safeParse(id);
+    if (!idValidation.success) {
       return NextResponse.json(
         { error: "Brak ID wpisu lub nieprawidłowy format" },
         { status: 400 }
       );
     }
+    
+    const postId = parseInt(idValidation.data);
 
     // Sprawdź czy wpis istnieje
     const existingPost = await prisma.post.findUnique({
@@ -48,7 +62,7 @@ export async function DELETE(
     );
 
   } catch (error) {
-    console.error("Błąd podczas usuwania wpisu:", error);
+    safeLog.error("Błąd podczas usuwania wpisu:", error);
     return NextResponse.json(
       { error: "Wystąpił błąd podczas usuwania wpisu" },
       { status: 500 }

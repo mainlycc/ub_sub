@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Footer from '@/components/Footer';
 import { getPostBySlug } from '@/lib/blog';
 import { Metadata } from 'next';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export const revalidate = 60;
 
@@ -57,8 +58,8 @@ export default async function BlogPostPage({ params }: Params) {
       </div>
 
       <article className="prose prose-lg max-w-3xl mx-auto px-4 py-10 bg-white mt-8 rounded-lg shadow">
-        {/* Zakładamy, że content to HTML; w przyszłości można dodać markdown */}
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        {/* Sanityzujemy HTML aby zapobiec atakom XSS */}
+        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }} />
       </article>
 
       <div className="max-w-3xl mx-auto px-4 py-8">

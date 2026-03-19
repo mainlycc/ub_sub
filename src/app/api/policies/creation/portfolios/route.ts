@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
+import { safeLog } from '@/lib/logger';
 
 export async function GET() {
-  console.log('[policies/portfolios] Otrzymano zapytanie GET');
+  safeLog.log('[policies/portfolios] Otrzymano zapytanie GET');
   try {
-    console.log('[policies/portfolios] Próba pobrania tokena...');
+    safeLog.log('[policies/portfolios] Próba pobrania tokena...');
     const token = await getAuthToken();
     
     if (!token) {
-      console.error('[policies/portfolios] Błąd autoryzacji: getAuthToken() zwrócił null');
+      safeLog.error('[policies/portfolios] Błąd autoryzacji: getAuthToken() zwrócił null');
       return NextResponse.json(
         { error: 'Błąd autoryzacji - nie udało się pobrać tokenu JWT' },
         { status: 401 }
       );
     }
     
-    console.log('[policies/portfolios] Token otrzymany pomyślnie');
+    safeLog.log('[policies/portfolios] Token otrzymany pomyślnie');
 
     const environment = getCurrentEnvironment();
     const response = await fetch(`${environment.apiUrl}/policies/creation/portfolios`, {
@@ -29,7 +30,7 @@ export async function GET() {
     });
 
     if (response.status === 401 || response.status === 403) {
-      console.error('[policies/portfolios] Błąd autoryzacji:', {
+      safeLog.error('[policies/portfolios] Błąd autoryzacji:', {
         status: response.status,
         statusText: response.statusText
       });
@@ -40,7 +41,7 @@ export async function GET() {
     }
 
     if (!response.ok) {
-      console.error('[policies/portfolios] Błąd podczas pobierania portfolios:', {
+      safeLog.error('[policies/portfolios] Błąd podczas pobierania portfolios:', {
         status: response.status,
         statusText: response.statusText
       });
@@ -53,7 +54,7 @@ export async function GET() {
         errorDetails = await response.text();
       }
       
-      console.error('[policies/portfolios] Szczegóły błędu:', errorDetails);
+      safeLog.error('[policies/portfolios] Szczegóły błędu:', errorDetails);
       
       return NextResponse.json(
         { 
@@ -65,12 +66,12 @@ export async function GET() {
     }
 
     const data = await response.json();
-    console.log('[policies/portfolios] Pobrano dane portfolios');
+    safeLog.log('[policies/portfolios] Pobrano dane portfolios');
     
     return NextResponse.json(data);
     
   } catch (error) {
-    console.error('[policies/portfolios] Nieoczekiwany błąd:', error);
+    safeLog.error('[policies/portfolios] Nieoczekiwany błąd:', error);
     return NextResponse.json(
       { 
         error: 'Nieoczekiwany błąd podczas pobierania portfolios',

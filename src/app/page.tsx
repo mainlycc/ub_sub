@@ -19,7 +19,7 @@ const HomePage = (): React.ReactNode => {
 
   return (
     <>
-      <main className="min-h-screen px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 bg-[#EAE7FC]">
+      <main className="min-h-screen px-4 sm:px-6 md:px-8 pt-0 pb-8 sm:pb-10 md:pb-12 bg-[#EAE7FC]">
         <InsuranceCalculator />
         <GapChartCard />
         <GapComparisonSection />

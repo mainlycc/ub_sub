@@ -27,7 +27,7 @@ const GapComparisonSection = (): React.ReactElement => {
             <span className="text-[#E53935] font-bold">35 000 zł</span>. Zobacz różnicę.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 items-stretch">
             {/* Lewa karta — BEZ GAP */}
             <div className="relative bg-red-100 rounded-[24px] shadow-xl border border-red-200 px-5 sm:px-6 py-6 sm:py-7 flex flex-col transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-1">
               <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">

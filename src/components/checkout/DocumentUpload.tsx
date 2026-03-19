@@ -24,13 +24,36 @@ const preventDefaults = (e: React.DragEvent) => {
   e.stopPropagation();
 };
 
-const isAcceptedType = (file: File) => {
-  const accepted = [
-    'image/jpeg',
-    'image/png',
-    'application/pdf'
-  ];
-  return accepted.includes(file.type);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf'];
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+];
+
+const isAcceptedType = (file: File): boolean => {
+  // Walidacja typu MIME
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return false;
+  }
+
+  // Walidacja rozszerzenia
+  const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+  if (!ALLOWED_EXTENSIONS.includes(extension)) {
+    return false;
+  }
+
+  // Walidacja rozmiaru
+  if (file.size > MAX_FILE_SIZE) {
+    return false;
+  }
+
+  if (file.size === 0) {
+    return false;
+  }
+
+  return true;
 };
 
 const toAcceptedFiles = (files: FileList | File[]): AcceptedFile[] => {

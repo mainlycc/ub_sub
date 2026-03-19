@@ -15,10 +15,10 @@ const InsuranceTypeCards = (): React.ReactElement => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
           {/* GAP Fakturowy - pomarańczowa karta z czarnymi napisami */}
-          <div className="rounded-[20px] overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#FF7715] text-white">
-            <div className="p-4 sm:p-6">
+          <div className="rounded-[20px] overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#FF7715] text-white flex flex-col h-full">
+            <div className="p-4 sm:p-6 flex-1 flex flex-col">
               <div className="flex items-center mb-4">
                 <div className="bg-white/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
                   <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
@@ -30,7 +30,7 @@ const InsuranceTypeCards = (): React.ReactElement => {
                 GAP Fakturowy wyrównuje różnicę pomiędzy wartością rynkową pojazdu a wartością określoną w fakturze zakupu w przypadku szkody całkowitej. Dzięki temu otrzymasz pełne odszkodowanie odpowiadające kwocie z faktury, a nie tylko wartości rynkowej w momencie szkody.
               </p>
               
-              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 flex-1">
                 <div className="flex items-start">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p className="text-sm sm:text-base">Chroni przed stratą finansową wynikającą z amortyzacji pojazdu</p>
@@ -65,8 +65,8 @@ const InsuranceTypeCards = (): React.ReactElement => {
           </div>
           
           {/* GAP Casco - zielona karta z białymi napisami */}
-          <div className="rounded-[20px] overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#16AB59] text-white">
-            <div className="p-4 sm:p-6">
+          <div className="rounded-[20px] overflow-hidden shadow-xl transform transition duration-300 hover:scale-105 bg-[#16AB59] text-white flex flex-col h-full">
+            <div className="p-4 sm:p-6 flex-1 flex flex-col">
               <div className="flex items-center mb-4">
                 <div className="bg-white/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
                   <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
@@ -78,7 +78,7 @@ const InsuranceTypeCards = (): React.ReactElement => {
                 GAP Casco zabezpiecza przed stratą finansową wynikającą z różnicy między wartością rynkową pojazdu a wartością określoną w umowie ubezpieczenia. Dzięki temu w przypadku szkody całkowitej lub kradzieży otrzymasz kwotę odpowiadającą pierwotnej wartości zakupu.
               </p>
               
-              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 flex-1">
                 <div className="flex items-start">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p className="text-sm sm:text-base">Dostępne dla używanych samochodów (nawet starszych modeli)</p>

@@ -1,4 +1,5 @@
 import { getAuthToken } from '@/lib/auth';
+import { safeLog } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -18,7 +19,7 @@ export async function GET() {
     });
 
   } catch (error: unknown) {
-    console.error('Błąd w auth-test:', error);
+    safeLog.error('Błąd w auth-test:', error);
     const errorMessage = error instanceof Error ? error.message : 'Nieznany błąd';
     return Response.json({
       success: false,
