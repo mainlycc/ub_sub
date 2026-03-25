@@ -29,6 +29,18 @@ interface EnvironmentStore {
 
 const isClient = typeof window !== 'undefined';
 
+type EnvironmentKey = keyof typeof ENVIRONMENTS;
+
+function getServerEnvironmentKey(): EnvironmentKey {
+  // Server-side environment selection MUST NOT rely on localStorage/zustand.
+  // Use an explicit env var:
+  // - GAP_ENV=TEST|PRODUCTION
+  // If missing, default to PRODUCTION (safer default; avoids accidental use of TEST creds/endpoint).
+  const raw = (process.env.GAP_ENV || '').toUpperCase();
+  if (raw === 'TEST' || raw === 'PRODUCTION') return raw as EnvironmentKey;
+  return 'PRODUCTION';
+}
+
 // Sprawdź początkowy stan z localStorage tylko po stronie klienta
 const getInitialState = () => {
   if (!isClient) return true;
@@ -81,7 +93,7 @@ export const useEnvironmentStore = create<EnvironmentStore>()(
 
 export const getCurrentEnvironment = () => {
   if (!isClient) {
-    return ENVIRONMENTS.PRODUCTION;
+    return ENVIRONMENTS[getServerEnvironmentKey()];
   }
   
   const state = useEnvironmentStore.getState();

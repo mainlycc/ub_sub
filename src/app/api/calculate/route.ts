@@ -79,7 +79,19 @@ export async function POST(request: NextRequest) {
     safeLog.log('Dane wysyłane do API:', calculationData);
     
     // Pobieramy token autoryzacyjny
-    const token = await getAuthToken();
+    // getAuthToken() potrafi rzucać wyjątkiem (np. 401 Invalid credentials),
+    // więc mapujemy to na poprawny kod HTTP zamiast 500.
+    let token: string | null = null;
+    try {
+      token = await getAuthToken();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Błąd autoryzacji';
+      safeLog.error('Błąd autoryzacji (getAuthToken):', msg);
+      return NextResponse.json(
+        { error: msg },
+        { status: 401 }
+      );
+    }
     
     if (!token) {
       return NextResponse.json(

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { safeLog } from '@/lib/logger';
+import { getCurrentEnvironment } from '@/lib/environment';
+import { getSellerNodeCode } from '@/lib/seller';
 
 // Dodajemy interfejs dla violation
 interface ValidationViolation {
@@ -21,6 +23,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Serwer jest źródłem prawdy dla sellerNodeCode (klient może nie mieć dostępu do prywatnych env var).
+    const serverSellerNodeCode = getSellerNodeCode();
+    const incomingSellerNodeCode = (data.sellerNodeCode || '').toString().trim();
+    if (incomingSellerNodeCode !== serverSellerNodeCode) {
+      data.sellerNodeCode = serverSellerNodeCode;
+      safeLog.log('sellerNodeCode nadpisany wartością z serwera:', data.sellerNodeCode);
+    }
+
     // Pobieramy token autoryzacyjny z istniejącej implementacji
     const token = await getAuthToken();
     
@@ -32,8 +42,9 @@ export async function POST(request: Request) {
     }
 
     safeLog.log('Wysyłanie danych do zewnętrznego API...');
+    const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API
-    const apiResponse = await fetch('https://test.v2.idefend.eu/api/policies/creation/calculate-offer', {
+    const apiResponse = await fetch(`${environment.apiUrl}/policies/creation/calculate-offer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

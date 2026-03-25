@@ -133,7 +133,9 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
           )
           .map((portfolio: PortfolioApiResponse) => ({
               productCode: portfolio.productCode,
-              sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || "PL_GAP_25",
+              // Nie ustawiamy sellerNodeCode po stronie klienta (brak dostępu do prywatnych env var).
+              // Serwerowe endpointy uzupełnią poprawną wartość z `.env`.
+              sellerNodeCode: "",
             name: `${portfolio.productGroupAlias} ${portfolio.productDerivativeAlias}`,
             description: getProductDescription(portfolio),
             signatureTypes: [{ 
@@ -245,7 +247,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
                 type="button"
                 onClick={() => handleVariantSelect({
                   productCode: variant.code,
-                  sellerNodeCode: process.env.GAP_SELLER_NODE_CODE || "PL_GAP_25",
+                  sellerNodeCode: "",
                   name: variant.name,
                   signatureTypes: [{ code: "AUTHORIZED_BY_SMS", name: "Autoryzacja SMS" }],
                   optionTypes: [],

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
-import { validateSellerNodeCode } from '@/lib/seller';
+import { getSellerNodeCode } from '@/lib/seller';
 import { safeLog } from '@/lib/logger';
 
 // Interfejs dla danych polisy
@@ -136,16 +136,12 @@ export async function POST(request: Request) {
     const data = await request.json();
     safeLog.log('Otrzymane dane:', JSON.stringify(data, null, 2));
 
-    // Walidacja sellerNodeCode
-    if (!validateSellerNodeCode(data.sellerNodeCode)) {
-      safeLog.error('Nieprawidłowy kod sprzedawcy:', data.sellerNodeCode);
-      return NextResponse.json(
-        { 
-          error: 'Nieprawidłowy kod sprzedawcy dla bieżącego środowiska',
-          details: ['Kod sprzedawcy nie jest zgodny z aktualnym środowiskiem']
-        },
-        { status: 400 }
-      );
+    // Serwer jest źródłem prawdy dla sellerNodeCode (klient może nie mieć dostępu do prywatnych env var).
+    const serverSellerNodeCode = getSellerNodeCode();
+    const incomingSellerNodeCode = (data.sellerNodeCode || '').toString().trim();
+    if (incomingSellerNodeCode !== serverSellerNodeCode) {
+      data.sellerNodeCode = serverSellerNodeCode;
+      safeLog.log('sellerNodeCode nadpisany wartością z serwera:', data.sellerNodeCode);
     }
 
     // Walidacja danych

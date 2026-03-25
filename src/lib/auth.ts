@@ -25,6 +25,13 @@ interface ErrorResponse {
 // Funkcja do autoryzacji i uzyskania tokenu JWT
 export async function getAuthToken(): Promise<string | null> {
   try {
+    // Szybka walidacja konfiguracji - bez wypisywania sekretów
+    if (!AUTH_CREDENTIALS.username || !AUTH_CREDENTIALS.password) {
+      throw new Error(
+        'Brak konfiguracji GAP API: ustaw GAP_API_USERNAME i GAP_API_PASSWORD w zmiennych środowiskowych serwera (np. ub_sub/.env.local) i zrestartuj aplikację.'
+      );
+    }
+
     // Sprawdź czy mamy ważny token w cache
     if (cachedToken && tokenExpiration && Date.now() < tokenExpiration) {
       return cachedToken;

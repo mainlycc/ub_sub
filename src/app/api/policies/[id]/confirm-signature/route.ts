@@ -39,7 +39,10 @@ export async function POST(
 
     // Dane do wysłania do API
     const requestBody = {
-      confirmationCode: validation.data.confirmationCode
+      // Defend API oczekuje pola `confirmationCodeToConfirm` (nie `confirmationCode`)
+      confirmationCodeToConfirm: validation.data.confirmationCode,
+      // Zachowujemy kompatybilność, jeśli jakieś środowisko nadal akceptuje starą nazwę
+      confirmationCode: validation.data.confirmationCode,
     };
     
     safeLog.log('Wysyłanie żądania do API Defend...');

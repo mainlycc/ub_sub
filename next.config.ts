@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  env: {
-    GAP_API_USERNAME: process.env.GAP_API_USERNAME,
-    GAP_API_PASSWORD: process.env.GAP_API_PASSWORD,
-    GAP_SELLER_NODE_CODE: process.env.GAP_SELLER_NODE_CODE,
+  // NIE umieszczaj sekretów w `env` next.config, bo Next wstrzykuje je do bundle (ryzyko wycieku).
+  // Używaj `process.env.*` po stronie serwera (Route Handlers) oraz `NEXT_PUBLIC_*` wyłącznie dla wartości jawnych na kliencie.
+  // Turbopack potrafi błędnie wykryć workspace root przy wielu lockfile'ach — ustawiamy jawnie root na katalog aplikacji.
+  turbopack: {
+    root: __dirname,
   },
   compress: true,
   images: {
