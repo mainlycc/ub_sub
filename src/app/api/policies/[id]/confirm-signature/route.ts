@@ -37,11 +37,8 @@ export async function POST(
     
     safeLog.log('Token auth uzyskany:', token ? 'Tak' : 'Nie');
 
-    // Dane do wysłania do API
     const requestBody = {
-      // Defend API oczekuje pola `confirmationCodeToConfirm` (nie `confirmationCode`)
       confirmationCodeToConfirm: validation.data.confirmationCode,
-      // Zachowujemy kompatybilność, jeśli jakieś środowisko nadal akceptuje starą nazwę
       confirmationCode: validation.data.confirmationCode,
     };
     

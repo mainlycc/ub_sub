@@ -6,7 +6,7 @@ import { z } from 'zod';
 export const calculateSchema = z.object({
   price: z.number().positive().max(10000000), // maksymalnie 10 milionów PLN
   months: z.number().int().min(12).max(60), // 12-60 miesięcy
-  type: z.string().optional(),
+  type: z.enum(['fakturowy', 'casco']).default('fakturowy'),
 });
 
 /**

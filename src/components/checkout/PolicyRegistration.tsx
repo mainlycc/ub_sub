@@ -71,11 +71,7 @@ export const PolicyRegistration = ({
 
   const getValidSaleInitiatedDate = () => {
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    // Formatowanie daty do formatu YYYY-MM-DD
-    return tomorrow.toISOString().split('T')[0];
+    return today.toISOString().split('T')[0];
   };
 
   const registerPolicy = async () => {

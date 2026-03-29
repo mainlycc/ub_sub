@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getSellerNodeCode } from '@/lib/seller';
+import { extractErrorFromResponseBody } from '@/lib/api-error-message';
 
 interface VehicleData {
   purchasedOn: string;
@@ -67,6 +68,8 @@ interface SummaryProps {
   paymentData: PaymentData;
   calculationResult: CalculationResult | null;
   onSubmit: () => void;
+  /** Po potwierdzeniu SMS — przejście do kroku dokumentów (Defend). Jeśli brak, wywoływane jest onSubmit. */
+  onSmsConfirmed?: (policyId: string) => void;
   isSubmitting: boolean;
   termsAgreed: boolean;
   onTermsChange: (agreed: boolean) => void;
@@ -95,9 +98,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
   const getValidSaleInitiatedDate = () => {
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    return today.toISOString().split('T')[0];
   };
 
   const registerPolicy = async () => {
@@ -259,7 +260,9 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           console.error('Szczegóły błędu API:', responseData.details);
           throw new Error(`Błąd API: ${JSON.stringify(responseData.details)}`);
         }
-        throw new Error(responseData.error || 'Błąd podczas rejestracji polisy');
+        throw new Error(
+          extractErrorFromResponseBody(responseData) || 'Błąd podczas rejestracji polisy'
+        );
       }
 
       setPolicyId(responseData.id);
@@ -274,85 +277,6 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
       );
     } finally {
       setIsRegistering(false);
-    }
-  };
-
-  const handleMissingDocuments = async (policyId: string) => {
-    try {
-      console.log('Sprawdzanie wymaganych dokumentów dla polisy ID:', policyId);
-      
-      // Sprawdzenie wymaganych dokumentów
-      const missingTypesResponse = await fetch(`/api/policies/${policyId}/missing-upload-types`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      // Jeśli status to 404, obsługujemy to jako brak wymaganych dokumentów
-      if (missingTypesResponse.status === 404) {
-        console.log('Endpoint missing-upload-types zwrócił 404 - brak wymaganych dokumentów lub endpoint nie istnieje');
-        return [];
-      }
-      
-      // Odczytaj odpowiedź jako tekst
-      const textResponse = await missingTypesResponse.text();
-      console.log('Odpowiedź missing-upload-types (tekst):', textResponse);
-      
-      interface MissingDocument {
-        code: string;
-        name: string;
-        description?: string;
-        error?: string;
-      }
-      
-      let missingTypes: MissingDocument[] = [];
-      
-      // Jeśli mamy niepustą odpowiedź, próbujemy sparsować JSON
-      if (textResponse.trim()) {
-        try {
-          // Sprawdź, czy odpowiedź to HTML (zaczyna się od <!DOCTYPE lub <html)
-          if (textResponse.trim().toLowerCase().startsWith('<!doctype') || 
-              textResponse.trim().toLowerCase().startsWith('<html')) {
-            console.warn('Otrzymano odpowiedź HTML zamiast JSON:', textResponse.substring(0, 100));
-            return [];
-          }
-          
-          const data = JSON.parse(textResponse);
-          
-          if (Array.isArray(data)) {
-            missingTypes = data;
-          } else if (data.error) {
-            console.error('Błąd API:', data.error);
-            throw new Error(data.error);
-          } else {
-            console.warn('Nieoczekiwany format odpowiedzi:', data);
-          }
-        } catch (parseError) {
-          console.error('Błąd parsowania JSON:', parseError);
-          // Nie rzucamy błędu, tylko zwracamy pustą tablicę
-          return [];
-        }
-      }
-      
-      console.log('Wymagane dokumenty:', missingTypes);
-      
-      // Jeśli status nie jest OK, sprawdzamy czy mamy błąd
-      if (!missingTypesResponse.ok) {
-        if (missingTypes.length > 0 && 'error' in missingTypes[0]) {
-          console.error('Błąd w danych:', missingTypes[0].error);
-          return [];
-        } else {
-          console.error('Błąd podczas sprawdzania wymaganych dokumentów');
-          return [];
-        }
-      }
-      
-      return missingTypes;
-    } catch (error) {
-      console.error('Błąd podczas sprawdzania dokumentów:', error);
-      // Zwracamy pustą tablicę zamiast rzucać błąd
-      return [];
     }
   };
 
@@ -427,45 +351,39 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         }
       }
 
-      // Sprawdź status odpowiedzi
       if (!response.ok) {
         console.error('Błąd odpowiedzi:', data);
-        
-        // Obsługujemy różne rodzaje błędów
-        if (data && data.error) {
-          if (data.error.includes('token') || data.error.includes('autoryzac')) {
-            throw new Error('Błąd autoryzacji. Spróbuj ponownie za chwilę.');
-          } else if (data.error.includes('nieprawidłow') || data.error.includes('invalid')) {
-            throw new Error('Nieprawidłowy kod SMS. Sprawdź kod i spróbuj ponownie.');
-          } else {
-            throw new Error(data.error);
-          }
-        } else {
-          throw new Error('Błąd podczas potwierdzania podpisu');
+        const msg = extractErrorFromResponseBody(data);
+        const lower = msg.toLowerCase();
+        if (lower.includes('token') || lower.includes('autoryzac')) {
+          throw new Error('Błąd autoryzacji. Spróbuj ponownie za chwilę.');
         }
+        if (lower.includes('nieprawidłow') || lower.includes('invalid')) {
+          throw new Error('Nieprawidłowy kod SMS. Sprawdź kod i spróbuj ponownie.');
+        }
+        if (msg) {
+          throw new Error(msg);
+        }
+        throw new Error('Błąd podczas potwierdzania podpisu');
       }
 
       // Jeśli mamy success: true, kontynuujemy
       if (data.success || response.ok) {
         console.log('Podpis SMS potwierdzony pomyślnie');
-        
-        // Po udanym potwierdzeniu sprawdzamy wymagane dokumenty
-        try {
-          const missingDocuments = await handleMissingDocuments(policyId);
-          console.log('Sprawdzono dokumenty dla polisy, brakujące dokumenty:', missingDocuments);
-        } catch (docsError) {
-          console.error('Błąd podczas pobierania wymaganych dokumentów:', docsError);
-          // Kontynuujemy mimo błędu z dokumentami
-        }
-        
-        // Ustawiamy komunikat sukcesu
-        setSmsSuccess('Podpis został potwierdzony pomyślnie. Za chwilę nastąpi przekierowanie...');
-        
-        // Ukrywamy formularz SMS po krótkim opóźnieniu
+
+        setSmsSuccess(
+          props.onSmsConfirmed
+            ? 'Podpis został potwierdzony. Za chwilę przejdziesz do przesłania dokumentów…'
+            : 'Podpis został potwierdzony pomyślnie. Za chwilę nastąpi przekierowanie...'
+        );
+
         setTimeout(() => {
           setShowSmsConfirmation(false);
-          // Wyświetlamy informację o sukcesie
-          props.onSubmit();
+          if (props.onSmsConfirmed && policyId) {
+            props.onSmsConfirmed(policyId);
+          } else {
+            props.onSubmit();
+          }
         }, 2000);
       } else {
         throw new Error('Nieznany błąd podczas potwierdzania kodu SMS');

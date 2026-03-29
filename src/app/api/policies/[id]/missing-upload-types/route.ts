@@ -3,12 +3,24 @@ import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { safeLog } from '@/lib/logger';
 
+/** API Platform czasem zwraca tablicę, czasem kolekcję JSON-LD z hydra:member. */
+function coerceMissingUploadTypesList(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload === 'object') {
+    const o = payload as Record<string, unknown>;
+    if (Array.isArray(o['hydra:member'])) return o['hydra:member'];
+    if (Array.isArray(o.member)) return o.member;
+    if (Array.isArray(o.data)) return o.data;
+  }
+  return [];
+}
+
 export async function GET(
-  request: Request
+  request: Request,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').slice(-2, -1)[0];
+    const { id } = await context.params;
     
     safeLog.log('Pobieranie typów dokumentów dla polisy ID:', id);
     
@@ -29,6 +41,7 @@ export async function GET(
     const response = await fetch(`${environment.apiUrl}/policies/${id}/missing-upload-types`, {
       method: 'GET',
       headers: {
+        Accept: 'application/json, application/ld+json;q=0.9',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
         'X-NODE-JWT-AUTH-TOKEN': token
@@ -91,14 +104,11 @@ export async function GET(
       );
     }
 
-    // Sprawdzamy czy odpowiedź to tablica
-    if (Array.isArray(jsonResponse)) {
-      return NextResponse.json(jsonResponse);
-    } else {
-      // Jeśli to nie jest tablica, ale mamy poprawną odpowiedź, zwracamy pustą tablicę
-      safeLog.warn('Odpowiedź API nie jest tablicą:', jsonResponse);
-      return NextResponse.json([]);
+    const asList = coerceMissingUploadTypesList(jsonResponse);
+    if (!Array.isArray(jsonResponse) && asList.length > 0) {
+      safeLog.log('Odpowiedź API: rozpakowano kolekcję (np. hydra:member), elementów:', asList.length);
     }
+    return NextResponse.json(asList);
     
   } catch (error) {
     safeLog.error('Wyjątek podczas przetwarzania żądania:', error);

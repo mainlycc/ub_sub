@@ -11,6 +11,26 @@ interface ValidationViolation {
   message: string;
 }
 
+const WARSAW_TZ = 'Europe/Warsaw';
+
+/** Data kalendarzowa YYYY-MM-DD w strefie Europe/Warsaw (zgodna z „dziś” użytkownika w PL). */
+function ymdInWarsaw(d: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: WARSAW_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
+}
+
+/** Data sprzed `daysBack` dni (południe lokalne serwera, potem format PL) — stabilniejsze przy DST. */
+function calendarDaysAgo(daysBack: number): Date {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() - daysBack);
+  return d;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parsowanie danych z zapytania
@@ -28,44 +48,56 @@ export async function POST(request: NextRequest) {
     const { price, months, type } = validation.data;
     safeLog.log('Dane wejściowe od formularza (z maskowaniem):', validation.data);
     
-    // Dla obu typów ubezpieczenia ustawiam ten sam kod produktu
-    const productCode = '5_DCGAP_MG25_GEN';
-    const productName = 'DEFEND Gap MAX AC';
+    // Dobór produktu zależnie od wyboru na froncie:
+    // - casco (AC) -> 5_DCGAP_MG25_GEN
+    // - fakturowy   -> 5_DCGAP_M25_GEN
+    const isCasco = type === 'casco';
+    const productCode = isCasco ? '5_DCGAP_MG25_GEN' : '5_DCGAP_M25_GEN';
+    const productName = isCasco ? 'DEFEND Gap MAX AC' : 'DEFEND Gap MAX';
     
     safeLog.log(`Wybrany typ ubezpieczenia: ${type}, kod produktu: ${productCode}`);
     
-    // Ustawiamy stałą datę zakupu
-    const purchasedOn = "2023-02-02";
+    // Daty pod reguły API:
+    // - Fakturowy (M25): zakup „niedawno” (≤180 dni), bez evaluationDate.
+    // - Casco AC (MG25): późna sprzedaż (>180 dni od zakupu), evaluationDate = dzień inicjacji — saleInitiatedOn musi być „aktualny” (okno -14/+180 dni).
+    const saleInitiatedOn = ymdInWarsaw(new Date());
+    const purchaseAt = calendarDaysAgo(isCasco ? 200 : 60);
+    const purchasedOn = ymdInWarsaw(purchaseAt);
+    const firstRegAt = new Date(purchaseAt);
+    firstRegAt.setDate(firstRegAt.getDate() + 1);
+    const firstRegisteredOn = `${ymdInWarsaw(firstRegAt)}T07:38:46+02:00`;
+
+    const vehicleSnapshot = {
+      purchasedOn,
+      modelCode: "91",
+      categoryCode: "PC",
+      usageCode: "STANDARD",
+      mileage: 10000,
+      firstRegisteredOn,
+      ...(isCasco ? { evaluationDate: saleInitiatedOn } : {}),
+      purchasePrice: Math.round(price * 100), // Konwersja z PLN na grosze
+      purchasePriceNet: Math.round(price * 100),
+      purchasePriceVatReclaimableCode: "NO",
+      usageTypeCode: "INDIVIDUAL",
+      purchasePriceInputType: "VAT_INAPPLICABLE",
+      vin: "12131231231313132",
+      vrm: "21121212",
+      owners: [
+        {
+          contact: {
+            inheritFrom: "policyHolder"
+          }
+        }
+      ]
+    };
     
     // Przygotuj dane do kalkulacji zgodnie ze specyfikacją
     const calculationData = {
       sellerNodeCode: getSellerNodeCode(),
       productCode: productCode,
-      saleInitiatedOn: "2025-04-14",
+      saleInitiatedOn,
       
-      vehicleSnapshot: {
-        purchasedOn: purchasedOn,
-        modelCode: "91",
-        categoryCode: "PC",
-        usageCode: "STANDARD",
-        mileage: 10000,
-        firstRegisteredOn: "2023-02-03T07:38:46+02:00",
-        evaluationDate: "2025-04-14",
-        purchasePrice: Math.round(price * 100), // Konwersja z PLN na grosze
-        purchasePriceNet: Math.round(price * 100),
-        purchasePriceVatReclaimableCode: "NO",
-        usageTypeCode: "INDIVIDUAL",
-        purchasePriceInputType: "VAT_INAPPLICABLE",
-        vin: "12131231231313132",
-        vrm: "21121212",
-        owners: [
-          {
-            contact: {
-              inheritFrom: "policyHolder"
-            }
-          }
-        ]
-      },
+      vehicleSnapshot,
       
       options: {
         TERM: `T_${months}`,
@@ -155,11 +187,17 @@ export async function POST(request: NextRequest) {
       safeLog.log('Przeliczona wartość składki:', premiumAmount);
       
       // Przygotowanie odpowiedzi w oczekiwanym formacie
+      // Nazwa z API bywa niespójna z wysłanym productCode — pokazujemy produkt zgodny z żądaniem.
+      const displayProductName =
+        responseData.productCode === productCode && responseData.productName
+          ? responseData.productName
+          : productName;
+
       return NextResponse.json({
         success: true,
         premium: premiumAmount,
         details: {
-          productName: responseData.productName || productName,
+          productName: displayProductName,
           coveragePeriod: `${months} miesięcy`,
           vehicleValue: price,
           maxCoverage: "50 000 PLN"

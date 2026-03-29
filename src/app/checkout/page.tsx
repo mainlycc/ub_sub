@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, ChevronRight, ArrowLeft, CreditCard, FileText, Mail } from 'lucide-react';
 import { Suspense } from 'react';
 import { InsuranceVariantForm } from '@/components/checkout/InsuranceVariantForm';
 import { CalculationForm } from '@/components/checkout/CalculationForm';
@@ -13,7 +13,6 @@ import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
 import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
 import { VehicleData } from '@/types/vehicle';
 import Footer from '@/components/Footer';
-import { DocumentUpload, DocumentUploadValue } from '@/components/checkout/DocumentUpload';
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -154,14 +153,10 @@ const CheckoutContent = () => {
   });
   
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  
-  // Pliki dokumentów (polisa AC, dowód rejestracyjny, faktura)
-  const [documents, setDocuments] = useState<DocumentUploadValue>({
-    acPolicyFiles: [],
-    registrationCertificateFiles: [],
-    invoiceFiles: []
-  });
-  
+
+  /** ID polisy po rejestracji — potrzebne do kroku dokumentów (Defend). */
+  const [registeredPolicyId, setRegisteredPolicyId] = useState<string | null>(null);
+
   // Walidacja
   const [errors, setErrors] = useState<{
     variant?: { [key: string]: string };
@@ -332,7 +327,7 @@ const CheckoutContent = () => {
       return;
     }
     
-    if (currentStep < 5) {  // Zmieniam maksymalny krok z 6 na 5
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
       router.push(`/checkout?step=${currentStep + 1}`);
     }
@@ -352,7 +347,7 @@ const CheckoutContent = () => {
       const step = searchParams.get('step');
       if (step) {
         const stepNumber = parseInt(step);
-        if (stepNumber >= 1 && stepNumber <= 5) {
+        if (stepNumber >= 1 && stepNumber <= 6) {
           setCurrentStep(stepNumber);
         }
       }
@@ -535,9 +530,16 @@ const CheckoutContent = () => {
   };
   
   const handleContinueToSummary = () => {
-    setCurrentStep(5); // Zmieniamy z 6 na 5
-    router.push(`/checkout?step=5`); // Zmieniamy z 6 na 5
+    setCurrentStep(5);
+    router.push(`/checkout?step=5`);
   };
+
+  const handleSmsConfirmed = (policyId: string) => {
+    setRegisteredPolicyId(policyId);
+    setCurrentStep(6);
+    router.push(`/checkout?step=6`);
+  };
+
 
   const renderStepContent = () => {
     if (isCompleted) {
@@ -555,24 +557,11 @@ const CheckoutContent = () => {
         );
       case 2:
         return (
-          <div className="space-y-8">
-            <VehicleForm
-              data={vehicleData}
-              onChange={handleVehicleChange}
-              errors={errors.vehicle}
-            />
-
-            <div className="pt-4 border-t border-gray-200">
-              <h3 className="text-xl font-semibold mb-3">Dodaj dokumenty</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Dodaj zdjęcia/skany polisy AC, dowodu rejestracyjnego oraz faktury. Obsługiwane formaty: JPG, PNG, PDF.
-              </p>
-              <DocumentUpload
-                value={documents}
-                onChange={setDocuments}
-              />
-            </div>
-          </div>
+          <VehicleForm
+            data={vehicleData}
+            onChange={handleVehicleChange}
+            errors={errors.vehicle}
+          />
         );
       case 3:
         return (
@@ -612,7 +601,7 @@ const CheckoutContent = () => {
             errors={errors.personal}
           />
         );
-      case 5: // Zmieniamy z 6 na 5
+      case 5:
         return (
           <Summary
             vehicleData={vehicleData}
@@ -620,6 +609,7 @@ const CheckoutContent = () => {
             paymentData={paymentData}
             calculationResult={calculationResult}
             onSubmit={handleSubmit}
+            onSmsConfirmed={handleSmsConfirmed}
             isSubmitting={isSubmitting}
             termsAgreed={termsAgreed}
             onTermsChange={setTermsAgreed}
@@ -627,6 +617,100 @@ const CheckoutContent = () => {
             dataConfirmed={dataConfirmed}
             onDataConfirmChange={setDataConfirmed}
           />
+        );
+      case 6:
+        if (!registeredPolicyId) {
+          return (
+            <div className="space-y-4 text-center py-8">
+              <p className="text-gray-600">
+                Brak identyfikatora polisy. Potwierdź najpierw podpis SMS w podsumowaniu.
+              </p>
+              <Button
+                className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                onClick={() => {
+                  setCurrentStep(5);
+                  router.push(`/checkout?step=5`);
+                }}
+              >
+                Wróć do podsumowania
+              </Button>
+            </div>
+          );
+        }
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+              <div className="bg-green-100 p-2 rounded-full mr-3">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              </div>
+              Polisa zarejestrowana!
+            </h2>
+
+            <div className="bg-green-50 border border-green-200 rounded-xl p-5 space-y-2">
+              <p className="text-green-800 font-medium">
+                Twoja polisa została pomyślnie zarejestrowana i podpisana.
+              </p>
+              <p className="text-green-700 text-sm">
+                Numer polisy: <strong>{registeredPolicyId}</strong>
+              </p>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-3">
+              <div className="flex items-start gap-3">
+                <CreditCard className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Krok 1: Opłać polisę</p>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Na Twój adres e-mail został wysłany link do płatności.
+                    Po opłaceniu polisa zostanie automatycznie zatwierdzona.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <FileText className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Krok 2: Prześlij dokumenty</p>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Po opłaceniu polisy będziesz mógł przesłać wymagane dokumenty
+                    (fakturę, dowód rejestracyjny, polisę AC).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-blue-800 text-sm">
+                    Zachowaj poniższy link — po opłaceniu polisy użyj go, aby przesłać dokumenty:
+                  </p>
+                  <a
+                    href={`/policies/${registeredPolicyId}/documents`}
+                    className="inline-block mt-2 text-[#300FE6] hover:text-[#2208B0] font-medium underline text-sm break-all"
+                  >
+                    {typeof window !== "undefined" ? window.location.origin : ""}/policies/{registeredPolicyId}/documents
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button
+                className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                onClick={() => router.push(`/policies/${registeredPolicyId}/documents`)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Przejdź do dokumentów
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/")}
+              >
+                Wróć na stronę główną
+              </Button>
+            </div>
+          </div>
         );
       default:
         return <div>Nieznany krok</div>;
@@ -658,7 +742,7 @@ const CheckoutContent = () => {
               <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200" />
               <div 
                 className="absolute top-5 left-0 right-0 h-[2px] bg-[#300FE6] transition-all duration-500"
-                style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
+                style={{ width: `${((currentStep - 1) / 5) * 100}%` }}
               />
 
               {[
@@ -666,7 +750,8 @@ const CheckoutContent = () => {
                 { number: 2, title: "POJAZD" },
                 { number: 3, title: "KALKULACJA" },
                 { number: 4, title: "KLIENT" },
-                { number: 5, title: "PODSUMOWANIE" }
+                { number: 5, title: "PODSUMOWANIE" },
+                { number: 6, title: "DOKUMENTY" }
               ].map((step, index) => (
                 <div key={index} className="flex flex-col items-center relative z-10">
                   <div 

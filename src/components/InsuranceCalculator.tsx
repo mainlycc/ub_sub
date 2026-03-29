@@ -210,7 +210,10 @@ const InsuranceCalculator = () => {
                   </p>
                 </div>
 
-                <Tabs defaultValue="fakturowy" onValueChange={(value) => setActiveInsuranceType(value as InsuranceType)}>
+                <Tabs
+                  value={activeInsuranceType}
+                  onValueChange={(value) => setActiveInsuranceType(value as InsuranceType)}
+                >
                   <TabsList className="grid w-full grid-cols-2 mb-8 rounded-[20px]">
                     <TabsTrigger 
                       value="fakturowy" 

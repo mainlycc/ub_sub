@@ -62,10 +62,9 @@ export async function POST(
       );
     }
 
-    // Tworzymy nowe FormData do wysłania do API
     const apiFormData = new FormData();
     apiFormData.append('file', file);
-    apiFormData.append('documentType', documentType);
+    apiFormData.append('uploadType', documentType);
 
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do właściwego API
