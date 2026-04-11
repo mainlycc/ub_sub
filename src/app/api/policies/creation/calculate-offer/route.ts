@@ -4,106 +4,106 @@ import { safeLog } from '@/lib/logger';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { getSellerNodeCode } from '@/lib/seller';
 
-// Dodajemy interfejs dla violation
 interface ValidationViolation {
   propertyPath: string;
   message: string;
 }
 
+const OPTION_NOT_AVAILABLE_RE = /Option type with code '(\w+)' is not available/;
+const MAX_RETRIES = 3;
+
+async function callDefendCalculate(
+  apiUrl: string,
+  token: string,
+  payload: Record<string, unknown>
+): Promise<{ status: number; body: Record<string, unknown> }> {
+  const res = await fetch(`${apiUrl}/policies/creation/calculate-offer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-NODE-JWT-AUTH-TOKEN': token },
+    body: JSON.stringify(payload),
+  });
+  const text = await res.text();
+  safeLog.log('Defend calculate-offer HTTP', res.status, text.substring(0, 400));
+  try {
+    return { status: res.status, body: JSON.parse(text) };
+  } catch {
+    return { status: res.status, body: { raw: text } };
+  }
+}
+
+function extractRejectedOptionCode(body: Record<string, unknown>): string | null {
+  const violations = body.violations as ValidationViolation[] | undefined;
+  if (!violations?.length) return null;
+  for (const v of violations) {
+    const m = OPTION_NOT_AVAILABLE_RE.exec(v.message);
+    if (m) return m[1];
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    safeLog.log('Dane wejściowe otrzymane w API:', data);
-    
-    // Walidacja podstawowych danych
+    safeLog.log('Dane wejściowe:', JSON.stringify({
+      productCode: data.productCode,
+      sellerNodeCode: data.sellerNodeCode,
+      options: data.options,
+    }));
+
     if (!data.vehicleSnapshot || !data.options) {
-      return NextResponse.json(
-        { error: 'Nieprawidłowe dane wejściowe' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nieprawidłowe dane wejściowe' }, { status: 400 });
     }
 
-    // Serwer jest źródłem prawdy dla sellerNodeCode (klient może nie mieć dostępu do prywatnych env var).
     const serverSellerNodeCode = getSellerNodeCode();
-    const incomingSellerNodeCode = (data.sellerNodeCode || '').toString().trim();
-    if (incomingSellerNodeCode !== serverSellerNodeCode) {
+    if ((data.sellerNodeCode || '').toString().trim() !== serverSellerNodeCode) {
       data.sellerNodeCode = serverSellerNodeCode;
-      safeLog.log('sellerNodeCode nadpisany wartością z serwera:', data.sellerNodeCode);
+      safeLog.log('sellerNodeCode nadpisany:', data.sellerNodeCode);
     }
 
-    // Pobieramy token autoryzacyjny z istniejącej implementacji
     const token = await getAuthToken();
-    
     if (!token) {
-      return NextResponse.json(
-        { error: 'Błąd autoryzacji - nie udało się pobrać tokenu JWT' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Błąd autoryzacji - brak tokenu JWT' }, { status: 401 });
     }
 
-    safeLog.log('Wysyłanie danych do zewnętrznego API...');
     const environment = getCurrentEnvironment();
-    // Wysyłamy żądanie do API
-    const apiResponse = await fetch(`${environment.apiUrl}/policies/creation/calculate-offer`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-NODE-JWT-AUTH-TOKEN': token
-      },
-      body: JSON.stringify(data),
-    });
 
-    safeLog.log('Status odpowiedzi z API:', apiResponse.status, apiResponse.statusText);
-    
-    // Pobieramy odpowiedź jako tekst, aby móc ją zalogować w przypadku błędu
-    const responseText = await apiResponse.text();
-    safeLog.log('Odpowiedź z API (surowa):', responseText);
-    
-    try {
-      // Próbujemy sparsować odpowiedź jako JSON
-      const responseData = JSON.parse(responseText);
-      safeLog.log('Odpowiedź z API (JSON):', JSON.stringify(responseData, null, 2));
-      
-      if (!apiResponse.ok) {
-        safeLog.error('API odpowiedziało błędem:', responseText);
-        
-        // Jeśli mamy błędy walidacji (422), formatujemy je w czytelny sposób
-        if (apiResponse.status === 422 && responseData.violations) {
-          const errors = responseData.violations.map((v: ValidationViolation) => 
-            `${v.propertyPath}: ${v.message}`
-          ).join('\n');
-          
-          safeLog.log('Znaleziono błędy walidacji:', errors);
-          
-          return NextResponse.json(
-            { error: `Błędy walidacji:\n${errors}` },
-            { status: 422 }
-          );
-        }
+    let result = await callDefendCalculate(environment.apiUrl, token, data);
 
-        return NextResponse.json(
-          { error: responseData.message || responseData.detail || 'Błąd podczas komunikacji z API' },
-          { status: apiResponse.status }
-        );
+    // Retry: jeśli API odrzuca konkretną opcję (np. CLAIM_LIMIT nie jest
+    // dostępny dla danego sellera), usuwamy ją i ponawiamy.
+    for (let attempt = 0; attempt < MAX_RETRIES && result.status === 422; attempt++) {
+      const rejected = extractRejectedOptionCode(result.body);
+      if (!rejected) break;
+
+      safeLog.log(`Opcja '${rejected}' niedostępna dla sellera — usuwam i ponawiam (próba ${attempt + 1})`);
+      const opts = data.options as Record<string, string>;
+      delete opts[rejected];
+      safeLog.log('Opcje po usunięciu:', JSON.stringify(opts));
+
+      result = await callDefendCalculate(environment.apiUrl, token, data);
+    }
+
+    if (result.status >= 400) {
+      const body = result.body;
+
+      if (result.status === 422 && Array.isArray(body.violations)) {
+        const errors = (body.violations as ValidationViolation[])
+          .map((v) => `${v.propertyPath}: ${v.message}`)
+          .join('\n');
+        safeLog.log('Błędy walidacji:', errors);
+        return NextResponse.json({ error: `Błędy walidacji:\n${errors}` }, { status: 422 });
       }
 
-      // Przekazujemy odpowiedź z API
-      safeLog.log('Odpowiedź została poprawnie przetworzona, zwracam dane do klienta');
-      return NextResponse.json(responseData);
-
-    } catch (error) {
-      safeLog.error('Nie udało się sparsować odpowiedzi:', responseText, 'Błąd:', error);
       return NextResponse.json(
-        { error: 'Otrzymano nieprawidłową odpowiedź z API' },
-        { status: 500 }
+        { error: (body.message as string) || (body.detail as string) || 'Błąd komunikacji z API' },
+        { status: result.status }
       );
     }
 
+    safeLog.log('Kalkulacja OK');
+    return NextResponse.json(result.body);
   } catch (error) {
-    safeLog.error('Błąd podczas kalkulacji:', error);
-    return NextResponse.json(
-      { error: 'Wystąpił błąd podczas kalkulacji' },
-      { status: 500 }
-    );
+    safeLog.error('Błąd kalkulacji:', error);
+    return NextResponse.json({ error: 'Wystąpił błąd podczas kalkulacji' }, { status: 500 });
   }
-} 
+}

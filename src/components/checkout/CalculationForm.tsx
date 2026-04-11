@@ -8,6 +8,8 @@ import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { VehicleData } from '@/types/vehicle';
 import { getSellerNodeCode } from '@/lib/seller';
+import { extractErrorFromResponseBody } from '@/lib/api-error-message';
+import { humanizeRawApiError } from '@/lib/user-facing-errors';
 
 interface CalculationFormProps {
   vehicleData: VehicleData;
@@ -77,7 +79,9 @@ export const CalculationForm = ({
       tenYearsAgo.setMonth(11, 31);
       
       if (purchaseDate < tenYearsAgo) {
-        setCalculationError('Data zakupu pojazdu nie może być starsza niż 10 lat (do 31 grudnia)');
+        setCalculationError(
+          'Data nabycia pojazdu jest zbyt stara — ubezpieczenie GAP przysługuje przy zakupach z ostatnich 10 lat. Sprawdź datę w formularzu.'
+        );
         setIsCalculating(false);
         return;
       }
@@ -129,12 +133,18 @@ export const CalculationForm = ({
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.error || 'Błąd podczas kalkulacji oferty');
+        const apiMsg = extractErrorFromResponseBody(responseData);
+        throw new Error(
+          apiMsg ||
+            'Nie udało się obliczyć składki. Sprawdź dane pojazdu (VIN, daty, wartość) i spróbuj ponownie.'
+        );
       }
 
       const premiumAmount = responseData.premiumSuggested || responseData.premiumMax || responseData.premium;
       if (premiumAmount === null || premiumAmount === undefined) {
-        throw new Error('Nieprawidłowa odpowiedź z serwera - brak danych o składce');
+        throw new Error(
+          'System nie zwrócił kwoty składki. Sprawdź dane pojazdu lub spróbuj ponownie za chwilę.'
+        );
       }
 
       const result: CalculationResult = {
@@ -151,9 +161,11 @@ export const CalculationForm = ({
     } catch (error) {
       console.error('Błąd podczas kalkulacji:', error);
       setCalculationError(
-        error instanceof Error 
-          ? error.message 
-          : 'Wystąpił nieoczekiwany błąd podczas kalkulacji'
+        humanizeRawApiError(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się obliczyć składki. Spróbuj ponownie za chwilę.'
+        )
       );
     } finally {
       setIsCalculating(false);
@@ -179,7 +191,7 @@ export const CalculationForm = ({
           <Select
             value={paymentData.claimLimit}
             onChange={(e) => handlePaymentChange('claimLimit', e.target.value)}
-            className={errors?.claimLimit ? 'border-red-500' : ''}
+            className={errors?.claimLimit ? 'border-amber-500' : ''}
           >
             <option value="">Wybierz limit</option>
             <option value="CL_50000">50 000 zł</option>
@@ -190,7 +202,7 @@ export const CalculationForm = ({
             <option value="CL_300000">300 000 zł</option>
           </Select>
           {errors?.claimLimit && (
-            <p className="text-sm text-red-500">{errors.claimLimit}</p>
+            <p className="text-sm text-amber-800">{errors.claimLimit}</p>
           )}
         </div>
 
@@ -203,7 +215,7 @@ export const CalculationForm = ({
           <Select
             value={paymentData.term}
             onChange={(e) => handlePaymentChange('term', e.target.value)}
-            className={errors?.term ? 'border-red-500' : ''}
+            className={errors?.term ? 'border-amber-500' : ''}
           >
             <option value="">Wybierz okres</option>
             <option value="T_12">1 rok</option>
@@ -213,7 +225,7 @@ export const CalculationForm = ({
             <option value="T_60">5 lat</option>
           </Select>
           {errors?.term && (
-            <p className="text-sm text-red-500">{errors.term}</p>
+            <p className="text-sm text-amber-800">{errors.term}</p>
           )}
         </div>
           
@@ -226,14 +238,14 @@ export const CalculationForm = ({
           <Select
             value={paymentData.paymentTerm}
             onChange={(e) => handlePaymentChange('paymentTerm', e.target.value)}
-            className={errors?.paymentTerm ? 'border-red-500' : ''}
+            className={errors?.paymentTerm ? 'border-amber-500' : ''}
           >
             <option value="">Wybierz rodzaj płatności</option>
             <option value="PT_LS">Płatność jednorazowa</option>
             <option value="PT_A">Płatność roczna</option>
           </Select>
           {errors?.paymentTerm && (
-            <p className="text-sm text-red-500">{errors.paymentTerm}</p>
+            <p className="text-sm text-amber-800">{errors.paymentTerm}</p>
           )}
           </div>
           
@@ -246,7 +258,7 @@ export const CalculationForm = ({
           <Select
             value={paymentData.paymentMethod}
             onChange={(e) => handlePaymentChange('paymentMethod', e.target.value)}
-            className={errors?.paymentMethod ? 'border-red-500' : ''}
+            className={errors?.paymentMethod ? 'border-amber-500' : ''}
           >
             <option value="">Wybierz formę płatności</option>
             <option value="PM_PBC">Płatne przez klienta (BLIK, karta, szybki przelew)</option>
@@ -255,7 +267,7 @@ export const CalculationForm = ({
             <option value="PM_BY_DLR">Płatne przez dealera</option>
           </Select>
           {errors?.paymentMethod && (
-            <p className="text-sm text-red-500">{errors.paymentMethod}</p>
+            <p className="text-sm text-amber-800">{errors.paymentMethod}</p>
           )}
             </div>
           </div>
@@ -279,9 +291,9 @@ export const CalculationForm = ({
 
       {/* Wyświetlanie błędu kalkulacji */}
       {calculationError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
-          <strong className="font-bold">Błąd! </strong>
-          <span className="block sm:inline">{calculationError}</span>
+        <div className="bg-amber-50 border border-amber-200 text-amber-950 px-4 py-3 rounded-lg relative mt-4" role="alert">
+          <strong className="font-semibold text-amber-900">Nie udało się obliczyć składki</strong>
+          <p className="mt-1 text-sm text-amber-900/90 whitespace-pre-line">{calculationError}</p>
         </div>
       )}
 

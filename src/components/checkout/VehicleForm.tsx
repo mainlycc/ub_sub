@@ -6,7 +6,9 @@ import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { VehicleMakeSelect } from './VehicleMakeSelect';
 import { VehicleModelSelect } from './VehicleModelSelect';
+import { VehicleFormDateField } from './VehicleFormDateField';
 import { VehicleData } from '@/types/vehicle';
+import { checkoutMessages, vinFieldMessage } from '@/lib/user-facing-errors';
 
 // Funkcja do formatowania liczb z separatorami tysięcy
 const formatNumber = (value: number | string): string => {
@@ -91,37 +93,38 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
     const newErrors: Record<string, string> = {};
     
     if (!selectedMakeId) {
-      newErrors.make = 'Wybierz markę pojazdu';
+      newErrors.make = checkoutMessages.make;
     }
     if (!selectedModel) {
-      newErrors.model = 'Wybierz model pojazdu';
+      newErrors.model = checkoutMessages.model;
     }
-    if (!data.vin) {
-      newErrors.vin = 'Brak numeru VIN';
+    const vinMsg = vinFieldMessage(data.vin || '');
+    if (vinMsg) {
+      newErrors.vin = vinMsg;
     }
-    if (!data.vrm) {
-      newErrors.vrm = 'Brak numeru rejestracyjnego';
+    if (!data.vrm?.trim()) {
+      newErrors.vrm = checkoutMessages.vrm;
     }
     if (!data.categoryCode) {
-      newErrors.categoryCode = 'Brak kategorii pojazdu';
+      newErrors.categoryCode = checkoutMessages.category;
     }
     if (!data.usageCode) {
-      newErrors.usageCode = 'Brak sposobu wykorzystania';
+      newErrors.usageCode = checkoutMessages.usage;
     }
     if (!data.firstRegisteredOn) {
-      newErrors.firstRegisteredOn = 'Brak daty pierwszej rejestracji';
+      newErrors.firstRegisteredOn = checkoutMessages.firstReg;
     }
     if (!data.purchasedOn) {
-      newErrors.purchasedOn = 'Brak daty nabycia';
+      newErrors.purchasedOn = checkoutMessages.purchaseDate;
     }
-    if (!data.purchasePrice) {
-      newErrors.purchasePrice = 'Brak wartości pojazdu';
+    if (!data.purchasePrice || data.purchasePrice <= 0) {
+      newErrors.purchasePrice = checkoutMessages.purchasePrice;
     }
-    if (!data.mileage) {
-      newErrors.mileage = 'Brak przebiegu pojazdu';
+    if (typeof data.mileage !== 'number' || isNaN(data.mileage) || data.mileage < 0) {
+      newErrors.mileage = data.mileage < 0 ? checkoutMessages.mileageNegative : checkoutMessages.mileageRequired;
     }
     if (!data.purchasePriceInputType) {
-      newErrors.purchasePriceInputType = 'Brak typu wartości';
+      newErrors.purchasePriceInputType = checkoutMessages.priceType;
     }
     
     setLocalErrors(newErrors);
@@ -247,10 +250,10 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="vin"
               value={data.vin}
               onChange={(e) => handleInputChange('vin', e.target.value)}
-              className={errors?.vin ? 'border-red-500' : ''}
+              className={errors?.vin ? 'border-amber-500' : ''}
             />
             {errors?.vin && (
-              <p className="text-sm text-red-500">{errors.vin}</p>
+              <p className="text-sm text-amber-800">{errors.vin}</p>
             )}
           </div>
 
@@ -260,10 +263,10 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="vrm"
               value={data.vrm}
               onChange={(e) => handleInputChange('vrm', e.target.value)}
-              className={errors?.vrm ? 'border-red-500' : ''}
+              className={errors?.vrm ? 'border-amber-500' : ''}
             />
             {errors?.vrm && (
-              <p className="text-sm text-red-500">{errors.vrm}</p>
+              <p className="text-sm text-amber-800">{errors.vrm}</p>
           )}
         </div>
 
@@ -273,7 +276,7 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="categoryCode"
               value={data.categoryCode}
               onChange={(e) => handleInputChange('categoryCode', e.target.value)}
-              className={errors?.categoryCode ? 'border-red-500' : ''}
+              className={errors?.categoryCode ? 'border-amber-500' : ''}
           >
             <option value="">Wybierz kategorię</option>
             {categories.map(cat => (
@@ -281,7 +284,7 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
             ))}
             </Select>
             {errors?.categoryCode && (
-              <p className="text-sm text-red-500">{errors.categoryCode}</p>
+              <p className="text-sm text-amber-800">{errors.categoryCode}</p>
             )}
           </div>
 
@@ -291,7 +294,7 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="usageCode"
               value={data.usageCode}
               onChange={(e) => handleInputChange('usageCode', e.target.value)}
-              className={errors?.usageCode ? 'border-red-500' : ''}
+              className={errors?.usageCode ? 'border-amber-500' : ''}
             >
               <option value="">Wybierz sposób wykorzystania</option>
               <option value="STANDARD">Standardowy</option>
@@ -299,37 +302,25 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               <option value="RENT">Wynajem</option>
             </Select>
             {errors?.usageCode && (
-              <p className="text-sm text-red-500">{errors.usageCode}</p>
+              <p className="text-sm text-amber-800">{errors.usageCode}</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="firstRegisteredOn">Data pierwszej rejestracji</Label>
-            <Input
-              type="date"
-              id="firstRegisteredOn"
-              value={data.firstRegisteredOn}
-              onChange={(e) => handleInputChange('firstRegisteredOn', e.target.value)}
-              className={errors?.firstRegisteredOn ? 'border-red-500' : ''}
-            />
-            {errors?.firstRegisteredOn && (
-              <p className="text-sm text-red-500">{errors.firstRegisteredOn}</p>
-          )}
-        </div>
+          <VehicleFormDateField
+            id="firstRegisteredOn"
+            label="Data pierwszej rejestracji"
+            value={data.firstRegisteredOn}
+            onChange={(ymd) => handleInputChange('firstRegisteredOn', ymd)}
+            error={errors?.firstRegisteredOn}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="purchasedOn">Data nabycia</Label>
-            <Input
-            type="date"
-              id="purchasedOn"
-              value={data.purchasedOn}
-              onChange={(e) => handleInputChange('purchasedOn', e.target.value)}
-              className={errors?.purchasedOn ? 'border-red-500' : ''}
-            />
-            {errors?.purchasedOn && (
-              <p className="text-sm text-red-500">{errors.purchasedOn}</p>
-            )}
-          </div>
+          <VehicleFormDateField
+            id="purchasedOn"
+            label="Data nabycia"
+            value={data.purchasedOn}
+            onChange={(ymd) => handleInputChange('purchasedOn', ymd)}
+            error={errors?.purchasedOn}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="purchasePrice">Wartość pojazdu</Label>
@@ -338,10 +329,10 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="purchasePrice"
               value={formatNumber(data.purchasePrice || '')}
               onChange={(e) => handleInputChange('purchasePrice', parseFormattedNumber(e.target.value))}
-              className={errors?.purchasePrice ? 'border-red-500' : ''}
+              className={errors?.purchasePrice ? 'border-amber-500' : ''}
             />
             {errors?.purchasePrice && (
-              <p className="text-sm text-red-500">{errors.purchasePrice}</p>
+              <p className="text-sm text-amber-800">{errors.purchasePrice}</p>
             )}
           </div>
 
@@ -392,7 +383,7 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               </button>
             </div>
             {errors?.purchasePriceInputType && (
-              <p className="text-sm text-red-500">{errors.purchasePriceInputType}</p>
+              <p className="text-sm text-amber-800">{errors.purchasePriceInputType}</p>
             )}
           </div>
 
@@ -434,7 +425,7 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               </button>
             </div>
             {errors?.purchasePriceVatReclaimableCode && (
-              <p className="text-sm text-red-500">{errors.purchasePriceVatReclaimableCode}</p>
+              <p className="text-sm text-amber-800">{errors.purchasePriceVatReclaimableCode}</p>
             )}
           </div>
 
@@ -445,11 +436,11 @@ export const VehicleForm = ({ data, onChange, errors }: VehicleFormProps): React
               id="mileage"
               value={formatNumber(data.mileage || '')}
               onChange={(e) => handleInputChange('mileage', parseFormattedNumber(e.target.value))}
-              className={errors?.mileage ? 'border-red-500' : ''}
+              className={errors?.mileage ? 'border-amber-500' : ''}
               placeholder="Wprowadź przebieg w kilometrach"
             />
             {errors?.mileage && (
-              <p className="text-sm text-red-500">{errors.mileage}</p>
+              <p className="text-sm text-amber-800">{errors.mileage}</p>
             )}
           </div>
         </div>

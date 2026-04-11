@@ -1,8 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import { User, Mail, CreditCard, Building, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { User, Mail, CreditCard, Building } from 'lucide-react';
 import { InsuredPersonsForm } from './InsuredPersonsForm';
 
 interface PersonalData {
@@ -23,6 +22,8 @@ interface PersonalData {
   };
 }
 
+type PolicyHolderData = PersonalData & { enabled?: boolean };
+
 interface InsuredData {
   inheritFrom?: string;
   personData?: PersonalData;
@@ -30,27 +31,23 @@ interface InsuredData {
 
 interface CheckoutFinalFormProps {
   data: {
-    policyHolder: PersonalData;
+    policyHolder: PolicyHolderData;
     insured: InsuredData;
     vehicleOwner: InsuredData;
     customer: PersonalData;
   };
   onChange: (data: {
-    policyHolder: PersonalData;
+    policyHolder: PolicyHolderData;
     insured: InsuredData;
     vehicleOwner: InsuredData;
     customer: PersonalData;
   }) => void;
-  onSaveOffer: () => void;
-  onContinue: () => void;
   errors?: { [key: string]: string };
 }
 
 export const CheckoutFinalForm = ({ 
   data, 
   onChange, 
-  onSaveOffer,
-  onContinue,
   errors 
 }: CheckoutFinalFormProps): React.ReactElement => {
   const [customerEntityType, setCustomerEntityType] = useState<'person' | 'company'>(
@@ -251,13 +248,13 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="companyName"
-                  className={`w-full p-2 border ${errors?.companyName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.companyName ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.companyName || ''}
                   onChange={handleCustomerChange}
                   required={customerEntityType === 'company'}
                 />
                 {errors?.companyName && (
-                  <p className="mt-1 text-sm text-red-500">{errors.companyName}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors.companyName}</p>
                 )}
               </div>
               
@@ -268,14 +265,14 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="taxId"
-                  className={`w-full p-2 border ${errors?.taxId ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.taxId ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.taxId || ''}
                   onChange={handleCustomerChange}
                   placeholder="np. 1234567890"
                   required={customerEntityType === 'company'}
                 />
                 {errors?.taxId && (
-                  <p className="mt-1 text-sm text-red-500">{errors.taxId}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors.taxId}</p>
                 )}
               </div>
             </div>
@@ -298,13 +295,13 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="firstName"
-                  className={`w-full p-2 border ${errors?.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.firstName ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.firstName}
                   onChange={handleCustomerChange}
                   required={customerEntityType === 'person'}
                 />
                 {errors?.firstName && (
-                  <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors.firstName}</p>
                 )}
               </div>
               
@@ -315,13 +312,13 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="lastName"
-                  className={`w-full p-2 border ${errors?.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.lastName ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.lastName}
                   onChange={handleCustomerChange}
                   required={customerEntityType === 'person'}
                 />
                 {errors?.lastName && (
-                  <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors.lastName}</p>
                 )}
               </div>
             </div>
@@ -343,14 +340,14 @@ export const CheckoutFinalForm = ({
               <input
                 type="email"
                 name="email"
-                className={`w-full p-2 border ${errors?.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                className={`w-full p-2 border ${errors?.email ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                 value={data.customer.email}
                 onChange={handleCustomerChange}
                 placeholder="np. jan.kowalski@example.com"
                 required
               />
               {errors?.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                <p className="mt-1 text-sm text-amber-800">{errors.email}</p>
               )}
             </div>
             
@@ -361,14 +358,14 @@ export const CheckoutFinalForm = ({
               <input
                 type="tel"
                 name="phoneNumber"
-                className={`w-full p-2 border ${errors?.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                className={`w-full p-2 border ${errors?.phoneNumber ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                 value={data.customer.phoneNumber}
                 onChange={handleCustomerChange}
                 placeholder="+48XXXXXXXXX"
                 required
               />
               {errors?.phoneNumber && (
-                <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>
+                <p className="mt-1 text-sm text-amber-800">{errors.phoneNumber}</p>
               )}
             </div>
           </div>
@@ -391,13 +388,13 @@ export const CheckoutFinalForm = ({
                 name="identificationNumber"
                 maxLength={11}
                 minLength={11}
-                className={`w-full p-2 border ${errors?.identificationNumber ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                className={`w-full p-2 border ${errors?.identificationNumber ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                 value={data.customer.identificationNumber}
                 onChange={handleCustomerChange}
                 required={customerEntityType === 'person'}
               />
               {errors?.identificationNumber && (
-                <p className="mt-1 text-sm text-red-500">{errors.identificationNumber}</p>
+                <p className="mt-1 text-sm text-amber-800">{errors.identificationNumber}</p>
               )}
             </div>
           </div>
@@ -420,14 +417,14 @@ export const CheckoutFinalForm = ({
               <input
                 type="text"
                 name="address.street"
-                className={`w-full p-2 border ${errors?.['address.street'] ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                className={`w-full p-2 border ${errors?.['address.street'] ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                 value={data.customer.address.street}
                 onChange={handleCustomerChange}
                 placeholder="np. Marszałkowska 1"
                 required
               />
               {errors?.['address.street'] && (
-                <p className="mt-1 text-sm text-red-500">{errors['address.street']}</p>
+                <p className="mt-1 text-sm text-amber-800">{errors['address.street']}</p>
               )}
             </div>
             
@@ -439,13 +436,13 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="address.city"
-                  className={`w-full p-2 border ${errors?.['address.city'] ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.['address.city'] ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.address.city}
                   onChange={handleCustomerChange}
                   required
                 />
                 {errors?.['address.city'] && (
-                  <p className="mt-1 text-sm text-red-500">{errors['address.city']}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors['address.city']}</p>
                 )}
               </div>
               
@@ -456,7 +453,7 @@ export const CheckoutFinalForm = ({
                 <input
                   type="text"
                   name="address.postCode"
-                  className={`w-full p-2 border ${errors?.['address.postCode'] ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                  className={`w-full p-2 border ${errors?.['address.postCode'] ? 'border-amber-500' : 'border-gray-300'} rounded-md`}
                   value={data.customer.address.postCode}
                   onChange={handleCustomerChange}
                   placeholder="XX-XXX"
@@ -464,7 +461,7 @@ export const CheckoutFinalForm = ({
                   pattern="[0-9]{2}-[0-9]{3}"
                 />
                 {errors?.['address.postCode'] && (
-                  <p className="mt-1 text-sm text-red-500">{errors['address.postCode']}</p>
+                  <p className="mt-1 text-sm text-amber-800">{errors['address.postCode']}</p>
                 )}
               </div>
             </div>
@@ -489,25 +486,6 @@ export const CheckoutFinalForm = ({
         }}
         errors={errors}
       />
-
-      {/* Przyciski nawigacyjne */}
-      <div className="mt-8 flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSaveOffer}
-          className="bg-white hover:bg-gray-50 text-[#300FE6] px-6 py-2 rounded-md border border-[#300FE6]"
-        >
-          Zapisz ofertę
-        </Button>
-        <Button
-          type="button"
-          onClick={onContinue}
-          className="bg-[#300FE6] hover:bg-[#2a0dd0] text-white px-6 py-2 rounded-md flex items-center"
-        >
-          Dalej <ChevronRight size={18} className="ml-1" />
-        </Button>
-      </div>
     </div>
   );
 }; 

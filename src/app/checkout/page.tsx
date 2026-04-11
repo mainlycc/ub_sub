@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight, ArrowLeft, CreditCard, FileText, Mail } from 'lucide-react';
+import { CheckCircle2, ChevronRight, ArrowLeft, Mail } from 'lucide-react';
 import { Suspense } from 'react';
 import { InsuranceVariantForm } from '@/components/checkout/InsuranceVariantForm';
 import { CalculationForm } from '@/components/checkout/CalculationForm';
@@ -11,8 +11,10 @@ import { VehicleForm } from '@/components/checkout/VehicleForm';
 import { Summary } from '@/components/checkout/Summary';
 import { convertToApiFormat } from '@/components/checkout/InsuredPersonsForm';
 import { CheckoutFinalForm } from '@/components/checkout/CheckoutFinalForm';
+import PolicyDocumentsEmailStep from '@/components/checkout/PolicyDocumentsEmailStep';
 import { VehicleData } from '@/types/vehicle';
 import Footer from '@/components/Footer';
+import { checkoutMessages, vinFieldMessage } from '@/lib/user-facing-errors';
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -49,7 +51,7 @@ interface InsuredData {
 }
 
 interface InsuredPersonsData {
-  policyHolder: PersonalData;
+  policyHolder: PersonalData & { enabled?: boolean };
   insured: InsuredData;
   vehicleOwner: InsuredData;
 }
@@ -133,7 +135,8 @@ const CheckoutContent = () => {
         city: "",
         postCode: "",
         countryCode: "PL"
-      }
+      },
+      enabled: true
     },
     insured: {
       inheritFrom: 'policyHolder',
@@ -183,11 +186,6 @@ const CheckoutContent = () => {
     }
   });
   
-  // Efekt synchronizujący początkowe dane klienta z danymi ubezpieczającego
-  useEffect(() => {
-    setCustomerData(insuredPersonsData.policyHolder);
-  }, [insuredPersonsData.policyHolder]);
-  
   // Handle variant change
   const handleVariantChange = (newVariant: InsuranceVariant) => {
     setInsuranceVariant(newVariant);
@@ -214,7 +212,7 @@ const CheckoutContent = () => {
     
     
     if (!insuranceVariant.productCode) {
-      newErrors.productCode = "Wybór wariantu ubezpieczenia jest wymagany";
+      newErrors.productCode = checkoutMessages.variantRequired;
     }
     
     setErrors(prev => ({ ...prev, variant: newErrors }));
@@ -226,7 +224,7 @@ const CheckoutContent = () => {
     const newErrors: { [key: string]: string } = {};
     
     if (!calculationResult) {
-      newErrors.calculation = "Kalkulacja ceny jest wymagana";
+      newErrors.calculation = checkoutMessages.calculationRequired;
     }
     
     setErrors(prev => ({ ...prev, calculation: newErrors }));
@@ -237,35 +235,35 @@ const CheckoutContent = () => {
     const newErrors: { [key: string]: string } = {};
     
     if (!insuredPersonsData.policyHolder.firstName) {
-      newErrors.firstName = "Imię jest wymagane";
+      newErrors.firstName = checkoutMessages.firstName;
     }
     
     if (!insuredPersonsData.policyHolder.lastName) {
-      newErrors.lastName = "Nazwisko jest wymagane";
+      newErrors.lastName = checkoutMessages.lastName;
     }
     
     if (!insuredPersonsData.policyHolder.phoneNumber) {
-      newErrors.phoneNumber = "Numer telefonu jest wymagany";
+      newErrors.phoneNumber = checkoutMessages.phone;
     }
     
     if (!insuredPersonsData.policyHolder.email || !/\S+@\S+\.\S+/.test(insuredPersonsData.policyHolder.email)) {
-      newErrors.email = "Wymagany poprawny adres email";
+      newErrors.email = checkoutMessages.email;
     }
     
     if (!insuredPersonsData.policyHolder.identificationNumber || insuredPersonsData.policyHolder.identificationNumber.length !== 11) {
-      newErrors.identificationNumber = "Wymagany poprawny numer PESEL (11 cyfr)";
+      newErrors.identificationNumber = checkoutMessages.pesel;
     }
     
     if (!insuredPersonsData.policyHolder.address.street) {
-      newErrors.street = "Ulica jest wymagana";
+      newErrors['address.street'] = checkoutMessages.street;
     }
     
     if (!insuredPersonsData.policyHolder.address.city) {
-      newErrors.city = "Miasto jest wymagane";
+      newErrors['address.city'] = checkoutMessages.city;
     }
     
     if (!insuredPersonsData.policyHolder.address.postCode || !/^\d{2}-\d{3}$/.test(insuredPersonsData.policyHolder.address.postCode)) {
-      newErrors.postCode = "Wymagany poprawny kod pocztowy (format: XX-XXX)";
+      newErrors['address.postCode'] = checkoutMessages.postCode;
     }
     
     setErrors(prev => ({ ...prev, personal: newErrors }));
@@ -276,31 +274,32 @@ const CheckoutContent = () => {
     const newErrors: { [key: string]: string } = {};
     
     if (!vehicleData.purchasedOn) {
-      newErrors.purchasedOn = "Data zakupu jest wymagana";
+      newErrors.purchasedOn = checkoutMessages.purchaseDate;
     }
     
     if (!vehicleData.firstRegisteredOn) {
-      newErrors.firstRegisteredOn = "Data pierwszej rejestracji jest wymagana";
+      newErrors.firstRegisteredOn = checkoutMessages.firstReg;
     }
     
-    if (!vehicleData.vin || vehicleData.vin.length < 17) {
-      newErrors.vin = "Wymagany poprawny numer VIN (17 znaków)";
+    const vinMsg = vinFieldMessage(vehicleData.vin || '');
+    if (vinMsg) {
+      newErrors.vin = vinMsg;
     }
     
-    if (!vehicleData.vrm) {
-      newErrors.vrm = "Numer rejestracyjny jest wymagany";
+    if (!vehicleData.vrm?.trim()) {
+      newErrors.vrm = checkoutMessages.vrm;
     }
     
     if (!vehicleData.purchasePrice || vehicleData.purchasePrice <= 0) {
-      newErrors.purchasePrice = "Cena zakupu pojazdu jest wymagana";
+      newErrors.purchasePrice = checkoutMessages.purchasePrice;
     }
 
     if (vehicleData.mileage < 0) {
-      newErrors.mileage = "Przebieg nie może być ujemny";
+      newErrors.mileage = checkoutMessages.mileageNegative;
     }
     
     if (typeof vehicleData.mileage !== 'number' || isNaN(vehicleData.mileage)) {
-      newErrors.mileage = "Przebieg pojazdu jest wymagany";
+      newErrors.mileage = checkoutMessages.mileageRequired;
     }
     
     setErrors(prev => ({ ...prev, vehicle: newErrors }));
@@ -347,7 +346,7 @@ const CheckoutContent = () => {
       const step = searchParams.get('step');
       if (step) {
         const stepNumber = parseInt(step);
-        if (stepNumber >= 1 && stepNumber <= 6) {
+        if (stepNumber >= 1 && stepNumber <= 7) {
           setCurrentStep(stepNumber);
         }
       }
@@ -472,7 +471,7 @@ const CheckoutContent = () => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Błąd podczas przetwarzania zamówienia:', error);
       }
-      alert('Wystąpił błąd podczas przetwarzania zamówienia. Spróbuj ponownie.');
+      alert(checkoutMessages.genericSubmit);
     } finally {
       setIsSubmitting(false);
     }
@@ -524,20 +523,15 @@ const CheckoutContent = () => {
     );
   };
 
-  // Funkcje do obsługi akcji w CheckoutFinalForm
-  const handleSaveOffer = () => {
-    alert('Oferta została zapisana!');
-  };
-  
-  const handleContinueToSummary = () => {
-    setCurrentStep(5);
-    router.push(`/checkout?step=5`);
-  };
-
   const handleSmsConfirmed = (policyId: string) => {
     setRegisteredPolicyId(policyId);
     setCurrentStep(6);
     router.push(`/checkout?step=6`);
+  };
+
+  const handleDocumentsComplete = () => {
+    setCurrentStep(7);
+    router.push(`/checkout?step=7`);
   };
 
 
@@ -586,18 +580,22 @@ const CheckoutContent = () => {
               customer: customerData
             }}
             onChange={(newData) => {
-              // Aktualizuj dane klienta
+              // Źródłem prawdy dla danych klienta jest customerData.
+              // PolicyHolder ma być z nim spójny, żeby kliknięcia w checkboxy (osoby w polisie)
+              // nie czyściły pól "Dane klienta" oraz żeby submit miał kompletne dane.
               setCustomerData(newData.customer);
-              
-              // Aktualizuj dane osób w polisie
-              setInsuredPersonsData({
-                policyHolder: newData.policyHolder,
+
+              setInsuredPersonsData((prev) => ({
+                policyHolder: {
+                  ...newData.customer,
+                  // checkbox "UBEZPIECZAJĄCY" jest trzymany na policyHolder.enabled
+                  // i może się zmieniać w InsuredPersonsForm — nie nadpisuj go starą wartością.
+                  enabled: newData.policyHolder.enabled ?? prev.policyHolder.enabled
+                },
                 insured: newData.insured,
                 vehicleOwner: newData.vehicleOwner
-              });
+              }));
             }}
-            onSaveOffer={handleSaveOffer}
-            onContinue={handleContinueToSummary}
             errors={errors.personal}
           />
         );
@@ -616,6 +614,7 @@ const CheckoutContent = () => {
             onPaymentChange={handlePaymentDataChange}
             dataConfirmed={dataConfirmed}
             onDataConfirmChange={setDataConfirmed}
+            onBack={goToPrevStep}
           />
         );
       case 6:
@@ -638,73 +637,64 @@ const CheckoutContent = () => {
           );
         }
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-              <div className="bg-green-100 p-2 rounded-full mr-3">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-              </div>
-              Polisa zarejestrowana!
+          <PolicyDocumentsEmailStep
+            policyId={registeredPolicyId}
+            onComplete={handleDocumentsComplete}
+            onBackToSummary={() => {
+              setCurrentStep(5);
+              router.push(`/checkout?step=5`);
+            }}
+          />
+        );
+      case 7:
+        return (
+          <div className="flex flex-col items-center text-center py-10 px-4 sm:py-14">
+            <div
+              className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-50 to-green-100 ring-8 ring-emerald-50/80 shadow-sm"
+              aria-hidden
+            >
+              <CheckCircle2 className="h-10 w-10 text-emerald-600" strokeWidth={2} />
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+              Podsumowanie i zakończenie
             </h2>
 
-            <div className="bg-green-50 border border-green-200 rounded-xl p-5 space-y-2">
-              <p className="text-green-800 font-medium">
-                Twoja polisa została pomyślnie zarejestrowana i podpisana.
+            <p className="mt-4 max-w-lg text-base sm:text-lg font-medium leading-relaxed text-gray-800">
+              Dokumenty zostały przesłane. Możesz zakończyć proces.
+            </p>
+
+            <div className="mt-6 flex w-full max-w-md flex-col items-center gap-3 rounded-2xl border border-emerald-100/80 bg-gradient-to-b from-emerald-50/90 to-white px-6 py-5 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100">
+                <Mail className="h-5 w-5" strokeWidth={2} aria-hidden />
+              </div>
+              <p className="text-sm sm:text-[15px] leading-relaxed text-gray-600">
+                Dokumenty oraz link do płatności zostaną przesłane na adres e-mail podany w formularzu.
               </p>
-              <p className="text-green-700 text-sm">
-                Numer polisy: <strong>{registeredPolicyId}</strong>
-              </p>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <CreditCard className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">Krok 1: Opłać polisę</p>
-                  <p className="text-gray-600 text-sm mt-1">
-                    Na Twój adres e-mail został wysłany link do płatności.
-                    Po opłaceniu polisa zostanie automatycznie zatwierdzona.
-                  </p>
-                </div>
+            {registeredPolicyId && (
+              <div className="mt-6 w-full max-w-sm rounded-xl border border-gray-200 bg-gray-50/80 px-5 py-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Numer polisy
+                </p>
+                <p className="mt-1 font-mono text-xl font-semibold tracking-wide text-gray-900 sm:text-2xl">
+                  {registeredPolicyId}
+                </p>
               </div>
-              <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">Krok 2: Prześlij dokumenty</p>
-                  <p className="text-gray-600 text-sm mt-1">
-                    Po opłaceniu polisy będziesz mógł przesłać wymagane dokumenty
-                    (fakturę, dowód rejestracyjny, polisę AC).
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-blue-800 text-sm">
-                    Zachowaj poniższy link — po opłaceniu polisy użyj go, aby przesłać dokumenty:
-                  </p>
-                  <a
-                    href={`/policies/${registeredPolicyId}/documents`}
-                    className="inline-block mt-2 text-[#300FE6] hover:text-[#2208B0] font-medium underline text-sm break-all"
-                  >
-                    {typeof window !== "undefined" ? window.location.origin : ""}/policies/{registeredPolicyId}/documents
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
               <Button
-                className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
-                onClick={() => router.push(`/policies/${registeredPolicyId}/documents`)}
+                className="w-full min-h-[44px] bg-[#300FE6] hover:bg-[#2208B0] text-white shadow-md shadow-[#300FE6]/25 sm:min-w-[200px] sm:flex-1"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
               >
-                <FileText className="h-4 w-4 mr-2" />
-                Przejdź do dokumentów
+                {isSubmitting ? "Wysyłanie…" : "Potwierdź i zakończ"}
               </Button>
               <Button
                 variant="outline"
+                className="w-full min-h-[44px] border-gray-300 sm:min-w-[200px] sm:flex-1"
                 onClick={() => router.push("/")}
               >
                 Wróć na stronę główną
@@ -742,7 +732,7 @@ const CheckoutContent = () => {
               <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200" />
               <div 
                 className="absolute top-5 left-0 right-0 h-[2px] bg-[#300FE6] transition-all duration-500"
-                style={{ width: `${((currentStep - 1) / 5) * 100}%` }}
+                style={{ width: `${((currentStep - 1) / 6) * 100}%` }}
               />
 
               {[
@@ -751,7 +741,8 @@ const CheckoutContent = () => {
                 { number: 3, title: "KALKULACJA" },
                 { number: 4, title: "KLIENT" },
                 { number: 5, title: "PODSUMOWANIE" },
-                { number: 6, title: "DOKUMENTY" }
+                { number: 6, title: "DOKUMENTY" },
+                { number: 7, title: "ZAKOŃCZENIE" }
               ].map((step, index) => (
                 <div key={index} className="flex flex-col items-center relative z-10">
                   <div 
@@ -776,43 +767,38 @@ const CheckoutContent = () => {
               {renderStepContent()}
             </div>
 
-            {/* Przyciski nawigacyjne */}
-            <div className="flex justify-between">
-              {currentStep > 1 ? (
-                <Button
-                  variant="outline"
-                  onClick={goToPrevStep}
-                  disabled={isSubmitting}
-                  className="flex items-center"
-                >
-                  <ArrowLeft size={16} className="mr-1" /> Wstecz
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/gap')}
-                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                >
-                  Anuluj
-                </Button>
-              )}
-              
-              {currentStep < 3 ? (
-                <Button
-                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
-                  onClick={goToNextStep}
-                >
-                  Dalej <ChevronRight size={16} className="ml-1" />
-                </Button>
-              ) : currentStep === 3 ? (
-                <Button
-                  className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
-                  onClick={goToNextStep}
-                >
-                  Dalej <ChevronRight size={16} className="ml-1" />
-                </Button>
-              ) : null}
-            </div>
+            {/* Przyciski nawigacyjne (krok 5: Wstecz + CTA są w komponencie Summary) */}
+            {currentStep !== 5 && (
+              <div className="flex justify-between items-center">
+                {currentStep > 1 ? (
+                  <Button
+                    variant="outline"
+                    onClick={goToPrevStep}
+                    disabled={isSubmitting}
+                    className="flex items-center"
+                  >
+                    <ArrowLeft size={16} className="mr-1" /> Wstecz
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/gap')}
+                    className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                  >
+                    Anuluj
+                  </Button>
+                )}
+                
+                {currentStep <= 4 ? (
+                  <Button
+                    className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                    onClick={goToNextStep}
+                  >
+                    Dalej <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
         

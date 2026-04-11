@@ -1,10 +1,21 @@
 "use client"
 
 import React, { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { getSellerNodeCode } from '@/lib/seller';
 import { extractErrorFromResponseBody } from '@/lib/api-error-message';
+import {
+  checkoutMessages,
+  formatPolicyValidationDetails,
+  humanizeRawApiError,
+  vinFieldMessage,
+} from '@/lib/user-facing-errors';
+
+const consentCheckboxClassName =
+  "mt-0.5 size-5 shrink-0 rounded-[4px] border-gray-300 bg-white shadow-none data-[state=checked]:border-[#300FE6] data-[state=checked]:bg-[#300FE6] data-[state=checked]:text-white focus-visible:border-[#300FE6] focus-visible:ring-[#300FE6]/30";
 
 interface VehicleData {
   purchasedOn: string;
@@ -76,6 +87,8 @@ interface SummaryProps {
   onPaymentChange: (paymentData: PaymentData) => void;
   dataConfirmed: boolean;
   onDataConfirmChange: (confirmed: boolean) => void;
+  /** Nawigacja wstecz — razem z CTA w jednym rzędzie (np. krok checkout). */
+  onBack?: () => void;
 }
 
 export const Summary = (props: SummaryProps): React.ReactElement => {
@@ -110,43 +123,52 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
     try {
       // Sprawdzanie kompletności danych przed wysłaniem
-      const validateData = () => {
-        const errors = [];
-        
-        // Sprawdzanie danych pojazdu
-        if (!props.vehicleData.makeId) errors.push('Brak makeId pojazdu');
-        if (!props.vehicleData.modelId) errors.push('Brak modelId pojazdu');
-        if (!props.vehicleData.vin) errors.push('Brak numeru VIN');
-        if (!props.vehicleData.vrm) errors.push('Brak numeru rejestracyjnego');
-        
-        // Sprawdzanie danych osobowych
-        if (!props.personalData.phoneNumber) errors.push('Brak numeru telefonu');
-        if (!props.personalData.identificationNumber) errors.push('Brak numeru PESEL');
-        if (!props.personalData.address?.street) errors.push('Brak ulicy');
-        if (!props.personalData.address?.postCode) errors.push('Brak kodu pocztowego');
-        if (!props.personalData.address?.city) errors.push('Brak miasta');
-        
-        // Upewnijmy się, że mamy addressLine1 (numer domu) lub użyjemy ulicy jako zamiennika
-        const addressLine1 = props.personalData.address?.addressLine1 || 
-                            (props.personalData.address?.street ? 
-                            props.personalData.address.street.match(/\d+$/)?.[0] || 
-                            props.personalData.address.street : '');
-        
-        if (!addressLine1) errors.push('Brak numeru domu');
-        
+      const validateData = (): string[] => {
+        const errors: string[] = [];
+
+        if (!props.vehicleData.makeId) errors.push(checkoutMessages.make);
+        if (!props.vehicleData.modelId) errors.push(checkoutMessages.model);
+        const vinProblem = vinFieldMessage(props.vehicleData.vin || '');
+        if (vinProblem) errors.push(vinProblem);
+        if (!props.vehicleData.vrm?.trim()) errors.push(checkoutMessages.vrm);
+
+        if (!props.personalData.phoneNumber?.trim()) errors.push(checkoutMessages.phone);
+        if (!props.personalData.identificationNumber?.trim()) errors.push(checkoutMessages.pesel);
+        if (!props.personalData.address?.street?.trim()) errors.push(checkoutMessages.street);
+        if (!props.personalData.address?.postCode?.trim()) errors.push(checkoutMessages.postCode);
+        if (!props.personalData.address?.city?.trim()) errors.push(checkoutMessages.city);
+
+        const addressLine1 = props.personalData.address?.addressLine1 ||
+          (props.personalData.address?.street
+            ? props.personalData.address.street.match(/\d+$/)?.[0] ||
+              props.personalData.address.street
+            : '');
+
+        if (!addressLine1?.trim()) {
+          errors.push(
+            'W adresie potrzebny jest numer domu lub mieszkania — dopisz go na końcu nazwy ulicy (np. „Lipowa 12”).'
+          );
+        }
+
         return errors;
       };
 
       const validationErrors = validateData();
       if (validationErrors.length > 0) {
         console.error('Błędy walidacji:', validationErrors);
-        throw new Error(`Nieprawidłowe dane: ${validationErrors.join(', ')}`);
+        const text =
+          validationErrors.length === 1
+            ? validationErrors[0]
+            : ['Nie możemy zapisać polisy, dopóki nie uzupełnisz:', ...validationErrors.map((e) => `• ${e}`)].join(
+                '\n'
+              );
+        throw new Error(text);
       }
 
       // Przygotuj numer telefonu w odpowiednim formacie
       let phoneNumber = props.personalData.phoneNumber;
       if (!phoneNumber || phoneNumber.trim() === '') {
-        throw new Error('Numer telefonu jest wymagany');
+        throw new Error(checkoutMessages.phone);
       }
       
       if (!phoneNumber.startsWith('+')) {
@@ -168,7 +190,7 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
         if (postCode && postCode.replace(/\D/g, '').length === 5) {
           postCode = postCode.replace(/\D/g, '').replace(/^(\d{2})(\d{3})$/, '$1-$2');
         } else {
-          throw new Error('Kod pocztowy musi mieć format XX-XXX');
+          throw new Error(checkoutMessages.postCode);
         }
       }
       
@@ -256,12 +278,18 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
       if (!response.ok) {
         console.error('Błąd odpowiedzi:', responseData);
-        if (responseData.details) {
+        if (responseData.details != null) {
           console.error('Szczegóły błędu API:', responseData.details);
-          throw new Error(`Błąd API: ${JSON.stringify(responseData.details)}`);
+          const fromDetails = formatPolicyValidationDetails(responseData.details);
+          if (fromDetails) {
+            throw new Error(fromDetails);
+          }
         }
         throw new Error(
-          extractErrorFromResponseBody(responseData) || 'Błąd podczas rejestracji polisy'
+          humanizeRawApiError(
+            extractErrorFromResponseBody(responseData) ||
+              'Nie udało się zapisać polisy. Sprawdź dane i spróbuj ponownie.'
+          )
         );
       }
 
@@ -271,9 +299,11 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     } catch (error) {
       console.error('Błąd podczas rejestracji polisy:', error);
       setRegistrationError(
-        error instanceof Error 
-          ? error.message 
-          : 'Wystąpił nieoczekiwany błąd podczas rejestracji polisy'
+        humanizeRawApiError(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się zapisać polisy. Spróbuj ponownie za chwilę.'
+        )
       );
     } finally {
       setIsRegistering(false);
@@ -392,9 +422,11 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
     } catch (error) {
       console.error('Błąd podczas potwierdzania podpisu:', error);
       setSmsError(
-        error instanceof Error 
-          ? error.message 
-          : 'Wystąpił nieoczekiwany błąd podczas potwierdzania podpisu'
+        humanizeRawApiError(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się potwierdzić kodu z SMS. Spróbuj ponownie.'
+        )
       );
       setSmsSuccess(null);
     } finally {
@@ -476,9 +508,16 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
             <p><span className="font-medium">Produkt:</span> {props.calculationResult.details.productName}</p>
             <p><span className="font-medium">Okres ochrony:</span> {props.calculationResult.details.coveragePeriod}</p>
             <p><span className="font-medium">Wartość pojazdu:</span> {props.calculationResult.details.vehicleValue.toLocaleString()} zł</p>
-            <p><span className="font-medium">Limit odszkodowania:</span> {props.calculationResult.details.maxCoverage}</p>
+            <p><span className="font-medium">Limit odszkodowania:</span>{' '}
+              {props.paymentData.claimLimit === 'CL_150000'
+                ? '150 000 zł'
+                : props.paymentData.claimLimit === 'CL_100000'
+                  ? '100 000 zł'
+                  : props.paymentData.claimLimit === 'CL_50000'
+                    ? '50 000 zł'
+                    : props.calculationResult.details.maxCoverage}
+            </p>
             <p><span className="font-medium">Okres ubezpieczenia:</span> {props.paymentData.term === 'T_36' ? '36 miesięcy' : props.paymentData.term === 'T_24' ? '24 miesiące' : props.paymentData.term === 'T_12' ? '12 miesięcy' : props.paymentData.term}</p>
-            <p><span className="font-medium">Limit odszkodowania:</span> {props.paymentData.claimLimit === 'CL_150000' ? '150 000 zł' : props.paymentData.claimLimit === 'CL_100000' ? '100 000 zł' : props.paymentData.claimLimit === 'CL_50000' ? '50 000 zł' : props.paymentData.claimLimit}</p>
           </div>
         </div>
 
@@ -515,32 +554,26 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
           Zgody i potwierdzenia
         </h3>
         <div className="space-y-4">
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-0.5">
-              <input
-                type="checkbox"
-                id="termsAgreed"
-                checked={props.termsAgreed}
-                onChange={(e) => props.onTermsChange(e.target.checked)}
-                className="w-5 h-5 text-[#300FE6] border-gray-300 rounded focus:ring-[#300FE6] focus:ring-offset-0 focus:ring-1 cursor-pointer"
-              />
-            </div>
-            <label htmlFor="termsAgreed" className="ml-2 text-sm text-gray-600">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="termsAgreed"
+              checked={props.termsAgreed}
+              onCheckedChange={(checked) => props.onTermsChange(checked === true)}
+              className={consentCheckboxClassName}
+            />
+            <label htmlFor="termsAgreed" className="cursor-pointer text-sm leading-relaxed text-gray-600 select-none">
               Oświadczam, że zapoznałem/am się z warunkami umowy ubezpieczenia GAP, Ogólnymi Warunkami Ubezpieczenia, Dokumentem zawierającym informacje o produkcie ubezpieczeniowym oraz Informacją Administratora Danych Osobowych i wyrażam zgodę na zawarcie umowy ubezpieczenia na tych warunkach.
             </label>
           </div>
-          
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-0.5">
-              <input
-                type="checkbox"
-                id="confirmData"
-                checked={props.dataConfirmed}
-                onChange={(e) => props.onDataConfirmChange(e.target.checked)}
-                className="w-5 h-5 text-[#300FE6] border-gray-300 rounded focus:ring-[#300FE6] focus:ring-offset-0 focus:ring-1 cursor-pointer"
-              />
-            </div>
-            <label htmlFor="confirmData" className="ml-2 text-sm text-gray-600">
+
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="confirmData"
+              checked={props.dataConfirmed}
+              onCheckedChange={(checked) => props.onDataConfirmChange(checked === true)}
+              className={consentCheckboxClassName}
+            />
+            <label htmlFor="confirmData" className="cursor-pointer text-sm leading-relaxed text-gray-600 select-none">
               Potwierdzam, że wszystkie informacje podane przeze mnie w formularzu są zgodne z prawdą i kompletne. Jestem świadomy/a, że podanie nieprawdziwych danych może skutkować odmową wypłaty odszkodowania.
             </label>
           </div>
@@ -549,28 +582,28 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
 
       {/* Wyświetlanie błędów */}
       {registrationError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl" role="alert">
+        <div className="bg-amber-50 border border-amber-200 text-amber-950 px-6 py-4 rounded-xl" role="alert">
           <div className="flex">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 mr-2 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
-            <div>
-              <strong className="font-bold">Błąd rejestracji: </strong>
-              <span className="block sm:inline">{registrationError}</span>
+            <div className="min-w-0">
+              <strong className="font-semibold text-amber-900">Nie udało się zapisać polisy</strong>
+              <p className="mt-1 text-sm whitespace-pre-line text-amber-900/90">{registrationError}</p>
             </div>
           </div>
         </div>
       )}
 
       {smsError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl" role="alert">
+        <div className="bg-amber-50 border border-amber-200 text-amber-950 px-6 py-4 rounded-xl" role="alert">
           <div className="flex">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 mr-2 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
-            <div>
-              <strong className="font-bold">Błąd potwierdzenia SMS: </strong>
-              <span className="block sm:inline">{smsError}</span>
+            <div className="min-w-0">
+              <strong className="font-semibold text-amber-900">Kod z SMS</strong>
+              <p className="mt-1 text-sm whitespace-pre-line text-amber-900/90">{smsError}</p>
             </div>
           </div>
         </div>
@@ -633,13 +666,43 @@ export const Summary = (props: SummaryProps): React.ReactElement => {
             </div>
             <p className="text-sm text-gray-500">Nie otrzymałeś/aś kodu? Możesz poprosić o ponowne wysłanie za <span className="font-semibold">60</span> sekund.</p>
           </div>
+          {props.onBack && (
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={props.onBack}
+                disabled={isConfirmingSms}
+                className="flex items-center justify-center w-full sm:w-auto shrink-0"
+              >
+                <ArrowLeft size={16} className="mr-1 shrink-0" /> Wstecz
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="flex justify-end mt-8">
+        <div
+          className={
+            props.onBack
+              ? 'flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 mt-8'
+              : 'flex justify-end mt-8'
+          }
+        >
+          {props.onBack && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={props.onBack}
+              disabled={isRegistering}
+              className="flex items-center justify-center w-full sm:w-auto shrink-0"
+            >
+              <ArrowLeft size={16} className="mr-1 shrink-0" /> Wstecz
+            </Button>
+          )}
           <Button
             onClick={registerPolicy}
             disabled={isRegistering || !props.termsAgreed || !props.dataConfirmed}
-            className="bg-[#300FE6] hover:bg-[#2507b3] text-white px-8 py-3"
+            className="bg-[#300FE6] hover:bg-[#2507b3] text-white px-8 py-3 w-full sm:w-auto shrink-0"
           >
             {isRegistering ? 
               <div className="flex items-center">

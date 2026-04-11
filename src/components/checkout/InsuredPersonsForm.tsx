@@ -347,29 +347,33 @@ export const InsuredPersonsForm = ({
             </>
           )}
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Telefon*
-            </label>
-            <input
-              type="tel"
-              value={personData.phoneNumber}
-              onChange={(e) => handlePersonDataChange(role, 'phoneNumber', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#300FE6] focus:border-transparent"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email*
-            </label>
-            <input
-              type="email"
-              value={personData.email}
-              onChange={(e) => handlePersonDataChange(role, 'email', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#300FE6] focus:border-transparent"
-            />
-          </div>
+          {role !== 'vehicleOwner' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefon*
+                </label>
+                <input
+                  type="tel"
+                  value={personData.phoneNumber ?? ''}
+                  onChange={(e) => handlePersonDataChange(role, 'phoneNumber', e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#300FE6] focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email*
+                </label>
+                <input
+                  type="email"
+                  value={personData.email ?? ''}
+                  onChange={(e) => handlePersonDataChange(role, 'email', e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#300FE6] focus:border-transparent"
+                />
+              </div>
+            </>
+          )}
           
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -619,10 +623,10 @@ export const convertToApiFormat = (data: {
     client: {
       policyHolder: {
         type: data.policyHolder.type,
-        phoneNumber: data.policyHolder.phoneNumber,
+        phoneNumber: data.policyHolder.phoneNumber ?? '',
         firstName: data.policyHolder.firstName,
         lastName: data.policyHolder.lastName,
-        email: data.policyHolder.email,
+        email: data.policyHolder.email ?? '',
         identificationNumber: data.policyHolder.identificationNumber,
         companyName: data.policyHolder.companyName,
         taxId: data.policyHolder.taxId,
@@ -640,10 +644,10 @@ export const convertToApiFormat = (data: {
         : data.insured.personData 
           ? {
               type: data.insured.personData.type || 'person',
-              phoneNumber: data.insured.personData.phoneNumber || '',
+              phoneNumber: data.insured.personData.phoneNumber ?? '',
               firstName: data.insured.personData.firstName || '',
               lastName: data.insured.personData.lastName || '',
-              email: data.insured.personData.email || '',
+              email: data.insured.personData.email ?? '',
               identificationNumber: data.insured.personData.identificationNumber || '',
               companyName: data.insured.personData.companyName,
               taxId: data.insured.personData.taxId,
@@ -667,23 +671,25 @@ export const convertToApiFormat = (data: {
           contact: data.vehicleOwner.inheritFrom === 'policyHolder'
             ? { inheritFrom: 'policyHolder' } // W API zawsze przekazujemy jako policyHolder
             : data.vehicleOwner.personData
-              ? {
-                  type: data.vehicleOwner.personData.type || 'person',
-                  phoneNumber: data.vehicleOwner.personData.phoneNumber || '',
-                  firstName: data.vehicleOwner.personData.firstName || '',
-                  lastName: data.vehicleOwner.personData.lastName || '',
-                  email: data.vehicleOwner.personData.email || '',
-                  identificationNumber: data.vehicleOwner.personData.identificationNumber || '',
-                  companyName: data.vehicleOwner.personData.companyName,
-                  taxId: data.vehicleOwner.personData.taxId,
-                  address: data.vehicleOwner.personData.address || {
-                    addressLine1: '',
-                    street: '',
-                    city: '',
-                    postCode: '',
-                    countryCode: 'PL'
-                  }
-                }
+              ? (() => {
+                  // Właściciel pojazdu: nie zbieramy ani nie wysyłamy email/telefon.
+                  const person = data.vehicleOwner.personData;
+                  return {
+                    type: person.type || 'person',
+                    firstName: person.firstName || '',
+                    lastName: person.lastName || '',
+                    identificationNumber: person.identificationNumber || '',
+                    companyName: person.companyName,
+                    taxId: person.taxId,
+                    address: person.address || {
+                      addressLine1: '',
+                      street: '',
+                      city: '',
+                      postCode: '',
+                      countryCode: 'PL'
+                    }
+                  };
+                })()
               : { inheritFrom: 'policyHolder' } // Domyślnie ustaw na policyHolder, gdy brak danych
         }
       ]

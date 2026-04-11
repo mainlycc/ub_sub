@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Car } from 'lucide-react';
+import { humanizeRawApiError } from '@/lib/user-facing-errors';
 
 interface VehicleModelSelectProps {
   selectedModelId: string | null;
@@ -42,7 +43,7 @@ export const VehicleModelSelect: React.FC<VehicleModelSelectProps> = ({
         const response = await fetch('/api/vehicles/models');
         
         if (!response.ok) {
-          throw new Error('Nie udało się pobrać listy modeli');
+          throw new Error('Nie udało się wczytać listy modeli. Odśwież stronę lub spróbuj ponownie za chwilę.');
         }
 
         const data = await response.json();
@@ -71,11 +72,17 @@ export const VehicleModelSelect: React.FC<VehicleModelSelectProps> = ({
           console.log('Pobrano i przefiltrowano modele dla marki:', makeId, 'Liczba modeli:', filteredModels.length);
         } else {
           console.error('Nieprawidłowy format danych:', data);
-          throw new Error('Nieprawidłowy format danych z API');
+          throw new Error('Lista modeli jest chwilowo niedostępna. Spróbuj ponownie za chwilę.');
         }
       } catch (error) {
         console.error('Błąd podczas pobierania modeli:', error);
-        setLoadError(error instanceof Error ? error.message : 'Nie udało się pobrać listy modeli');
+        setLoadError(
+          humanizeRawApiError(
+            error instanceof Error
+              ? error.message
+              : 'Nie udało się wczytać modeli pojazdów. Odśwież stronę.'
+          )
+        );
         setModels([]);
       } finally {
         setIsLoading(false);
@@ -93,7 +100,7 @@ export const VehicleModelSelect: React.FC<VehicleModelSelectProps> = ({
       </label>
       <select
         id="vehicleModel"
-        className={`w-full p-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md bg-white ${
+        className={`w-full p-2 border ${error ? 'border-amber-500' : 'border-gray-300'} rounded-md bg-white ${
           isLoading ? 'animate-pulse bg-gray-50' : ''
         }`}
         value={selectedModelForDisplay || ''}
@@ -115,10 +122,10 @@ export const VehicleModelSelect: React.FC<VehicleModelSelectProps> = ({
         ))}
       </select>
       {error && (
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-amber-800">{error}</p>
       )}
       {loadError && (
-        <p className="text-sm text-red-500">{loadError}</p>
+        <p className="text-sm text-amber-800">{loadError}</p>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { humanizeRawApiError } from '@/lib/user-facing-errors';
 
 interface VehicleMake {
   id: number;
@@ -31,7 +32,7 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
         const response = await fetch('/api/vehicles/makes');
         
         if (!response.ok) {
-          throw new Error('Nie udało się pobrać listy marek');
+          throw new Error('Nie udało się wczytać listy marek. Odśwież stronę lub spróbuj ponownie za chwilę.');
         }
 
         const data = await response.json();
@@ -43,11 +44,17 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
           console.log('Pobrano marki:', data.length);
         } else {
           console.error('Nieprawidłowy format danych:', data);
-          throw new Error('Nieprawidłowy format danych z API');
+          throw new Error('Lista marek jest chwilowo niedostępna. Spróbuj ponownie za chwilę.');
         }
       } catch (error) {
         console.error('Błąd podczas pobierania marek:', error);
-        setLoadError(error instanceof Error ? error.message : 'Nie udało się pobrać listy marek');
+        setLoadError(
+          humanizeRawApiError(
+            error instanceof Error
+              ? error.message
+              : 'Nie udało się wczytać marek pojazdów. Odśwież stronę.'
+          )
+        );
       } finally {
         setIsLoading(false);
       }
@@ -71,7 +78,7 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
         <label className="block text-sm font-medium text-gray-700">
           Marka pojazdu *
         </label>
-        <div className="text-red-500 text-sm p-2 border border-red-300 rounded-md bg-red-50">
+        <div className="text-sm p-2 border border-amber-200 rounded-md bg-amber-50 text-amber-900">
           {loadError}
         </div>
       </div>
@@ -84,7 +91,7 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
         Marka pojazdu *
       </label>
       <select
-        className={`w-full p-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md bg-white`}
+        className={`w-full p-2 border ${error ? 'border-amber-500' : 'border-gray-300'} rounded-md bg-white`}
         value={selectedMakeId || ''}
         onChange={(e) => {
           const makeId = e.target.value;
@@ -101,7 +108,7 @@ export const VehicleMakeSelect: React.FC<VehicleMakeSelectProps> = ({
         ))}
       </select>
       {error && (
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-amber-800">{error}</p>
       )}
     </div>
   );

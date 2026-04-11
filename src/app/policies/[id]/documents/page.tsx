@@ -147,6 +147,8 @@ export default function PolicyDocumentsPage() {
   const [uploadErrorByCode, setUploadErrorByCode] = useState<Record<string, string>>({});
   const [selectedFileByCode, setSelectedFileByCode] = useState<Record<string, File | null>>({});
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUploadingBatch, setIsUploadingBatch] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocumentAvailability>({ precontract: false, contract: false });
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -287,6 +289,49 @@ export default function PolicyDocumentsPage() {
       }));
     } finally {
       setUploadingCode(null);
+    }
+  };
+
+  const uploadBatch = async () => {
+    setBatchError(null);
+    const batchItems = missingTypes
+      .map((t) => ({ code: t.code, file: selectedFileByCode[t.code] }))
+      .filter((x) => x.file instanceof File) as Array<{ code: string; file: File }>;
+
+    if (batchItems.length === 0) {
+      setBatchError("Wybierz przynajmniej jeden plik, aby wysłać batch.");
+      return;
+    }
+
+    setIsUploadingBatch(true);
+    try {
+      const fd = new FormData();
+      batchItems.forEach((x, idx) => {
+        fd.append(`items[${idx}][documentType]`, x.code);
+        fd.append(`items[${idx}][file]`, x.file);
+      });
+
+      const res = await fetch(`/api/policies/${policyId}/uploads-batch`, {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) {
+        setBatchError(extractErrorFromResponseBody(data) || `Błąd (${res.status})`);
+        return;
+      }
+
+      setSelectedFileByCode((prev) => {
+        const next = { ...prev };
+        for (const x of batchItems) delete next[x.code];
+        return next;
+      });
+
+      await checkStatus();
+    } catch (e) {
+      setBatchError(e instanceof Error ? e.message : "Nie udało się wysłać batch");
+    } finally {
+      setIsUploadingBatch(false);
     }
   };
 
@@ -554,10 +599,34 @@ export default function PolicyDocumentsPage() {
                   ))}
                 </ul>
 
-                <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-                  Odśwież listę
-                </Button>
+                {batchError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                    {batchError}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+                    onClick={() => void uploadBatch()}
+                    disabled={isUploadingBatch || missingTypes.length === 0}
+                  >
+                    {isUploadingBatch ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Wysyłanie batch…
+                      </>
+                    ) : (
+                      "Wyślij wszystkie wybrane (batch) i powiadom e-mail"
+                    )}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+                    Odśwież listę
+                  </Button>
+                </div>
+
               </div>
             )}
 

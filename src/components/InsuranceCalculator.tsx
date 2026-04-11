@@ -214,17 +214,17 @@ const InsuranceCalculator = () => {
                   value={activeInsuranceType}
                   onValueChange={(value) => setActiveInsuranceType(value as InsuranceType)}
                 >
-                  <TabsList className="grid w-full grid-cols-2 mb-8 rounded-[20px]">
+                  <TabsList className="grid w-full grid-cols-2 mb-8 rounded-[20px] h-auto p-1 items-stretch bg-gray-100">
                     <TabsTrigger 
                       value="fakturowy" 
-                      className="py-3 text-xs sm:text-sm md:text-base rounded-tl-[20px] rounded-bl-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
+                      className="h-full w-full py-3 text-xs sm:text-sm md:text-base rounded-tl-[20px] rounded-bl-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
                     >
                       <span className="whitespace-nowrap">GAP Fakturowy</span>
                       <span className="ml-0 sm:ml-1 mt-1 sm:mt-0">{renderTooltip(tooltips.gapFakturowy)}</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="casco" 
-                      className="py-3 text-xs sm:text-sm md:text-base rounded-tr-[20px] rounded-br-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
+                      className="h-full w-full py-3 text-xs sm:text-sm md:text-base rounded-tr-[20px] rounded-br-[20px] data-[state=active]:bg-[#FF8E3D] data-[state=active]:text-white flex-col sm:flex-row items-center"
                     >
                       <span className="whitespace-nowrap">GAP Casco</span>
                       <span className="ml-0 sm:ml-1 mt-1 sm:mt-0">{renderTooltip(tooltips.gapCasco)}</span>

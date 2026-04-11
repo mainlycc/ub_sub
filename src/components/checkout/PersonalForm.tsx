@@ -19,10 +19,10 @@ interface PersonalFormProps {
 
 interface PersonalData {
   type: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email?: string;
   identificationNumber: string;
   companyName?: string;
   taxId?: string;
@@ -223,8 +223,6 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
         lastName: '',
         identificationNumber: '',
         type: 'person',
-        phoneNumber: '',
-        email: '',
         address: {
           addressLine1: '',
           street: '',
@@ -243,7 +241,7 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
     } else if (name in updatedVehicleOwner.personData) {
       // Bezpośrednio sprawdzamy, czy pole istnieje w obiekcie personData
       // i ustawiamy jego wartość typowo
-      if (name === 'firstName' || name === 'lastName' || name === 'email' || name === 'phoneNumber' || name === 'identificationNumber' || name === 'type') {
+      if (name === 'firstName' || name === 'lastName' || name === 'identificationNumber' || name === 'type') {
         (updatedVehicleOwner.personData as PersonalData)[name] = value;
       }
     }
@@ -305,8 +303,6 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
             lastName: '',
             identificationNumber: '',
             type: 'person',
-            phoneNumber: '',
-            email: '',
             address: {
               street: '',
               city: '',
@@ -918,34 +914,6 @@ export const PersonalForm = ({ data, onChange, errors }: PersonalFormProps): Rea
                 required
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefon
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                className="w-full p-2 border border-gray-300 rounded-md"
-                value={data.vehicleOwner.personData?.phoneNumber || ''}
-                onChange={handleVehicleOwnerChange}
-                placeholder="+48XXXXXXXXX"
-              />
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              value={data.vehicleOwner.personData?.email || ''}
-              onChange={handleVehicleOwnerChange}
-              placeholder="np. jan.kowalski@example.com"
-            />
           </div>
           
           <h4 className="text-md font-semibold mb-3">Adres zamieszkania</h4>

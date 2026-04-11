@@ -2,7 +2,6 @@
 
 import React from "react";
 import { X, Check, Car, Shield, Clock, CreditCard } from "lucide-react";
-import Link from "next/link";
 
 const GapComparisonSection = (): React.ReactElement => {
   return (

@@ -23,9 +23,8 @@ export async function POST(request: NextRequest) {
     requireEnvironmentVariables();
 
     // Rate limiting - sprawdź czy IP nie przekroczyło limitu
-    let headers: Headers;
     try {
-      headers = limiter.checkNext(request, 5); // maksymalnie 5 prób
+      limiter.checkNext(request, 5); // maksymalnie 5 prób
     } catch {
       return NextResponse.json(
         { 

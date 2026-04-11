@@ -61,7 +61,7 @@ async function validateMagicBytes(
     }
 
     return false;
-  } catch (error) {
+  } catch {
     // Jeśli nie możemy odczytać magic bytes, odrzuć plik
     return false;
   }

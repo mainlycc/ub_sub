@@ -70,11 +70,18 @@ const KontaktPage = () => {
     setFormStatus('submitting');
     
     try {
-      // Tutaj normalnie byłaby kod wysyłający dane do API
-      // Symulacja opóźnienia sieciowego
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Symulacja sukcesu
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setFormStatus('error');
+        return;
+      }
+
       setFormStatus('success');
       setFormData({
         name: '',

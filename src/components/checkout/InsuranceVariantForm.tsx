@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Truck } from 'lucide-react';
+import { Car, Truck } from 'lucide-react';
+import { humanizeRawApiError } from '@/lib/user-facing-errors';
 
 interface InsuranceVariantFormProps {
   data: InsuranceVariant;
@@ -88,7 +89,7 @@ const variantOptions: VariantOption[] = [
     code: '5_DCGAP_MG25_GEN',
     name: 'DEFEND Gap MAX AC',
     description: 'Ubezpieczenie GAP dla samochodów osobowych z AC',
-    icon: ShieldCheck,
+    icon: Car,
     vehicleTypes: ['PC']
   },
   {
@@ -149,7 +150,13 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
 
       } catch (error) {
         console.error('Błąd podczas pobierania produktów:', error);
-        setLoadError(error instanceof Error ? error.message : 'Nie udało się pobrać listy produktów');
+        setLoadError(
+          humanizeRawApiError(
+            error instanceof Error
+              ? error.message
+              : 'Nie udało się wczytać ofert. Sprawdź połączenie z internetem i odśwież stronę.'
+          )
+        );
       } finally {
         setIsLoading(false);
       }
@@ -219,9 +226,9 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
 
   if (loadError) {
     return (
-      <div className="p-4 border border-red-300 rounded-md bg-red-50 text-red-700">
-        <p className="font-medium">Wystąpił błąd podczas ładowania produktów</p>
-        <p className="text-sm mt-1">{loadError}</p>
+      <div className="p-4 border border-amber-200 rounded-lg bg-amber-50 text-amber-950" role="alert">
+        <p className="font-semibold text-amber-900">Nie udało się wczytać listy ubezpieczeń</p>
+        <p className="text-sm mt-2 text-amber-900/90">{loadError}</p>
       </div>
     );
   }
@@ -236,7 +243,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
           Wybierz wariant ubezpieczenia
         </h2>
         
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {variantOptions.map((variant) => {
             const Icon = variant.icon;
             const isSelected = data.productCode === variant.code;
@@ -276,7 +283,7 @@ export const InsuranceVariantForm = ({ data, onChange, onInputPathsChange, error
         </div>
 
         {errors?.productCode && (
-          <p className="text-sm text-red-500 mt-2">{errors.productCode}</p>
+          <p className="text-sm text-amber-800 mt-2">{errors.productCode}</p>
         )}
       </div>
     </form>

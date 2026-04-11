@@ -114,6 +114,8 @@ export const PolicyDocumentsStep: React.FC<PolicyDocumentsStepProps> = ({
   const [uploadErrorByCode, setUploadErrorByCode] = useState<Record<string, string>>({});
   const [selectedFileByCode, setSelectedFileByCode] = useState<Record<string, File | null>>({});
   const [isRefreshingMissing, setIsRefreshingMissing] = useState(false);
+  const [isUploadingBatch, setIsUploadingBatch] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
@@ -262,6 +264,53 @@ export const PolicyDocumentsStep: React.FC<PolicyDocumentsStepProps> = ({
     }
   };
 
+  const uploadBatch = async () => {
+    setBatchError(null);
+
+    // zbierz wybrane pliki, ale tylko dla aktualnie brakujących typów
+    const batchItems = missingTypes
+      .map((t) => ({ code: t.code, file: selectedFileByCode[t.code] }))
+      .filter((x) => x.file instanceof File) as Array<{ code: string; file: File }>;
+
+    if (batchItems.length === 0) {
+      setBatchError("Wybierz przynajmniej jeden plik, aby wysłać batch.");
+      return;
+    }
+
+    setIsUploadingBatch(true);
+    try {
+      const fd = new FormData();
+      batchItems.forEach((x, idx) => {
+        fd.append(`items[${idx}][documentType]`, x.code);
+        fd.append(`items[${idx}][file]`, x.file);
+      });
+
+      const res = await fetch(`/api/policies/${policyId}/uploads-batch`, {
+        method: "POST",
+        body: fd,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) {
+        const msg = extractErrorFromResponseBody(data) || `Błąd uploadu (${res.status})`;
+        setBatchError(msg);
+        return;
+      }
+
+      // po sukcesie wyczyść wybrane pliki i odśwież brakujące typy
+      setSelectedFileByCode((prev) => {
+        const next = { ...prev };
+        for (const x of batchItems) delete next[x.code];
+        return next;
+      });
+      await afterSuccessfulUpload();
+    } catch (e) {
+      setBatchError(e instanceof Error ? e.message : "Nie udało się wysłać batch");
+    } finally {
+      setIsUploadingBatch(false);
+    }
+  };
+
   const missingTypesInfoBox = (
     <div className="rounded-xl border border-[#300FE6]/20 bg-[#300FE6]/5 p-4 text-sm text-gray-700">
       <p className="font-medium text-gray-900 mb-1">Jak działają typy dokumentów</p>
@@ -288,11 +337,14 @@ export const PolicyDocumentsStep: React.FC<PolicyDocumentsStepProps> = ({
         <p className="text-gray-600">
           Wszystkie wymagane na tym etapie dokumenty zostały przesłane. Możesz zakończyć proces.
         </p>
+        <p className="text-gray-600">
+          Dokumenty oraz link do płatności zostaną przesłane na adres e-mail podany w formularzu.
+        </p>
         <Button
           className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
           onClick={onComplete}
         >
-          Zakończ i wyślij potwierdzenie
+          Potwierdź i zakończ
         </Button>
       </div>
     );
@@ -433,6 +485,11 @@ export const PolicyDocumentsStep: React.FC<PolicyDocumentsStepProps> = ({
           {globalError}
         </div>
       )}
+      {batchError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {batchError}
+        </div>
+      )}
       <ul className="space-y-6">
         {missingTypes.map((doc) => (
           <li
@@ -482,6 +539,23 @@ export const PolicyDocumentsStep: React.FC<PolicyDocumentsStepProps> = ({
           </li>
         ))}
       </ul>
+      <div className="flex flex-wrap gap-3">
+        <Button
+          type="button"
+          className="bg-[#300FE6] hover:bg-[#2208B0] text-white"
+          disabled={isUploadingBatch || missingTypes.length === 0}
+          onClick={() => void uploadBatch()}
+        >
+          {isUploadingBatch ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Wysyłanie batch…
+            </>
+          ) : (
+            "Wyślij wszystkie wybrane (batch) i powiadom e-mail"
+          )}
+        </Button>
+      </div>
       <Button
         variant="outline"
         size="sm"

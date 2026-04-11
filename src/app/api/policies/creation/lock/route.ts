@@ -3,6 +3,12 @@ import { getAuthToken } from '@/lib/auth';
 import { getCurrentEnvironment } from '@/lib/environment';
 import { getSellerNodeCode } from '@/lib/seller';
 import { safeLog } from '@/lib/logger';
+import {
+  fetchPortfolios,
+  filterOptionsForPortfolio,
+  pickPortfolio,
+  requiredOptionCodesFromPortfolio,
+} from '@/lib/defend-portfolio-options';
 
 // Interfejs dla danych polisy
 interface PolicyData {
@@ -48,17 +54,15 @@ interface PolicyData {
       inheritFrom: string;
     };
   };
-  options: {
-    TERM: string;
-    CLAIM_LIMIT: string;
-    PAYMENT_TERM: string;
-    PAYMENT_METHOD: string;
-  };
+  options: Record<string, string>;
   premium: number;
 }
 
 // Funkcja walidująca dane polisy
-function validatePolicyData(data: PolicyData): { isValid: boolean; errors: string[] } {
+function validatePolicyData(
+  data: PolicyData,
+  requiredOptionCodes: string[]
+): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Sprawdzanie podstawowych pól
@@ -114,10 +118,9 @@ function validatePolicyData(data: PolicyData): { isValid: boolean; errors: strin
   if (!options) {
     errors.push('Brak opcji');
   } else {
-    if (!options.TERM) errors.push('Brak TERM');
-    if (!options.CLAIM_LIMIT) errors.push('Brak CLAIM_LIMIT');
-    if (!options.PAYMENT_TERM) errors.push('Brak PAYMENT_TERM');
-    if (!options.PAYMENT_METHOD) errors.push('Brak PAYMENT_METHOD');
+    for (const code of requiredOptionCodes) {
+      if (!options[code]) errors.push(`Brak ${code}`);
+    }
   }
 
   // Sprawdzanie składki
@@ -144,20 +147,6 @@ export async function POST(request: Request) {
       safeLog.log('sellerNodeCode nadpisany wartością z serwera:', data.sellerNodeCode);
     }
 
-    // Walidacja danych
-    const validation = validatePolicyData(data as PolicyData);
-    if (!validation.isValid) {
-      safeLog.error('Błędy walidacji:', validation.errors);
-      return NextResponse.json(
-        { 
-          error: 'Nieprawidłowe dane polisy - brak wymaganych pól lub nieprawidłowy format',
-          details: validation.errors
-        },
-        { status: 400 }
-      );
-    }
-
-    // Pobierz token autoryzacyjny
     let token: string;
     try {
       const authToken = await getAuthToken();
@@ -174,6 +163,30 @@ export async function POST(request: Request) {
     }
 
     safeLog.log('Token autoryzacyjny uzyskany:', !!token);
+
+    let requiredOptionCodes = requiredOptionCodesFromPortfolio(undefined);
+    try {
+      const portfolios = await fetchPortfolios(token);
+      const portfolio = pickPortfolio(portfolios, data.productCode, data.sellerNodeCode);
+      if (data.options && typeof data.options === 'object') {
+        data.options = filterOptionsForPortfolio(data.options as Record<string, string>, portfolio);
+      }
+      requiredOptionCodes = requiredOptionCodesFromPortfolio(portfolio);
+    } catch (e) {
+      safeLog.log('Lock: pominięto filtrację opcji (portfolios):', e);
+    }
+
+    const validation = validatePolicyData(data as PolicyData, requiredOptionCodes);
+    if (!validation.isValid) {
+      safeLog.error('Błędy walidacji:', validation.errors);
+      return NextResponse.json(
+        { 
+          error: 'Część danych jest niepełna lub nie pasuje do wymagań. Sprawdź formularz i spróbuj ponownie.',
+          details: validation.errors
+        },
+        { status: 400 }
+      );
+    }
 
     const environment = getCurrentEnvironment();
     // Wysyłamy żądanie do API

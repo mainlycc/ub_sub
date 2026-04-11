@@ -53,7 +53,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
       return null;
     }
     return typedPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
