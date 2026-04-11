@@ -130,7 +130,7 @@ const PrivacyPolicy = () => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">§10 Kontakt</h2>
                 <p>
                   W sprawach dotyczących ochrony danych osobowych można kontaktować się z Administratorem:<br />
-                  Adres e-mail: biuro@gapauto.pl<br />
+                  Adres e-mail: kontakt@gapauto.pl<br />
                   Tel.: +48 796 148 577<br />
                   Adres korespondencyjny: ul. Przyszłości 6, 05-140 Skubianka
                 </p>

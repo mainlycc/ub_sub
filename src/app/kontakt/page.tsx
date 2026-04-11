@@ -266,7 +266,7 @@ const KontaktPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-700">biuro@gapauto.pl</p>
+                    <p className="text-gray-700">kontakt@gapauto.pl</p>
                     <p className="text-sm text-gray-500">Odpowiadamy w ciągu 24h</p>
                   </div>
                 </div>
