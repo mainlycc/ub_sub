@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 const KontaktPage = () => {
   const [formData, setFormData] = useState({
@@ -97,6 +98,7 @@ const KontaktPage = () => {
   };
 
   return (
+    <>
     <div className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
@@ -311,18 +313,10 @@ const KontaktPage = () => {
             </div>
           </div>
         </div>
-        
-        {/* Mapa */}
-        <div className="mt-12 bg-white p-4 rounded-xl shadow-lg border border-gray-200">
-          <div className="rounded-lg overflow-hidden h-96 bg-[#E1EDFF]">
-            {/* Tutaj normalnie byłaby prawdziwa mapa, np. z Google Maps */}
-            <div className="w-full h-full flex items-center justify-center">
-              <p className="text-gray-700">Tutaj będzie osadzona mapa Google</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
