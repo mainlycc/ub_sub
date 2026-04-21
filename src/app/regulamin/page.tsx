@@ -36,8 +36,8 @@ const Terms = () => {
               <section className="bg-gradient-to-br from-white to-[#E1EDFF]/30 rounded-xl p-6 border border-[#E1EDFF]">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Postanowienia ogólne</h2>
                 <p>
-                  Administratorem serwisu GapAuto.pl (dalej „Serwis”) jest Ubezpieczenia GAP z siedzibą w Skubiance (05‑140), ul. Przyszłości 6.<br />
-                  Kontakt: tel. +48 796 148 577, e‑mail: kontakt@gapauto.pl. Godziny pracy: pon.–pt. 9:00–17:00, sob. 9:00–14:00, nd. – nieczynne.<br />
+                  Administratorem serwisu GapAuto.pl (dalej „Serwis”) jest Ubezpieczenia GAP z siedzibą w Skubiance (05‑140), ul. Przyszłości 6. Drugi adres: ul. Liliowa 31D, 04-953 Warszawa.<br />
+                  Kontakt: tel. +48 796 148 577, +48 603 086 580, e‑mail: kontakt@gapauto.pl. Godziny pracy: pon.–pt. 9:00–17:00, sob. 9:00–14:00, nd. – nieczynne.<br />
                   Celem Serwisu jest prezentacja i sprzedaż ubezpieczeń GAP („GAP Fakturowy” i „GAP Casco”), kalkulator składki, pomoc i kontakt z obsługą klienta.
                 </p>
               </section>

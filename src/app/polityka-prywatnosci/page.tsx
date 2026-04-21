@@ -131,8 +131,9 @@ const PrivacyPolicy = () => {
                 <p>
                   W sprawach dotyczących ochrony danych osobowych można kontaktować się z Administratorem:<br />
                   Adres e-mail: kontakt@gapauto.pl<br />
-                  Tel.: +48 796 148 577<br />
-                  Adres korespondencyjny: ul. Przyszłości 6, 05-140 Skubianka
+                  Tel.: +48 796 148 577, +48 603 086 580<br />
+                  Adres korespondencyjny: ul. Przyszłości 6, 05-140 Skubianka<br />
+                  Drugi adres: ul. Liliowa 31D, 04-953 Warszawa
                 </p>
               </section>
 

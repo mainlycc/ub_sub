@@ -17,7 +17,7 @@ interface ConsentUpdateEvent {
 
 declare global {
   interface Window {
-    dataLayer?: ConsentUpdateEvent[]
+    dataLayer?: unknown[]
     gtag?: (
       command: "consent",
       action: "update",
@@ -56,7 +56,7 @@ export const CookieBanner = () => {
         analytics_storage: consent,
         ad_user_data: consent,
         ad_personalization: consent,
-      })
+      } satisfies ConsentUpdateEvent)
 
       if (typeof window.gtag === "function") {
         window.gtag("consent", "update", {
@@ -80,7 +80,7 @@ export const CookieBanner = () => {
         analytics_storage: "granted",
         ad_user_data: "granted",
         ad_personalization: "granted",
-      })
+      } satisfies ConsentUpdateEvent)
 
       if (typeof window.gtag === "function") {
         window.gtag("consent", "update", {
@@ -106,7 +106,7 @@ export const CookieBanner = () => {
         analytics_storage: "denied",
         ad_user_data: "denied",
         ad_personalization: "denied",
-      })
+      } satisfies ConsentUpdateEvent)
 
       if (typeof window.gtag === "function") {
         window.gtag("consent", "update", {

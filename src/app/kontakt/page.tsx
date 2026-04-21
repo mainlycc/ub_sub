@@ -256,6 +256,7 @@ const KontaktPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">Telefon</h3>
                     <p className="text-gray-700">+48 796 148 577</p>
+                    <p className="text-gray-700">+48 603 086 580</p>
                     <p className="text-sm text-gray-500">Pon-Pt: 9:00 - 17:00</p>
                   </div>
                 </div>
@@ -277,8 +278,16 @@ const KontaktPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Adres</h3>
-                    <p className="text-gray-700">Przyszłości 6</p>
-                    <p className="text-gray-700">05-140 Skubianka</p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-gray-700">ul. Przyszłości 6</p>
+                        <p className="text-gray-700">05-140 Skubianka</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-700">ul. Liliowa 31D</p>
+                        <p className="text-gray-700">04-953 Warszawa</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -289,8 +298,6 @@ const KontaktPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">Godziny otwarcia</h3>
                     <p className="text-gray-700">Poniedziałek - Piątek: 9:00 - 17:00</p>
-                    <p className="text-gray-700">Sobota: 9:00 - 14:00</p>
-                    <p className="text-gray-700">Niedziela: Zamknięte</p>
                   </div>
                 </div>
               </div>

@@ -15,6 +15,7 @@ import PolicyDocumentsEmailStep from '@/components/checkout/PolicyDocumentsEmail
 import { VehicleData } from '@/types/vehicle';
 import Footer from '@/components/Footer';
 import { checkoutMessages, vinFieldMessage } from '@/lib/user-facing-errors';
+import { pushToDataLayer } from "@/lib/data-layer";
 
 // Zaktualizowane interfejsy 
 interface InsuranceVariant {
@@ -87,6 +88,16 @@ const CheckoutContent = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
   const [dataConfirmed, setDataConfirmed] = useState<boolean>(false);
+
+  const stepMeta: Record<number, string> = {
+    1: "WARIANT",
+    2: "POJAZD",
+    3: "KALKULACJA",
+    4: "KLIENT",
+    5: "PODSUMOWANIE",
+    6: "DOKUMENTY",
+    7: "ZAKOŃCZENIE",
+  };
   
   // Nowy stan dla wariantu ubezpieczenia
   const [insuranceVariant, setInsuranceVariant] = useState<InsuranceVariant>({
@@ -352,6 +363,17 @@ const CheckoutContent = () => {
       }
     }
   }, [searchParams]);
+
+  // GTM: emituj zdarzenie przy zmianie kroku (bez PII).
+  useEffect(() => {
+    pushToDataLayer({
+      event: "purchase_step",
+      step_number: currentStep,
+      step_name: stepMeta[currentStep] ?? `STEP_${currentStep}`,
+      page_path: typeof window !== "undefined" ? window.location.pathname : undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
   
   // Submit function
   const handleSubmit = async () => {
@@ -467,11 +489,21 @@ const CheckoutContent = () => {
       
       // Sukces - niezależnie od wyniku wysyłania maila
       setIsCompleted(true);
+      pushToDataLayer({
+        event: "purchase_submit_success",
+        payment_method: paymentData.paymentMethod,
+        term: paymentData.term,
+        claim_limit: paymentData.claimLimit,
+        payment_term: paymentData.paymentTerm,
+      });
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Błąd podczas przetwarzania zamówienia:', error);
       }
       alert(checkoutMessages.genericSubmit);
+      pushToDataLayer({
+        event: "purchase_submit_error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -527,11 +559,19 @@ const CheckoutContent = () => {
     setRegisteredPolicyId(policyId);
     setCurrentStep(6);
     router.push(`/checkout?step=6`);
+    pushToDataLayer({
+      event: "purchase_sms_confirmed",
+      policy_id_present: Boolean(policyId),
+    });
   };
 
   const handleDocumentsComplete = () => {
     setCurrentStep(7);
     router.push(`/checkout?step=7`);
+    pushToDataLayer({
+      event: "purchase_documents_complete",
+      policy_id_present: Boolean(registeredPolicyId),
+    });
   };
 
 
