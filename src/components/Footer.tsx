@@ -46,6 +46,16 @@ const Footer = (): React.ReactElement => {
                    Kontakt
                  </Link>
                </li>
+               <li>
+                 <a
+                   href="https://www.mainly.pl"
+                   className="text-white text-sm sm:text-base hover:text-gray-300 transition-colors"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                 >
+                   www.mainly.pl
+                 </a>
+               </li>
                                <li>
                   <a 
                     href="/pdfs/BUSINESS CARE DANIEL PIWOWARCZYK- zmiana z umowy uproszczonej na pełną + nowe pełnomocnictwo-2.pdf" 
@@ -192,7 +202,20 @@ const Footer = (): React.ReactElement => {
 
         {/* Stopka */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-white">
-          <p className="text-sm sm:text-base pb-0 mb-0">&copy; {new Date().getFullYear()} Ubezpieczenia GAP. Wszelkie prawa zastrzeżone.</p>
+          <p className="text-sm sm:text-base pb-0 mb-0 flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
+            <span>&copy; {new Date().getFullYear()} Ubezpieczenia GAP. Wszelkie prawa zastrzeżone.</span>
+            <span>
+              Made by{" "}
+              <a
+                href="https://www.mainly.pl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-gray-300 transition-colors"
+              >
+                mainly
+              </a>
+            </span>
+          </p>
         </div>
       </div>
     </div>
