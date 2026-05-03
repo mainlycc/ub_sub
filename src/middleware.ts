@@ -9,12 +9,13 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   // Content Security Policy
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net https://static.hotjar.com https://tagassistant.google.com",
-    "style-src 'self' 'unsafe-inline'",
+    // Hotjar wymaga *.hotjar.com / *.hotjar.io / wss (nie tylko static.hotjar.com) — zob. dokumentację CSP Hotjar.
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net https://static.hotjar.com https://*.hotjar.com https://tagassistant.google.com",
+    "style-src 'self' 'unsafe-inline' https://*.hotjar.com",
     "img-src 'self' data: https: blob:",
-    "font-src 'self' data:",
-    "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net https://static.hotjar.com https://v2.idefend.eu https://test.v2.idefend.eu https://tagassistant.google.com",
-    "frame-src 'self' https://www.googletagmanager.com https://tagassistant.google.com",
+    "font-src 'self' data: https://*.hotjar.com",
+    "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://www.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net https://static.hotjar.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com https://v2.idefend.eu https://test.v2.idefend.eu https://tagassistant.google.com",
+    "frame-src 'self' https://www.googletagmanager.com https://tagassistant.google.com https://*.hotjar.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

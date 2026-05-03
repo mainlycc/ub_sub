@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeletePostDialog } from "@/components/admin/DeletePostDialog";
 
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
 
 export default async function AdminBlogPage() {
   const posts = await listPublishedPosts({ limit: 100, offset: 0 });

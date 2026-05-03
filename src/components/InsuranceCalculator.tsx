@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { Calculator, Info, Check, FileText, Receipt, Shield, BadgeDollarSign, CalendarDays } from 'lucide-react';
 import Image from 'next/image';
+import { trackInitiateCheckout, trackInsuranceQuote, trackLead } from '@/lib/facebook-pixel';
 import {
   Tabs,
   TabsContent,
@@ -45,6 +46,14 @@ interface CalculationResult {
   };
 }
 
+type InsuranceCalculatorProps = {
+  initialCarPrice?: number;
+  initialYear?: number;
+  initialMonths?: number;
+  initialInsuranceType?: InsuranceType;
+  hideIntro?: boolean;
+};
+
 // Dodajemy funkcję do formatowania liczb
 const formatPrice = (price: number | undefined): string => {
   if (!price) return '';
@@ -66,21 +75,40 @@ const tooltips = {
   months: "Określ na jak długi okres chcesz wykupić ubezpieczenie."
 };
 
-const InsuranceCalculator = () => {
+const InsuranceCalculator: React.FC<InsuranceCalculatorProps> = ({
+  initialCarPrice,
+  initialYear,
+  initialMonths,
+  initialInsuranceType,
+  hideIntro,
+}) => {
   const router = useRouter();
   const [calculatorData, setCalculatorData] = useState<CalculatorData>({
-    carPrice: 0,
-    year: new Date().getFullYear(),
-    months: 12,
+    carPrice: initialCarPrice ?? 0,
+    year: initialYear ?? new Date().getFullYear(),
+    months: initialMonths ?? 12,
   });
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  const [activeInsuranceType, setActiveInsuranceType] = useState<InsuranceType>('fakturowy');
+  const [activeInsuranceType, setActiveInsuranceType] = useState<InsuranceType>(initialInsuranceType ?? 'fakturowy');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isCalculating, setIsCalculating] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   
   // Dodajemy referencję do sekcji wynikowej
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // Prefill z zewnątrz (np. z quizu) — aktualizujemy tylko gdy propsy się zmienią
+  React.useEffect(() => {
+    setCalculatorData((prev) => ({
+      carPrice: typeof initialCarPrice === "number" ? initialCarPrice : prev.carPrice,
+      year: typeof initialYear === "number" ? initialYear : prev.year,
+      months: typeof initialMonths === "number" ? initialMonths : prev.months,
+    }));
+  }, [initialCarPrice, initialYear, initialMonths]);
+
+  React.useEffect(() => {
+    if (initialInsuranceType) setActiveInsuranceType(initialInsuranceType);
+  }, [initialInsuranceType]);
 
   // Wykrycie desktopu (>= md) – żeby renderować tylko jeden wariant wyniku (mobile vs desktop)
   React.useEffect(() => {
@@ -116,6 +144,7 @@ const InsuranceCalculator = () => {
     setErrors({});
     
     try {
+      trackLead("Calculator start", "Home");
       const response = await fetch('/api/calculate', {
         method: 'POST',
         headers: {
@@ -138,6 +167,8 @@ const InsuranceCalculator = () => {
         };
         
         setCalculationResult(calculationResult);
+
+        trackInsuranceQuote(activeInsuranceType, data.premium);
         
         // Zapisz dane w localStorage do wykorzystania w checkout
         localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
@@ -177,23 +208,20 @@ const InsuranceCalculator = () => {
   );
   
   return (
-    <section className="-mt-10 sm:-mt-12 md:-mt-14 pt-0 pb-12 bg-[#EAE7FC]">
+    <section className="pt-0 pb-12 bg-[#EAE7FC]" id="calculator">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8 md:hidden">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-[1.05] tracking-tight max-w-xl mx-auto">Twoje auto <span className="text-orange-600 italic">nie musi</span> tracić na wartości !</h2>
-          <p className="mt-3 text-xl text-gray-600">
-            Oblicz składkę ubezpieczenia GAP
-          </p>
-        </div>
+        {!hideIntro && (
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-[1.05] tracking-tight max-w-3xl mx-auto">
+              Policz realną wycenę — bez zobowiązań
+            </h2>
+            <p className="mt-3 text-base sm:text-lg text-gray-600">
+              Podaj 3 dane i zobacz, ile możesz odzyskać przy kradzieży lub szkodzie całkowitej.
+            </p>
+          </div>
+        )}
         
         <div className="md:grid md:grid-cols-2 md:gap-x-8 md:items-start">
-          {/* Desktopowy nagłówek w drugiej kolumnie */}
-          <div className="md:col-start-2 md:row-start-1 hidden md:block">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.05] tracking-tight mb-0 max-w-2xl mx-auto text-center transform translate-y-28">
-              Twoje auto <span className="text-orange-600 italic">nie musi</span> tracić na wartości !
-            </h2>
-          </div>
-
           {/* Lewa karta */}
           <div className="md:col-start-1 md:row-start-2 md:self-end">
             <div className="bg-white rounded-[20px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.2),0_12px_30px_-8px_rgba(0,0,0,0.15)] border border-gray-200 overflow-hidden 
@@ -206,7 +234,7 @@ const InsuranceCalculator = () => {
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">Kalkulator składki</h3>
                   <p className="mt-2 text-sm sm:text-base text-gray-600 max-w-md">
-                    Zabezpiecz 100% ceny z dnia zakupu nawet na 5 lat. Wybierz odpowiedni limit odszkodowania i zyskaj pełną ochronę finansową.
+                    Policz wycenę i zobacz, ile możesz odzyskać przy kradzieży lub szkodzie całkowitej.
                   </p>
                 </div>
 
@@ -313,9 +341,12 @@ const InsuranceCalculator = () => {
                         disabled={isCalculating}
                       >
                         <div className="flex items-center justify-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] py-4 text-white font-medium rounded-[20px] shadow-md hover:shadow-lg">
-                          {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
+                          {isCalculating ? 'Obliczanie...' : 'Sprawdź ile możesz odzyskać'}
                         </div>
                       </StarBorder>
+                      <p className="mt-3 text-xs text-gray-500 text-center">
+                        Bez zobowiązań. 14 dni na rezygnację po zakupie.
+                      </p>
                     </div>
                   </TabsContent>
 
@@ -401,9 +432,12 @@ const InsuranceCalculator = () => {
                         disabled={isCalculating}
                       >
                         <div className="flex items-center justify-center bg-gradient-to-r from-[#300FE6] to-[#2208B0] hover:from-[#4024E9] hover:to-[#300FE6] py-4 text-white font-medium rounded-[20px] shadow-md hover:shadow-lg">
-                          {isCalculating ? 'Obliczanie...' : 'Oblicz składkę ubezpieczenia'}
+                          {isCalculating ? 'Obliczanie...' : 'Sprawdź ile możesz odzyskać'}
                         </div>
                       </StarBorder>
+                      <p className="mt-3 text-xs text-gray-500 text-center">
+                        Bez zobowiązań. 14 dni na rezygnację po zakupie.
+                      </p>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -455,6 +489,7 @@ const InsuranceCalculator = () => {
                         onClick={() => {
                           // Zapisz dane w localStorage przed przekierowaniem
                           localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
+                          trackInitiateCheckout(calculationResult.premium, "PLN");
                           router.push('/checkout');
                         }}
                       >
@@ -562,6 +597,7 @@ const InsuranceCalculator = () => {
                         className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-[20px]"
                         onClick={() => {
                           localStorage.setItem('gapCalculationResult', JSON.stringify(calculationResult));
+                          trackInitiateCheckout(calculationResult.premium, "PLN");
                           router.push('/checkout');
                         }}
                       >

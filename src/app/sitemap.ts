@@ -47,7 +47,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Dynamiczne strony bloga
+  // Dynamiczne strony bloga (pomiń Prisma przy buildzie bez DATABASE_URL)
+  if (!process.env.DATABASE_URL) {
+    return staticPages;
+  }
+
   try {
     const posts = await listPublishedPosts({ limit: 1000 });
     const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({

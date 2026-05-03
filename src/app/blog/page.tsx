@@ -11,7 +11,8 @@ function formatDate(dateString: string | null) {
   return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-export const revalidate = 60;
+/** Bez statycznego prerenderu: build nie wymaga DATABASE_URL (dane z bazy przy żądaniu). */
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const posts = await listPublishedPosts({ limit: 30 });
